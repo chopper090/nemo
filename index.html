@@ -97,18 +97,26 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
+/* ════════════ SCROLL E TOUCH FOUNDATION ════════════
+   Una sola gerarchia di scroll: html scrolla naturalmente, body è solo flow container.
+   Niente min-height su entrambi, niente overflow-y:auto annidato → touch responsivo. */
+html {
   background: var(--bg); color: var(--text);
-  font: 14px/1.5 var(--font-ui);
   -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  /* touch-action default (auto) = pan-x pan-y pinch-zoom — scroll un dito ovunque */
+}
+body {
+  background: var(--bg);
+  font: 14px/1.5 var(--font-ui);
   min-height: 100dvh;
   max-width: 100vw;
   overflow-x: hidden;
-  /* IMPORTANTE: lasciamo touch-action default → consente pan/scroll con un dito ovunque.
-     Solo elementi specifici (dial Resolve, drag picker) bloccano lo scroll quando serve. */
+  /* NO overflow-y: il document/window gestisce lo scroll → niente container annidati */
+  -webkit-overflow-scrolling: touch;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
-html { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 /* Aspect ratio bounds: max ultra-wide 21:9 su desktop, no scroll-X su 9:16 mobile */
 @media (min-width: 1900px) {
   body { max-width: 2240px; margin: 0 auto; } /* 21:9 cap @ 960h ~ 2240x960 */
@@ -448,7 +456,8 @@ body.layout-force-desktop { display: block; }
 @media (max-width: 720px) {
   .topbar {
     grid-template-columns: 1fr;
-    padding: 8px 50px 8px 8px; gap: 6px;
+    padding: 8px 8px 48px 8px;  /* padding-bottom 48px per la freccia in basso */
+    gap: 6px;
   }
   .topbar-left, .topbar-center, .topbar-right {
     justify-self: center; justify-content: center; gap: 4px;
@@ -466,13 +475,19 @@ body.layout-force-desktop { display: block; }
   /* Quando topbar è collassata, mostra solo il centro (drill tabs) */
   .topbar.collapsed .topbar-left,
   .topbar.collapsed .topbar-right { display: none; }
-  /* Bottone collapse + GRANDE, ben staccato dal contenuto */
+  /* Bottone collapse + GRANDE, posizionato in BASSO a destra (non più al centro)
+     per non sovrapporsi mai alla riga di drill tabs centrata */
   .topbar-collapse {
-    width: 36px; height: 36px;
+    top: auto !important;
+    bottom: 4px;
+    right: 4px;
+    transform: none !important;
+    width: 38px; height: 38px;
     font-size: 16px; padding: 0;
     background: var(--surface-2) !important;
-    border: 1px solid var(--border) !important;
+    border: 1px solid var(--border-strong) !important;
   }
+  .topbar.collapsed .topbar-collapse { transform: rotate(180deg) !important; }
 }
 .topbar-collapse {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
@@ -523,7 +538,7 @@ body.layout-force-desktop { display: block; }
 
 /* ════════════ MOBILE OPTIMIZED ════════════ */
 @media (max-width: 720px) {
-  body { overscroll-behavior: contain; }
+  /* niente overscroll-behavior contain: blocca lo scroll-chain su alcuni TWA Android */
   .layout {
     padding: 8px;
     padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
