@@ -1,0 +1,21 @@
+{
+  "name": "Note Trainer — Fretboard Studio",
+  "short_name": "NoteTrainer",
+  "description": "Studio del fretboard con riconoscimento note, intervalli, accordi, scale e arpeggi.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#15171C",
+  "theme_color": "#3B5BDB",
+  "categories": ["education", "music"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
