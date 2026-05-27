@@ -2189,13 +2189,13 @@ body.resolve-active{overflow:hidden}
   background:var(--surface);border:1px solid var(--border);border-radius:20px;
   padding:24px 26px;color:var(--text);
   box-shadow:0 24px 80px rgba(0,0,0,.45);
-  animation:ltSheetIn .35s cubic-bezier(.2,.7,.2,1)
+  /* Animazione SOLO opacity — niente transform → il translate(-50%,-50%) di centratura
+     non viene mai sovrascritto, il modal nasce già esattamente al centro. */
+  animation:ltFadeOnly .2s ease-out
 }
-/* Animazione che PRESERVA il translate(-50%,-50%) per il centering corretto.
-   Senza questo, l'animation badgeIn finiva con transform:none → modal in basso-dx. */
-@keyframes ltSheetIn{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}
-  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+@keyframes ltFadeOnly{
+  from{opacity:0}
+  to{opacity:1}
 }
 .lt-close{position:absolute;top:14px;right:14px;background:transparent;border:0;color:var(--text-muted);font-size:24px;cursor:pointer;width:36px;height:36px;border-radius:50%}
 .lt-close:hover{background:var(--surface-2);color:var(--text)}
@@ -5294,6 +5294,13 @@ function renderFretboard() {
 // ═══════════════════════════════════════════════════════════
 function setView(v) {
   if (state.running) stopSession();
+  // Auto-exit Solo Mode quando si lascia la vista Pratica.
+  // Solo è dedicato alla sessione di pratica; Apprendi/Teoria/Brani/Stats/Percorso
+  // tornano alla skin normale per leggibilità ottimale.
+  if (v !== 'practice' && typeof Solo !== 'undefined' && Solo.active) {
+    try { Solo.active = false; if (typeof Solo.apply === 'function') Solo.apply(); else document.body.classList.remove('solo-mode'); }
+    catch(e){ document.body.classList.remove('solo-mode'); }
+  }
   state.view = v;
   localStorage.setItem('nt-mainview', v);
   document.querySelectorAll('.viewtab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
@@ -10120,6 +10127,13 @@ if ('serviceWorker' in navigator) {
   const btnPanel = document.getElementById('btnSoloPanel');
   if(btnSolo) btnSolo.addEventListener('click', ()=>{
     Solo.active = !Solo.active;
+    // Solo Mode è dedicato alla sessione di pratica: se attiviamo da altra vista, switch a Practice.
+    if(Solo.active){
+      const s = (typeof state !== 'undefined' ? state : null);
+      if (s && s.view !== 'practice' && typeof setView === 'function') {
+        try{ setView('practice'); }catch(e){}
+      }
+    }
     apply();
     if(Solo.active){ /* prima volta? apri drawer per onboarding */
       if(!ls.get('introShown', false)){
