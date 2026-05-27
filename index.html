@@ -475,8 +475,8 @@ body.layout-force-desktop { display: block; }
   /* Quando topbar è collassata, mostra solo il centro (drill tabs) */
   .topbar.collapsed .topbar-left,
   .topbar.collapsed .topbar-right { display: none; }
-  /* Bottone collapse + GRANDE, posizionato in BASSO a destra (non più al centro)
-     per non sovrapporsi mai alla riga di drill tabs centrata */
+  /* Bottone collapse: in basso a destra quando esploso (sotto i tabs),
+     a destra al centro quando compresso (allineato con la singola riga drill tabs). */
   .topbar-collapse {
     top: auto !important;
     bottom: 4px;
@@ -487,7 +487,16 @@ body.layout-force-desktop { display: block; }
     background: var(--surface-2) !important;
     border: 1px solid var(--border-strong) !important;
   }
-  .topbar.collapsed .topbar-collapse { transform: rotate(180deg) !important; }
+  /* Quando compressa la topbar è solo 1 riga: riposiziona la freccia a destra al centro */
+  .topbar.collapsed {
+    padding: 8px 50px 8px 8px !important;  /* spazio a destra per la freccia, no bottom */
+  }
+  .topbar.collapsed .topbar-collapse {
+    bottom: auto !important;
+    top: 50% !important;
+    right: 6px;
+    transform: translateY(-50%) rotate(180deg) !important;
+  }
 }
 .topbar-collapse {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
@@ -2180,7 +2189,13 @@ body.resolve-active{overflow:hidden}
   background:var(--surface);border:1px solid var(--border);border-radius:20px;
   padding:24px 26px;color:var(--text);
   box-shadow:0 24px 80px rgba(0,0,0,.45);
-  animation:badgeIn .4s cubic-bezier(.34,1.56,.64,1)
+  animation:ltSheetIn .35s cubic-bezier(.2,.7,.2,1)
+}
+/* Animazione che PRESERVA il translate(-50%,-50%) per il centering corretto.
+   Senza questo, l'animation badgeIn finiva con transform:none → modal in basso-dx. */
+@keyframes ltSheetIn{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
 }
 .lt-close{position:absolute;top:14px;right:14px;background:transparent;border:0;color:var(--text-muted);font-size:24px;cursor:pointer;width:36px;height:36px;border-radius:50%}
 .lt-close:hover{background:var(--surface-2);color:var(--text)}
@@ -4354,7 +4369,17 @@ const state = {
   mode:       localStorage.getItem('nt-mode') || 'note',
   notation:   localStorage.getItem('nt-notation') || 'en',
   tonic:      parseInt(localStorage.getItem('nt-tonic') ?? '0'),
-  tuning:     parseInt(localStorage.getItem('nt-tuning') ?? '0'),
+  tuning:     (function(){
+                // Migrazione one-shot: se l'utente non ha mai cambiato tuning manualmente,
+                // imposta All 4ths come default (preferenza di Marco).
+                const stored = localStorage.getItem('nt-tuning');
+                if (stored === null || (stored === '0' && !localStorage.getItem('nt-tuning-migrated-to-4ths'))) {
+                  localStorage.setItem('nt-tuning-migrated-to-4ths', '1');
+                  localStorage.setItem('nt-tuning', '1');
+                  return 1;
+                }
+                return parseInt(stored);
+              })(),
   showFretboard: localStorage.getItem('nt-fretboard') !== 'false', // default true
   focusMode:  localStorage.getItem('nt-focus') === 'true',
   viewMode:   localStorage.getItem('nt-view') || 'note',
@@ -9022,9 +9047,30 @@ function updateNotationBtn() { dom.btnNotation.textContent = state.notation === 
 dom.btnNotation.addEventListener('click', () => {
   state.notation = state.notation === 'en' ? 'it' : 'en';
   localStorage.setItem('nt-notation', state.notation);
-  updateNotationBtn(); refreshTopbarValues(); refreshStats();
-  if (state.running) state.currentDrill.render();
-  else if (state.currentDrill.preview) state.currentDrill.preview();
+  updateNotationBtn();
+  refreshTopbarValues();
+  refreshStats();
+  // ── Re-render TUTTE le viste possibili così la notazione si propaga ovunque ──
+  if (state.running && state.currentDrill && state.currentDrill.render) {
+    state.currentDrill.render();
+  } else if (state.currentDrill && state.currentDrill.preview) {
+    state.currentDrill.preview();
+  }
+  // Fretboard: sempre, mostra labels in nuova notazione
+  if (typeof renderFretboard === 'function') { try { renderFretboard(); } catch(e){} }
+  // Re-render della vista attiva (Apprendi/Brani/Teoria/Stats/Percorso)
+  try {
+    if (state.view === 'learn' && typeof Learn !== 'undefined') {
+      if (Learn.currentLessonId) Learn.openLesson(Learn.currentLessonId);
+      else Learn.renderList();
+    }
+    else if (state.view === 'songs' && typeof SongsLibrary !== 'undefined') SongsLibrary.render();
+    else if (state.view === 'theory' && typeof Theory !== 'undefined') {
+      if (Theory.current) Theory.render(); else Theory.renderIdle();
+    }
+    else if (state.view === 'stats' && typeof Stats !== 'undefined') Stats.render();
+    else if (state.view === 'path' && typeof renderPathView === 'function') renderPathView();
+  } catch(e){ console.warn('notation re-render:', e); }
 });
 dom.btnTheme.addEventListener('click', () => {
   const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
