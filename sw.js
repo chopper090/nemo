@@ -1,6 +1,6 @@
 // Service Worker — Note Trainer PWA
 // Strategia: network-first per HTML (sempre fresh), cache-first per asset statici.
-const CACHE = 'note-trainer-v25-png-icons';
+const CACHE = 'note-trainer-v28-resolve-polish';
 const STATIC_ASSETS = [
   './manifest.json',
   './icon.svg',
