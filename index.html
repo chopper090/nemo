@@ -102,15 +102,13 @@ html, body {
   font: 14px/1.5 var(--font-ui);
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
-  /* FIX scroll mobile (un dito) e desktop (rotellina ovunque):
-     - touch-action manipulation: tap + pan, no pinch-zoom su elementi specifici
-     - rimosso overscroll-behavior:none che bloccava la propagazione wheel/touch */
-  touch-action: manipulation;
   max-width: 100vw;
   overflow-x: hidden;
+  /* IMPORTANTE: lasciamo touch-action default → consente pan/scroll con un dito ovunque.
+     Solo elementi specifici (dial Resolve, drag picker) bloccano lo scroll quando serve. */
 }
-html { overflow-y: auto; }
-body { overflow-y: auto; }
+html { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 /* Aspect ratio bounds: max ultra-wide 21:9 su desktop, no scroll-X su 9:16 mobile */
 @media (min-width: 1900px) {
   body { max-width: 2240px; margin: 0 auto; } /* 21:9 cap @ 960h ~ 2240x960 */
@@ -445,23 +443,54 @@ body.layout-force-desktop { display: block; }
 .topbar-left   { justify-self: start;  justify-content: flex-start; }
 .topbar-center { justify-self: center; justify-content: center; }
 .topbar-right  { justify-self: end;    justify-content: flex-end; }
-/* Su mobile: collassa in colonna unica, tutto centrato */
+/* Su mobile: drill tabs (Nota/Intervallo/Accordi/Scala/Arpeggio) compatti e tutti visibili.
+   Tonica/Tuning/Mic vanno sotto il drill — ma collassati di default. */
 @media (max-width: 720px) {
-  .topbar { grid-template-columns: 1fr; padding: 6px 38px 6px 6px; gap: 4px; }
-  .topbar-left, .topbar-center, .topbar-right { justify-self: center; justify-content: center; }
+  .topbar {
+    grid-template-columns: 1fr;
+    padding: 8px 50px 8px 8px; gap: 6px;
+  }
+  .topbar-left, .topbar-center, .topbar-right {
+    justify-self: center; justify-content: center; gap: 4px;
+  }
+  /* Drill tabs in una sola riga sempre — niente scroll richiesto */
+  .topbar-tabs {
+    display: flex !important; flex-wrap: nowrap; gap: 2px;
+    width: 100%; justify-content: center;
+  }
+  .topbar-tab {
+    padding: 6px 8px !important; font-size: 11px;
+    flex: 0 1 auto; min-width: 0;
+    letter-spacing: 0 !important;
+  }
+  /* Quando topbar è collassata, mostra solo il centro (drill tabs) */
+  .topbar.collapsed .topbar-left,
+  .topbar.collapsed .topbar-right { display: none; }
+  /* Bottone collapse + GRANDE, ben staccato dal contenuto */
+  .topbar-collapse {
+    width: 36px; height: 36px;
+    font-size: 16px; padding: 0;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+  }
 }
 .topbar-collapse {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  font: 600 12px/1 var(--font-ui);
-  padding: 6px 9px;
-  background: transparent;
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 700 14px/1 var(--font-ui);
+  background: var(--surface-2);
   color: var(--text-muted);
-  border: 1px solid transparent;
-  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   cursor: pointer;
-  z-index: 2;
+  z-index: 5;
+  transition: background .15s, color .15s, transform .2s;
 }
-.topbar-collapse:hover { background: var(--surface-2); }
+.topbar-collapse:hover {
+  background: var(--surface-3); color: var(--text);
+}
+.topbar.collapsed .topbar-collapse { transform: translateY(-50%) rotate(180deg); }
 
 /* Control group with prev/next arrows */
 .ctrl-group {
@@ -787,9 +816,9 @@ body.layout-force-desktop { display: block; }
 /* ════════════ FRETBOARD ════════════ */
 .fretboard-wrap {
   width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  /* FIX scroll mobile: dichiariamo che questo container gestisce SOLO pan orizzontale.
-     Lo scroll verticale del dito/rotellina passa al body (pagina). */
-  touch-action: pan-x pinch-zoom;
+  /* Lo scroll orizzontale del manico convive con quello verticale della pagina:
+     pan-y consente al dito di scrollare la pagina anche mentre è sul manico. */
+  touch-action: pan-x pan-y;
 }
 .fretboard-container {
   background: var(--surface); border: 1px solid var(--border);
@@ -2344,15 +2373,65 @@ body.solo-mode .viewtab[data-view="stats"]{display:none !important}
 body.solo-mode .header{background:transparent;border-bottom-color:var(--solo-line);box-shadow:none}
 body.solo-mode .header-logo{filter:brightness(0) invert(1);opacity:.85}
 body.solo-mode .header h1{font:300 22px/1 'Cormorant Garamond',serif;color:var(--solo-fg)}
-/* Topbar skin (mantieni layout, cambia colori) */
-body.solo-mode .topbar{background:transparent;border-color:var(--solo-line)}
-body.solo-mode .topbar-tab{background:transparent;color:var(--solo-mute);border:0;font:500 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px}
-body.solo-mode .topbar-tab.active{color:var(--solo-acc);border-bottom:2px solid var(--solo-acc)}
+/* Topbar skin Solo — minimal raffinato, frecce in grigio scuro, separatori sottili */
+body.solo-mode .topbar{background:transparent;border-color:rgba(255,255,255,.04)}
+body.solo-mode .topbar-tab{
+  background:transparent;color:var(--solo-mute);border:0;
+  font:500 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;
+  transition:color .2s
+}
+body.solo-mode .topbar-tab.active{color:var(--solo-fg);border-bottom:2px solid var(--solo-acc)}
+body.solo-mode .topbar-tab:hover{color:var(--solo-fg)}
+
+/* Frecce + selettori in scala di grigi con bordi trasparenti */
 body.solo-mode .topbar-ctrl,
-body.solo-mode .ctrl-nav{background:var(--solo-card);color:var(--solo-fg);border:1px solid var(--solo-line);border-radius:10px}
+body.solo-mode .ctrl-nav{
+  background:rgba(255,255,255,.025) !important;
+  color:rgba(255,255,255,.7) !important;
+  border:1px solid rgba(255,255,255,.06) !important;
+  border-radius:8px;
+  transition:background .15s,color .15s,border-color .15s
+}
+body.solo-mode .topbar-ctrl:hover,
+body.solo-mode .ctrl-nav:hover{
+  background:rgba(255,255,255,.05) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.12) !important
+}
 body.solo-mode .topbar-ctrl strong,
 body.solo-mode .topbar-ctrl #ctrlTonicVal,
 body.solo-mode .topbar-ctrl span{color:var(--solo-acc)}
+
+/* Separatore verticale sottile tra frecce e label in ctrl-group */
+body.solo-mode .ctrl-group{
+  display:inline-flex;align-items:center;gap:0;
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:10px;
+  padding:1px;
+  overflow:hidden
+}
+body.solo-mode .ctrl-group .ctrl-nav,
+body.solo-mode .ctrl-group .topbar-ctrl{
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  margin:0;
+  padding:6px 10px
+}
+/* Separatore verticale fra elementi del ctrl-group */
+body.solo-mode .ctrl-group .ctrl-nav + .topbar-ctrl,
+body.solo-mode .ctrl-group .topbar-ctrl + .ctrl-nav{
+  border-left:1px solid rgba(255,255,255,.04) !important
+}
+/* Collapse button skin in Solo */
+body.solo-mode .topbar-collapse{
+  background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06);
+  color:rgba(255,255,255,.6)
+}
+body.solo-mode .topbar-collapse:hover{
+  background:rgba(255,255,255,.06);color:#fff
+}
 /* Viewtabs skin */
 body.solo-mode .viewtabs{background:transparent;border-color:var(--solo-line)}
 body.solo-mode .viewtab{color:var(--solo-mute);background:transparent;border:1px solid var(--solo-line);border-radius:10px;padding:8px 18px}
