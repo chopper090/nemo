@@ -2,13 +2,13 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#3B5BDB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15171C" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Note Trainer</title>
+<title>Nemo — Fretboard & Ear Training</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -102,11 +102,15 @@ html, body {
   font: 14px/1.5 var(--font-ui);
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
-  overscroll-behavior: none;
-  /* Fix overflow orizzontale mobile (9:16) e bound responsive */
+  /* FIX scroll mobile (un dito) e desktop (rotellina ovunque):
+     - touch-action manipulation: tap + pan, no pinch-zoom su elementi specifici
+     - rimosso overscroll-behavior:none che bloccava la propagazione wheel/touch */
+  touch-action: manipulation;
   max-width: 100vw;
   overflow-x: hidden;
 }
+html { overflow-y: auto; }
+body { overflow-y: auto; }
 /* Aspect ratio bounds: max ultra-wide 21:9 su desktop, no scroll-X su 9:16 mobile */
 @media (min-width: 1900px) {
   body { max-width: 2240px; margin: 0 auto; } /* 21:9 cap @ 960h ~ 2240x960 */
@@ -170,10 +174,18 @@ button { font-family: inherit; }
   .grid-settings, .grid-stats { display: flex !important; }
 }
 
-/* ════════════ LAYOUT FORCE TOGGLE (mobile/desktop override) ════════════ */
+/* ════════════ LAYOUT FORCE TOGGLE (mobile/desktop override) ════════════
+   MOBILE 9:16  → portrait stretto, tutto in colonna, font grandi per tap, no sidebar
+   DESKTOP 21:9 → ultra-wide, 3 colonne sostanziose, fretboard a pieno, content centrato
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── MOBILE 9:16 portrait ── */
+body.layout-force-mobile {
+  max-width: 100vw;
+}
 body.layout-force-mobile .layout {
-  padding: 8px !important;
-  gap: 8px !important;
+  padding: 6px !important;
+  gap: 6px !important;
   grid-template-columns: 1fr !important;
   grid-template-rows: auto auto auto 1fr auto auto !important;
   grid-template-areas:
@@ -183,15 +195,49 @@ body.layout-force-mobile .layout {
     "display"
     "fretboard"
     "footer" !important;
+  max-width: 100vw;
 }
 body.layout-force-mobile .grid-settings,
 body.layout-force-mobile .grid-stats { display: none !important; }
 body.layout-force-mobile .stats-inline { display: flex !important; }
+/* Header compatto */
+body.layout-force-mobile .header {
+  flex-wrap: wrap; padding: 6px 8px; gap: 6px;
+}
+body.layout-force-mobile .header-left h1 { font-size: 14px; }
+body.layout-force-mobile .header-actions { gap: 3px; flex-wrap: nowrap; }
+body.layout-force-mobile .btn-label { padding: 0 7px !important; height: 28px; font-size: 11px; }
+body.layout-force-mobile .btn-label .btn-l-full { display: none; }
+body.layout-force-mobile .btn-label .btn-l-icon { display: inline; }
+body.layout-force-mobile .chip-goal, body.layout-force-mobile .chip-league { display: none !important; }
+body.layout-force-mobile .chip { padding: 2px 6px; font-size: 11px; }
+/* Topbar compatta */
+body.layout-force-mobile .topbar { flex-wrap: wrap; gap: 4px; padding: 6px 4px; }
+body.layout-force-mobile .topbar-tab { padding: 6px 10px; font-size: 12px; }
+body.layout-force-mobile .ctrl-group { gap: 2px; }
+body.layout-force-mobile .ctrl-nav { width: 22px; height: 24px; padding: 0; font-size: 11px; }
+body.layout-force-mobile .topbar-ctrl { padding: 4px 8px; font-size: 12px; }
+/* Display + fretboard adattati al portrait */
+body.layout-force-mobile .display-degree { font-size: clamp(72px, 16vw, 120px) !important; }
+body.layout-force-mobile .display-note { font-size: 15px; }
+body.layout-force-mobile .chord-name { font-size: clamp(48px, 12vw, 80px); }
+body.layout-force-mobile .fretboard-svg { min-width: 0; width: 100%; height: auto; }
+body.layout-force-mobile .fretboard-container { padding: 4px; }
+/* Footer compatto */
+body.layout-force-mobile .footer { padding: 6px 4px; gap: 4px; }
+body.layout-force-mobile .footer-row { gap: 4px; flex-wrap: wrap; }
+body.layout-force-mobile .stat-inline-value { font-size: 18px; }
+body.layout-force-mobile .stat-inline-label { font-size: 9px; }
+body.layout-force-mobile .btn-lg { padding: 8px 14px; font-size: 12px; }
+/* View tabs compatte */
+body.layout-force-mobile .viewtabs { gap: 2px; padding: 4px; flex-wrap: wrap; }
+body.layout-force-mobile .viewtab { padding: 6px 8px; font-size: 11px; }
 
+/* ── DESKTOP 21:9 ultrawide ── */
 body.layout-force-desktop .layout {
-  padding: 20px 24px !important;
-  gap: 16px !important;
-  grid-template-columns: 220px 1fr 220px !important;
+  padding: 24px 32px !important;
+  gap: 18px !important;
+  grid-template-columns: 240px minmax(0,1fr) 240px !important;
   grid-template-rows: auto auto auto 1fr auto auto !important;
   grid-template-areas:
     "header     header     header"
@@ -200,10 +246,29 @@ body.layout-force-desktop .layout {
     "settings   display    stats"
     "fretboard  fretboard  fretboard"
     "footer     footer     footer" !important;
+  max-width: 1920px;       /* limite ragionevole su ultra-wide */
+  margin: 0 auto !important;
+  min-height: 100dvh;
 }
 body.layout-force-desktop .grid-settings,
 body.layout-force-desktop .grid-stats { display: flex !important; }
 body.layout-force-desktop .stats-inline { display: none !important; }
+/* Header desktop */
+body.layout-force-desktop .header { padding: 14px 20px; }
+body.layout-force-desktop .header-left h1 { font-size: 22px; }
+body.layout-force-desktop .btn-label { padding: 0 14px !important; height: 36px; font-size: 13px; }
+body.layout-force-desktop .btn-label .btn-l-full { display: inline; }
+body.layout-force-desktop .btn-label .btn-l-icon { display: none; }
+body.layout-force-desktop .chip-goal,
+body.layout-force-desktop .chip-league { display: inline-flex !important; }
+/* Display generoso */
+body.layout-force-desktop .display-degree { font-size: clamp(140px, 12vw, 240px) !important; }
+body.layout-force-desktop .display-note { font-size: 22px; }
+body.layout-force-desktop .chord-name { font-size: clamp(72px, 7vw, 130px); }
+body.layout-force-desktop .fretboard-svg { min-width: 0; height: 180px; max-width: 100%; margin: 0 auto; }
+body.layout-force-desktop .fretboard-container { display: flex; justify-content: center; padding: 14px; }
+/* Body sempre centrato */
+body.layout-force-desktop { display: block; }
 .grid-header    { grid-area: header; }
 .grid-viewtabs  { grid-area: viewtabs; }
 .grid-topbar    { grid-area: topbar; }
@@ -220,12 +285,25 @@ body.layout-force-desktop .stats-inline { display: none !important; }
   border-bottom: 1px solid var(--border-subtle);
   gap: 12px;
 }
-.header-left { display: flex; align-items: center; gap: 14px; }
+/* ════════ HEADER 3-section layout (SX brand · CENTRO bottoni · DX info) ════════ */
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.header-left { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
+.header-logo { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; }
 .header-left h1 {
-  font: 600 18px/1.2 var(--font-ui);
+  font: 700 18px/1.2 var(--font-ui);
   letter-spacing: -0.02em;
 }
-.header-actions { display: flex; gap: 6px; align-items: center; }
+.header-actions {
+  flex: 1 1 auto;
+  display: flex; gap: 6px; align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.header-right {
+  flex: 0 0 auto;
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  justify-content: flex-end;
+}
 
 /* XP & Streak chips */
 .chip {
@@ -310,11 +388,14 @@ body.layout-force-desktop .stats-inline { display: none !important; }
 .viewtab.active { background: var(--accent-tab); color: #fff; }
 .viewtab:hover:not(.active) { background: var(--surface-2); color: var(--text); }
 
-/* ════════════ TOP BAR ════════════ */
+/* ════════════ TOP BAR — Grid 3-colonne (SX | CENTRO | DX) ════════════ */
 .topbar {
-  display: flex; align-items: center; gap: 6px;
-  flex-wrap: wrap;
-  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 8px 44px 8px 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
@@ -355,8 +436,22 @@ body.layout-force-desktop .stats-inline { display: none !important; }
 .topbar-ctrl:hover { background: var(--surface-3); }
 .topbar-ctrl strong { font-weight: 600; color: var(--accent-tab); }
 .topbar-ctrl::after { content: '▾'; font-size: 9px; opacity: 0.6; margin-left: 2px; }
-.topbar-spacer { flex: 1; }
+/* Spacer disattivato: rompeva la centratura del contenuto. */
+.topbar-spacer { display: none; }
+/* Sezioni topbar: SX (start), CENTRO (center), DX (end) */
+.topbar-section {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.topbar-left   { justify-self: start;  justify-content: flex-start; }
+.topbar-center { justify-self: center; justify-content: center; }
+.topbar-right  { justify-self: end;    justify-content: flex-end; }
+/* Su mobile: collassa in colonna unica, tutto centrato */
+@media (max-width: 720px) {
+  .topbar { grid-template-columns: 1fr; padding: 6px 38px 6px 6px; gap: 4px; }
+  .topbar-left, .topbar-center, .topbar-right { justify-self: center; justify-content: center; }
+}
 .topbar-collapse {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   font: 600 12px/1 var(--font-ui);
   padding: 6px 9px;
   background: transparent;
@@ -364,6 +459,7 @@ body.layout-force-desktop .stats-inline { display: none !important; }
   border: 1px solid transparent;
   border-radius: var(--r-sm);
   cursor: pointer;
+  z-index: 2;
 }
 .topbar-collapse:hover { background: var(--surface-2); }
 
@@ -691,6 +787,9 @@ body.layout-force-desktop .stats-inline { display: none !important; }
 /* ════════════ FRETBOARD ════════════ */
 .fretboard-wrap {
   width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  /* FIX scroll mobile: dichiariamo che questo container gestisce SOLO pan orizzontale.
+     Lo scroll verticale del dito/rotellina passa al body (pagina). */
+  touch-action: pan-x pinch-zoom;
 }
 .fretboard-container {
   background: var(--surface); border: 1px solid var(--border);
@@ -1636,6 +1735,99 @@ body.focus-mode .btn-focus-exit { display: inline-flex; }
 /* ════════════ UTILITY ════════════ */
 .hidden { display: none !important; }
 
+/* ════════════ LAYOUT CUSTOM (CSS variables modificate da LayoutEditor) ════════════ */
+:root {
+  --layout-note-size: 1;
+  --layout-chord-size: 1;
+  --layout-fretboard-size: 1;
+  --layout-ui-scale: 1;
+  --layout-spacing: 1;
+  --layout-corner: 1;
+}
+/* Applica i moltiplicatori CSS dove conta */
+.display-degree { font-size: calc(clamp(64px, 11vw, 140px) * var(--layout-note-size)) !important; }
+.chord-name { font-size: calc(clamp(60px, 7vw, 110px) * var(--layout-chord-size)) !important; }
+.fretboard-svg { transform: scale(var(--layout-fretboard-size)); transform-origin: center top; }
+.layout { gap: calc(12px * var(--layout-spacing)) !important; }
+body { font-size: calc(14px * var(--layout-ui-scale)); }
+.card, .stats-card, .lesson-reader, .lesson-card-content { border-radius: calc(var(--r-lg) * var(--layout-corner)); }
+
+body.layout-compact .header { padding: 4px 10px; }
+body.layout-compact .header h1 { font-size: 14px; }
+body.layout-compact .header .chip { padding: 2px 6px; font-size: 11px; }
+body.layout-no-sidebars .grid-settings,
+body.layout-no-sidebars .grid-stats { display: none !important; }
+body.layout-no-sidebars .layout {
+  grid-template-columns: 1fr !important;
+  grid-template-areas:
+    "header"
+    "viewtabs"
+    "topbar"
+    "display"
+    "fretboard"
+    "footer" !important;
+}
+
+/* Panel laterale Layout Editor */
+.layout-editor-panel {
+  position: fixed; top: 0; right: -420px;
+  width: 380px; max-width: 92vw; height: 100dvh;
+  background: var(--surface); border-left: 1px solid var(--border-strong);
+  z-index: 10800; transition: right .35s cubic-bezier(.2,.7,.2,1);
+  overflow-y: auto; box-shadow: -20px 0 60px rgba(0,0,0,.35);
+  display: flex; flex-direction: column;
+}
+.layout-editor-panel.open { right: 0; }
+.le-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.le-title { font: 700 16px/1 var(--font-ui); color: var(--text); }
+.le-close {
+  background: transparent; border: 0; color: var(--text-muted);
+  font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+}
+.le-close:hover { background: var(--surface-2); color: var(--text); }
+.le-body { padding: 16px 20px; flex: 1; overflow-y: auto; }
+.le-intro { font: 400 12px/1.5 var(--font-ui); color: var(--text-muted); margin-bottom: 18px; padding: 10px; background: var(--surface-2); border-radius: 8px; }
+.le-row { margin-bottom: 14px; }
+.le-row-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.le-row-label { font: 500 13px/1.3 var(--font-ui); color: var(--text); }
+.le-row-val { font: 600 12px/1 var(--font-mono); color: var(--accent-tab); }
+.le-slider {
+  width: 100%; height: 6px; background: var(--surface-2);
+  border-radius: 3px; appearance: none; -webkit-appearance: none;
+  outline: none; cursor: pointer;
+}
+.le-slider::-webkit-slider-thumb {
+  appearance: none; width: 18px; height: 18px;
+  background: var(--accent-tab); border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--surface);
+}
+.le-slider::-moz-range-thumb {
+  width: 18px; height: 18px; background: var(--accent-tab);
+  border-radius: 50%; cursor: pointer; border: 2px solid var(--surface);
+}
+.le-section-label {
+  font: 600 11px/1 var(--font-mono); letter-spacing: .18em;
+  text-transform: uppercase; color: var(--text-subtle);
+  margin: 18px 0 10px;
+}
+.le-toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border-subtle);
+}
+.le-actions {
+  margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border);
+  display: flex; justify-content: center;
+}
+.le-btn-reset {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-muted); padding: 9px 18px; border-radius: 10px;
+  font: 600 12px/1 var(--font-ui); cursor: pointer;
+}
+.le-btn-reset:hover { color: var(--text); border-color: var(--text-subtle); }
+
 /* ════════════════════════════════════════════════════════════
    RESOLVE · ear-training cieco — fullscreen overlay
    ════════════════════════════════════════════════════════════ */
@@ -1659,12 +1851,25 @@ body.resolve-active .btn-resolve .resolve-logo-mini b{color:#fff}
 .rs-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.resolve-active{overflow:hidden}
 
-/* Top bar Resolve */
+/* Top bar Resolve — 3 sezioni (SX brand · CENTRO controlli · DX info) */
 .rs-topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:18px 22px;border-bottom:1px solid #1a1a1d;flex-shrink:0
+  padding:14px 22px;border-bottom:1px solid #1a1a1d;flex-shrink:0;gap:14px
+}
+.rs-topbar-left{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.rs-brand-logo{width:24px;height:24px;border-radius:6px;opacity:.9}
+.rs-brand-name{font:700 13px/1 'Inter',sans-serif;color:#fff;letter-spacing:.02em}
+.rs-topbar-center{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:14px}
+.rs-topbar-right{flex:0 0 auto;display:flex;align-items:center;gap:8px}
+.rs-info-chip{
+  background:#0f0f10;border:1px solid #1f1f22;color:var(--solo-acc);
+  border-radius:999px;padding:6px 12px;font:600 12px/1 'JetBrains Mono',monospace;letter-spacing:.1em
 }
 .rs-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em;color:#fff;text-transform:lowercase}
+@media (max-width:520px){
+  .rs-brand-name{display:none}
+  .rs-info-chip{padding:4px 8px;font-size:10px}
+}
 .rs-icon-btn{
   background:transparent;border:0;color:#7e8088;font-size:22px;cursor:pointer;
   width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center
@@ -2117,11 +2322,29 @@ body.solo-mode[data-solo-vibe="penta"]{--solo-bg:#1a1410;--solo-acc:#e8a838;--so
 body.solo-mode[data-solo-vibe="neon"]{--solo-bg:#05050a;--solo-acc:#00ffae;--solo-card:#0a0a14;--solo-line:#14142a}
 body.solo-mode[data-solo-vibe="warm"]{--solo-bg:#0d0805;--solo-acc:#ff6b35;--solo-card:#1a0f0a;--solo-line:#2a1810}
 
-/* Overlay full-bleed in modalità Solo */
+/* ════════════════════════════════════════════════════════════
+   SOLO MODE · SKIN DARK (UI completa, palette dark + accenti)
+   Mantiene visibili: header (3 sezioni), viewtabs, topbar, footer.
+   Cambia solo l'aspetto (sfondo nero, font serif, accenti blu Solo).
+   I controlli si modificano dall'header come in modalità normale.
+   ════════════════════════════════════════════════════════════ */
 body.solo-mode{background:var(--solo-bg) !important}
 body.solo-mode .layout{background:var(--solo-bg)}
+/* Mostra il bottone setup dedicato di Solo */
+body.solo-mode #btnSoloPanel{
+  display:inline-flex !important;
+  background:var(--solo-card);color:var(--solo-acc);border:1px solid var(--solo-line)
+}
+/* Nascondi solo Teoria/Percorso/Stats nelle viewtabs (UI dense incompatibili) */
+body.solo-mode .viewtab[data-view="theory"],
+body.solo-mode .viewtab[data-view="path"],
+body.solo-mode .viewtab[data-view="songs"],
+body.solo-mode .viewtab[data-view="stats"]{display:none !important}
+/* Header skin */
 body.solo-mode .header{background:transparent;border-bottom-color:var(--solo-line);box-shadow:none}
+body.solo-mode .header-logo{filter:brightness(0) invert(1);opacity:.85}
 body.solo-mode .header h1{font:300 22px/1 'Cormorant Garamond',serif;color:var(--solo-fg)}
+/* Topbar skin (mantieni layout, cambia colori) */
 body.solo-mode .topbar{background:transparent;border-color:var(--solo-line)}
 body.solo-mode .topbar-tab{background:transparent;color:var(--solo-mute);border:0;font:500 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px}
 body.solo-mode .topbar-tab.active{color:var(--solo-acc);border-bottom:2px solid var(--solo-acc)}
@@ -2130,18 +2353,19 @@ body.solo-mode .ctrl-nav{background:var(--solo-card);color:var(--solo-fg);border
 body.solo-mode .topbar-ctrl strong,
 body.solo-mode .topbar-ctrl #ctrlTonicVal,
 body.solo-mode .topbar-ctrl span{color:var(--solo-acc)}
-body.solo-mode .viewtabs{background:transparent;border-color:var(--solo-line);display:flex;justify-content:center;gap:8px}
+/* Viewtabs skin */
+body.solo-mode .viewtabs{background:transparent;border-color:var(--solo-line)}
 body.solo-mode .viewtab{color:var(--solo-mute);background:transparent;border:1px solid var(--solo-line);border-radius:10px;padding:8px 18px}
 body.solo-mode .viewtab.active{color:var(--solo-acc);border-color:var(--solo-acc);background:rgba(10,132,255,.08)}
-/* In Solo Mode si mantengono solo Pratica + Apprendi: Teoria / Percorso / Stats sono nascosti
-   perché contengono UI dense incompatibili con la skin minimale */
-body.solo-mode .viewtab[data-view="theory"],
-body.solo-mode .viewtab[data-view="path"],
-body.solo-mode .viewtab[data-view="songs"],
-body.solo-mode .viewtab[data-view="stats"]{display:none !important}
 
-/* Display: nota gigante serif centrata */
-body.solo-mode .display{background:var(--solo-bg);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:40px 24px}
+/* Display: nota gigante centrata. Mantiene il layout-grid del body normale (no override). */
+body.solo-mode .display{
+  background:var(--solo-bg);position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 18px;min-height:200px
+}
+body.solo-mode .fretboard-wrap{background:transparent;border:0;padding:0;margin:0 auto;max-width:min(960px,96vw)}
+body.solo-mode .fretboard-container{background:transparent;border:0;padding:0}
 body.solo-mode .display-tonic{
   position:absolute;top:24px;left:0;right:0;
   text-align:center;font:400 13px/1 'Inter',sans-serif;letter-spacing:.22em;text-transform:uppercase;
@@ -2165,68 +2389,51 @@ body.solo-mode .display > *{animation:soloFade .22s cubic-bezier(.2,.7,.2,1)}
 body.solo-mode .display.solo-switching{opacity:0}
 
 /* ════════════════════════════════════════════════════════════
-   Layout "Note + Fretboard" — 4 posizioni × 2 orientamenti
-   Attivato da data-solo-fb-pos su body. Si vede solo se .fretboard-wrap
-   non è .hidden.
+   Layout "Note + Fretboard" in Solo Mode — controllato da data-solo-fb-pos
+   Funziona via class su body (fb-visible) settata da JS — niente :has() per compat.
    ════════════════════════════════════════════════════════════ */
 body.solo-mode .layout{
   transition:grid-template-columns .25s ease, grid-template-rows .25s ease
 }
-/* POSIZIONE = DESTRA (default) */
-body.solo-mode[data-solo-fb-pos="right"] .layout:has(.fretboard-wrap:not(.hidden)){
-  grid-template-columns: 1fr 1.1fr !important;
-  grid-template-rows: auto auto auto 1fr auto !important;
-  grid-template-areas:
-    "header    header"
-    "viewtabs  viewtabs"
-    "topbar    topbar"
-    "display   fretboard"
-    "footer    footer" !important;
+/* Quando fretboard visibile in Solo: layout side-by-side default (su schermi medi+) */
+@media (min-width: 900px){
+  body.solo-mode.fb-visible[data-solo-fb-pos="right"] .layout{
+    grid-template-columns: 1fr 1.2fr !important;
+    grid-template-areas:
+      "header     header"
+      "viewtabs   viewtabs"
+      "topbar     topbar"
+      "display    fretboard"
+      "footer     footer" !important;
+  }
+  body.solo-mode.fb-visible[data-solo-fb-pos="left"] .layout{
+    grid-template-columns: 1.2fr 1fr !important;
+    grid-template-areas:
+      "header    header"
+      "viewtabs  viewtabs"
+      "topbar    topbar"
+      "fretboard display"
+      "footer    footer" !important;
+  }
+  body.solo-mode.fb-visible .grid-display{align-self:center;padding:20px}
+  body.solo-mode.fb-visible .grid-fretboard{align-self:center}
+  body.solo-mode.fb-visible .display-degree{font-size:clamp(140px,16vw,240px) !important}
 }
-/* POSIZIONE = SINISTRA */
-body.solo-mode[data-solo-fb-pos="left"] .layout:has(.fretboard-wrap:not(.hidden)){
-  grid-template-columns: 1.1fr 1fr !important;
-  grid-template-rows: auto auto auto 1fr auto !important;
-  grid-template-areas:
-    "header    header"
-    "viewtabs  viewtabs"
-    "topbar    topbar"
-    "fretboard display"
-    "footer    footer" !important;
-}
-/* POSIZIONE = SOPRA */
-body.solo-mode[data-solo-fb-pos="top"] .layout:has(.fretboard-wrap:not(.hidden)){
-  grid-template-columns: 1fr !important;
-  grid-template-rows: auto auto auto auto 1fr auto !important;
-  grid-template-areas:
-    "header"
-    "viewtabs"
-    "topbar"
-    "fretboard"
-    "display"
-    "footer" !important;
-}
-/* POSIZIONE = SOTTO */
-body.solo-mode[data-solo-fb-pos="bottom"] .layout:has(.fretboard-wrap:not(.hidden)){
-  grid-template-columns: 1fr !important;
-  grid-template-rows: auto auto auto 1fr auto auto !important;
-  grid-template-areas:
-    "header"
-    "viewtabs"
-    "topbar"
-    "display"
-    "fretboard"
-    "footer" !important;
-}
-/* Stile comune del fretboard in Solo Mode */
-body.solo-mode .layout:has(.fretboard-wrap:not(.hidden)) .grid-display{
-  align-self:center;justify-self:center;padding:20px
-}
-body.solo-mode .layout:has(.fretboard-wrap:not(.hidden)) .grid-fretboard{
-  align-self:center;justify-self:stretch;background:transparent;border:0
-}
-body.solo-mode .layout:has(.fretboard-wrap:not(.hidden)) .grid-display .display-degree{
-  font-size:clamp(140px,18vw,260px) !important
+/* Mobile/Stack: nota sopra, fretboard sotto, vicini, no overlap */
+@media (max-width: 899px){
+  body.solo-mode.fb-visible .layout{
+    grid-template-rows: auto auto auto auto auto auto !important;
+    grid-template-areas:
+      "header"
+      "viewtabs"
+      "topbar"
+      "display"
+      "fretboard"
+      "footer" !important;
+  }
+  body.solo-mode.fb-visible .grid-display{padding:8px 12px 4px;min-height:auto}
+  body.solo-mode.fb-visible .display-degree{font-size:clamp(90px,22vw,160px) !important;line-height:.9}
+  body.solo-mode.fb-visible .grid-fretboard{padding:4px 8px 12px}
 }
 /* Fretboard SVG: in solo-mode rendi i pallini blu più visibili */
 body.solo-mode .fretboard-wrap svg circle[fill]:not([fill="transparent"]){
@@ -2555,21 +2762,18 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
 
   <!-- HEADER -->
   <header class="grid-header header">
+    <!-- SX · Brand -->
     <div class="header-left">
-      <h1>Note Trainer</h1>
-      <span class="chip chip-xp" id="chipXp">0 XP</span>
-      <span class="chip chip-streak" id="chipStreak">0</span>
-      <span class="chip chip-league" id="chipLeague" title="Lega corrente (XP ultime 4 settimane)">🥉 Bronze</span>
-      <span class="chip-goal" id="chipGoal" title="Obiettivo giornaliero">
-        <span class="chip-goal-bar"><span class="chip-goal-fill" id="chipGoalFill"></span></span>
-        <span id="chipGoalText">0/50</span>
-      </span>
+      <img class="header-logo" src="icon.svg" alt="" aria-hidden="true">
+      <h1>Nemo</h1>
     </div>
+    <!-- CENTRO · Bottoni -->
     <div class="header-actions">
       <button class="btn btn-icon btn-focus-exit" id="btnFocusExit" title="Esci focus (ESC)">✕</button>
+      <button class="btn btn-icon" id="btnSoloPanel" title="Solo · Setup" style="display:none">⚙</button>
       <button class="btn btn-icon btn-solo" id="btnSolo" title="Solo Mode — minimal focus (S)"><span class="solo-logo-mini">s<b>ø</b>lo</span></button>
       <button class="btn btn-icon btn-resolve" id="btnResolve" title="Resolve — ear training cieco (R)"><span class="resolve-logo-mini">s<b>ø</b>lve</span></button>
-      <button class="btn btn-icon" id="btnSoloPanel" title="Quick settings Solo" style="display:none">⚙</button>
+      <button class="btn btn-icon btn-label" id="btnLayoutEdit" title="Personalizza layout (dimensioni / spaziature) — salvato per profilo"><span class="btn-l-full">Custom</span><span class="btn-l-icon">⇲</span></button>
       <button class="btn btn-icon btn-label" id="btnFocus" title="Focus mode (F)"><span class="btn-l-full">Focus</span><span class="btn-l-icon">⛶</span></button>
       <button class="btn btn-icon btn-label" id="btnView" title="Vista (V)" style="display:none">Vista</button>
       <button class="btn btn-icon btn-label" id="btnFretboard" title="Mostra/nascondi manico"><span class="btn-l-full">Manico</span><span class="btn-l-icon">🎸</span></button>
@@ -2577,6 +2781,16 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
       <button class="btn btn-icon btn-label" id="btnNotation" title="Notazione (EN/IT)">EN</button>
       <button class="btn btn-icon btn-label" id="btnLayoutMode" title="Layout: Auto (L)"><span class="btn-l-full">Layout</span><span class="btn-l-icon">▭</span></button>
       <button class="btn btn-icon btn-label" id="btnTheme" title="Tema (T)"><span class="btn-l-full">Tema ☀</span><span class="btn-l-icon">☀</span></button>
+    </div>
+    <!-- DX · Info utente (gradi & esperienza) -->
+    <div class="header-right">
+      <span class="chip chip-xp" id="chipXp">0 XP</span>
+      <span class="chip chip-streak" id="chipStreak">0</span>
+      <span class="chip chip-league" id="chipLeague" title="Lega corrente (XP ultime 4 settimane)">🥉 Bronze</span>
+      <span class="chip-goal" id="chipGoal" title="Obiettivo giornaliero">
+        <span class="chip-goal-bar"><span class="chip-goal-fill" id="chipGoalFill"></span></span>
+        <span id="chipGoalText">0/50</span>
+      </span>
     </div>
   </header>
 
@@ -2590,50 +2804,58 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
     <button class="viewtab" data-view="stats">📊 Stats</button>
   </div>
 
-  <!-- TOP BAR -->
+  <!-- TOP BAR — 3 sezioni: SX (Tonica + Accordatura) · CENTRO (drill tabs) · DX (Mic + extra) -->
   <div class="grid-topbar topbar" id="topbar">
-    <div class="topbar-tabs" id="topbarTabs"></div>
-    <div class="topbar-divider"></div>
-    <div class="ctrl-group">
-      <button class="ctrl-nav" data-nav="tonic-prev" title="Tonica precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlTonic" data-popover="tonic">Tonica: <strong id="ctrlTonicVal">C</strong></button>
-      <button class="ctrl-nav" data-nav="tonic-next" title="Tonica successiva">▶</button>
+    <!-- SX · Tonica e Accordatura (sempre visibili) -->
+    <div class="topbar-section topbar-left">
+      <div class="ctrl-group">
+        <button class="ctrl-nav" data-nav="tonic-prev" title="Tonica precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlTonic" data-popover="tonic">Tonica: <strong id="ctrlTonicVal">C</strong></button>
+        <button class="ctrl-nav" data-nav="tonic-next" title="Tonica successiva">▶</button>
+      </div>
+      <div class="ctrl-group">
+        <button class="ctrl-nav" data-nav="tuning-prev" title="Accordatura precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlTuning" data-popover="tuning"><span id="ctrlTuningVal">Standard</span></button>
+        <button class="ctrl-nav" data-nav="tuning-next" title="Accordatura successiva">▶</button>
+      </div>
     </div>
-    <div class="ctrl-group">
-      <button class="ctrl-nav" data-nav="tuning-prev" title="Accordatura precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlTuning" data-popover="tuning"><span id="ctrlTuningVal">Standard</span></button>
-      <button class="ctrl-nav" data-nav="tuning-next" title="Accordatura successiva">▶</button>
+    <!-- CENTRO · Drill modes (Nota / Intervallo / Accordi / Scala / Arpeggio) -->
+    <div class="topbar-section topbar-center">
+      <div class="topbar-tabs" id="topbarTabs"></div>
     </div>
-    <button class="topbar-ctrl" id="ctrlAudio" data-popover="audio"><span id="ctrlAudioVal">Mic</span></button>
-    <div class="ctrl-group hidden" id="ctrlGroupProg">
-      <button class="ctrl-nav" data-nav="prog-prev" title="Progressione precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlProg" data-popover="prog"><span id="ctrlProgVal">I-IV-V-I</span></button>
-      <button class="ctrl-nav" data-nav="prog-next" title="Progressione successiva">▶</button>
-    </div>
-    <div class="ctrl-group hidden" id="ctrlGroupChordType">
-      <button class="ctrl-nav" data-nav="chordtype-prev" title="Tipo accordo precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlChordType" data-popover="chordtype"><span id="ctrlChordTypeVal">Triade</span></button>
-      <button class="ctrl-nav" data-nav="chordtype-next" title="Tipo accordo successivo">▶</button>
-    </div>
-    <div class="ctrl-group hidden" id="ctrlGroupPlayOrder">
-      <button class="ctrl-nav" data-nav="playorder-prev" title="Ordine precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlPlayOrder" data-popover="playorder"><span id="ctrlPlayOrderVal">Qualsiasi</span></button>
-      <button class="ctrl-nav" data-nav="playorder-next" title="Ordine successivo">▶</button>
-    </div>
-    <div class="ctrl-group hidden" id="ctrlGroupScaleType">
-      <button class="ctrl-nav" data-nav="scaletype-prev" title="Scala precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlScaleType" data-popover="scaletype"><span id="ctrlScaleTypeVal">Maggiore</span></button>
-      <button class="ctrl-nav" data-nav="scaletype-next" title="Scala successiva">▶</button>
-    </div>
-    <div class="ctrl-group hidden" id="ctrlGroupScaleDir">
-      <button class="ctrl-nav" data-nav="scaledir-prev" title="Direzione precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlScaleDir" data-popover="scaledir"><span id="ctrlScaleDirVal">Asc</span></button>
-      <button class="ctrl-nav" data-nav="scaledir-next" title="Direzione successiva">▶</button>
-    </div>
-    <div class="ctrl-group hidden" id="ctrlGroupArpType">
-      <button class="ctrl-nav" data-nav="arptype-prev" title="Arpeggio precedente">◀</button>
-      <button class="topbar-ctrl" id="ctrlArpType" data-popover="arptype"><span id="ctrlArpTypeVal">Maj7</span></button>
-      <button class="ctrl-nav" data-nav="arptype-next" title="Arpeggio successivo">▶</button>
+    <!-- DX · Mic + parametri drill-specifici (Progressione, Chord type, Order, Scale type, Direction, Arpeggio) -->
+    <div class="topbar-section topbar-right">
+      <button class="topbar-ctrl" id="ctrlAudio" data-popover="audio"><span id="ctrlAudioVal">Mic</span></button>
+      <div class="ctrl-group hidden" id="ctrlGroupProg">
+        <button class="ctrl-nav" data-nav="prog-prev" title="Progressione precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlProg" data-popover="prog"><span id="ctrlProgVal">I-IV-V-I</span></button>
+        <button class="ctrl-nav" data-nav="prog-next" title="Progressione successiva">▶</button>
+      </div>
+      <div class="ctrl-group hidden" id="ctrlGroupChordType">
+        <button class="ctrl-nav" data-nav="chordtype-prev" title="Tipo accordo precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlChordType" data-popover="chordtype"><span id="ctrlChordTypeVal">Triade</span></button>
+        <button class="ctrl-nav" data-nav="chordtype-next" title="Tipo accordo successivo">▶</button>
+      </div>
+      <div class="ctrl-group hidden" id="ctrlGroupPlayOrder">
+        <button class="ctrl-nav" data-nav="playorder-prev" title="Ordine precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlPlayOrder" data-popover="playorder"><span id="ctrlPlayOrderVal">Qualsiasi</span></button>
+        <button class="ctrl-nav" data-nav="playorder-next" title="Ordine successivo">▶</button>
+      </div>
+      <div class="ctrl-group hidden" id="ctrlGroupScaleType">
+        <button class="ctrl-nav" data-nav="scaletype-prev" title="Scala precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlScaleType" data-popover="scaletype"><span id="ctrlScaleTypeVal">Maggiore</span></button>
+        <button class="ctrl-nav" data-nav="scaletype-next" title="Scala successiva">▶</button>
+      </div>
+      <div class="ctrl-group hidden" id="ctrlGroupScaleDir">
+        <button class="ctrl-nav" data-nav="scaledir-prev" title="Direzione precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlScaleDir" data-popover="scaledir"><span id="ctrlScaleDirVal">Asc</span></button>
+        <button class="ctrl-nav" data-nav="scaledir-next" title="Direzione successiva">▶</button>
+      </div>
+      <div class="ctrl-group hidden" id="ctrlGroupArpType">
+        <button class="ctrl-nav" data-nav="arptype-prev" title="Arpeggio precedente">◀</button>
+        <button class="topbar-ctrl" id="ctrlArpType" data-popover="arptype"><span id="ctrlArpTypeVal">Maj7</span></button>
+        <button class="ctrl-nav" data-nav="arptype-next" title="Arpeggio successivo">▶</button>
+      </div>
     </div>
     <div class="topbar-spacer"></div>
     <button class="topbar-collapse" id="topbarCollapse" title="Comprimi">⌃</button>
@@ -8009,10 +8231,10 @@ const Theory = {
 // ═══════════════════════════════════════════════════════════
 function renderMasteryPolygon(size) {
   size = size || 360;
-  // Padding orizzontale extra per le label laterali (Tensioni Estese / Armonia Funzionale ecc.)
-  const PAD_X = 130, PAD_Y = 40;
+  // Padding generoso per le label laterali leggibili a 16px
+  const PAD_X = 170, PAD_Y = 60;
   const cx = size / 2, cy = size / 2;
-  const r = (size / 2) - 36;  // raggio aumentato, più "ariosità" la diamo coi PAD
+  const r = (size / 2) - 48;
   const pillars = Object.entries(PILLARS);
   const n = pillars.length;
   // Vertici esterni (per labels + outer outline)
@@ -8055,16 +8277,16 @@ function renderMasteryPolygon(size) {
   const vertices = filled.map(f => {
     return `<circle cx="${f.vx.toFixed(1)}" cy="${f.vy.toFixed(1)}" r="5" fill="${f.pillar.color}" stroke="#fff" stroke-width="2"/>`;
   }).join('');
-  // Labels esterne (clickable → Teoria + Pratica del pilastro)
+  // Labels esterne (clickable → Teoria + Pratica del pilastro) — leggibili
   const labels = filled.map(f => {
     const anchor = f.angle > Math.PI*0.25 && f.angle < Math.PI*0.75 ? 'middle' :
                    f.angle > -Math.PI*0.75 && f.angle < -Math.PI*0.25 ? 'middle' :
                    (Math.cos(f.angle) > 0 ? 'start' : 'end');
     return `
       <g class="poly-label" data-pillar="${f.key}" tabindex="0" role="button" aria-label="Apri ${f.pillar.label}">
-        <text x="${f.lx.toFixed(1)}" y="${(f.ly-6).toFixed(1)}" text-anchor="${anchor}" font-size="11" font-weight="700" fill="${f.pillar.color}">${f.pillar.icon} ${f.pillar.label}</text>
-        <text x="${f.lx.toFixed(1)}" y="${(f.ly+9).toFixed(1)}" text-anchor="${anchor}" font-size="10" fill="var(--text-muted)" font-family="var(--font-mono)">${Math.round(f.sp)}/1000 · ${f.tier}</text>
-        <text x="${f.lx.toFixed(1)}" y="${(f.ly+24).toFixed(1)}" text-anchor="${anchor}" font-size="9" fill="var(--accent-tab)" font-family="var(--font-ui)" opacity="0.75">▸ Allena</text>
+        <text x="${f.lx.toFixed(1)}" y="${(f.ly-8).toFixed(1)}" text-anchor="${anchor}" font-size="16" font-weight="700" fill="${f.pillar.color}">${f.pillar.icon} ${f.pillar.label}</text>
+        <text x="${f.lx.toFixed(1)}" y="${(f.ly+12).toFixed(1)}" text-anchor="${anchor}" font-size="13" fill="var(--text-muted)" font-family="var(--font-mono)">${Math.round(f.sp)}/1000</text>
+        <text x="${f.lx.toFixed(1)}" y="${(f.ly+28).toFixed(1)}" text-anchor="${anchor}" font-size="12" fill="var(--accent-tab)" font-family="var(--font-ui)" font-weight="600" opacity="0.85">${f.tier} ▸</text>
       </g>`;
   }).join('');
   // viewBox con padding orizzontale per non tagliare le label laterali
@@ -9248,6 +9470,147 @@ const Composer = {
   },
 };
 
+// ═══════════════════════════════════════════════════════════
+//  LAYOUT EDITOR · slider per dimensioni/spaziature salvati per profilo
+//  L'utente personalizza la UI dal browser, le preferenze si salvano in
+//  progress.layoutPrefs e si applicano come CSS custom properties.
+// ═══════════════════════════════════════════════════════════
+const LAYOUT_DEFAULTS = {
+  noteSize:        1.00,  // moltiplicatore display-degree (font-size)
+  chordSize:       1.00,  // moltiplicatore chord-name
+  fretboardSize:   1.00,  // moltiplicatore fretboard svg height
+  uiScale:         1.00,  // moltiplicatore globale UI (font/padding base)
+  spacing:         1.00,  // moltiplicatore gap/margin tra blocchi
+  cornerRadius:    1.00,  // moltiplicatore border-radius
+  headerCompact:   0,     // 0 = normale, 1 = compatto
+  showSidebars:    1,     // 1 = mostra settings/stats su desktop, 0 = nascondi
+};
+
+const LayoutEditor = {
+  open: false,
+  prefs: { ...LAYOUT_DEFAULTS },
+
+  load() {
+    const saved = progress.layoutPrefs || {};
+    this.prefs = Object.assign({}, LAYOUT_DEFAULTS, saved);
+    this.apply();
+  },
+  save() {
+    progress.layoutPrefs = { ...this.prefs };
+    saveProgress();
+  },
+  reset() {
+    if (!confirm('Ripristinare il layout di default?')) return;
+    this.prefs = { ...LAYOUT_DEFAULTS };
+    this.save();
+    this.apply();
+    this._renderControls();
+  },
+
+  apply() {
+    const root = document.documentElement;
+    root.style.setProperty('--layout-note-size',      this.prefs.noteSize);
+    root.style.setProperty('--layout-chord-size',     this.prefs.chordSize);
+    root.style.setProperty('--layout-fretboard-size', this.prefs.fretboardSize);
+    root.style.setProperty('--layout-ui-scale',       this.prefs.uiScale);
+    root.style.setProperty('--layout-spacing',        this.prefs.spacing);
+    root.style.setProperty('--layout-corner',         this.prefs.cornerRadius);
+    document.body.classList.toggle('layout-compact', !!this.prefs.headerCompact);
+    document.body.classList.toggle('layout-no-sidebars', !this.prefs.showSidebars);
+  },
+
+  toggle() {
+    this.open = !this.open;
+    if (this.open) this._showPanel();
+    else this._hidePanel();
+  },
+
+  _showPanel() {
+    let panel = document.getElementById('layoutEditorPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'layoutEditorPanel';
+      panel.className = 'layout-editor-panel';
+      document.body.appendChild(panel);
+    }
+    this._renderControls(panel);
+    requestAnimationFrame(() => panel.classList.add('open'));
+  },
+
+  _hidePanel() {
+    const panel = document.getElementById('layoutEditorPanel');
+    if (panel) panel.classList.remove('open');
+  },
+
+  _renderControls(panel) {
+    if (!panel) panel = document.getElementById('layoutEditorPanel');
+    if (!panel) return;
+    const sliders = [
+      { key:'noteSize',      label:'Dimensione nota gigante',    min:0.5, max:2.0, step:0.05 },
+      { key:'chordSize',     label:'Dimensione nome accordo',    min:0.5, max:2.0, step:0.05 },
+      { key:'fretboardSize', label:'Dimensione manico',          min:0.5, max:2.5, step:0.05 },
+      { key:'uiScale',       label:'Scala UI generale',          min:0.7, max:1.5, step:0.05 },
+      { key:'spacing',       label:'Spaziatura tra blocchi',     min:0.3, max:2.5, step:0.05 },
+      { key:'cornerRadius',  label:'Curvatura angoli',           min:0,   max:2.0, step:0.1  },
+    ];
+    const toggles = [
+      { key:'headerCompact', label:'Header compatto (meno spazio in alto)' },
+      { key:'showSidebars',  label:'Mostra sidebar Settings/Stats su desktop' },
+    ];
+    panel.innerHTML = `
+      <div class="le-header">
+        <div class="le-title">⇲ Layout Custom</div>
+        <button class="le-close" id="leClose">×</button>
+      </div>
+      <div class="le-body">
+        <p class="le-intro">Personalizza dimensioni e spaziature. Salvato automaticamente per il profilo <strong>${getActiveProfile()}</strong>.</p>
+        ${sliders.map(s => `
+          <div class="le-row">
+            <div class="le-row-head">
+              <span class="le-row-label">${s.label}</span>
+              <span class="le-row-val" id="leVal_${s.key}">${this.prefs[s.key].toFixed(2)}×</span>
+            </div>
+            <input type="range" class="le-slider"
+                   data-key="${s.key}" min="${s.min}" max="${s.max}" step="${s.step}"
+                   value="${this.prefs[s.key]}">
+          </div>
+        `).join('')}
+        <div class="le-section-label">Toggle</div>
+        ${toggles.map(t => `
+          <div class="le-row le-toggle-row">
+            <span class="le-row-label">${t.label}</span>
+            <button class="solo-switch ${this.prefs[t.key]?'on':''}" data-toggle="${t.key}"></button>
+          </div>
+        `).join('')}
+        <div class="le-actions">
+          <button class="le-btn-reset" id="leReset">↺ Ripristina default</button>
+        </div>
+      </div>
+    `;
+    panel.querySelector('#leClose').addEventListener('click', () => this.toggle());
+    panel.querySelectorAll('.le-slider').forEach(sl => {
+      sl.addEventListener('input', () => {
+        const k = sl.dataset.key;
+        this.prefs[k] = parseFloat(sl.value);
+        document.getElementById('leVal_'+k).textContent = this.prefs[k].toFixed(2) + '×';
+        this.apply();
+      });
+      sl.addEventListener('change', () => this.save());
+    });
+    panel.querySelectorAll('[data-toggle]').forEach(b => {
+      b.addEventListener('click', () => {
+        const k = b.dataset.toggle;
+        this.prefs[k] = this.prefs[k] ? 0 : 1;
+        b.classList.toggle('on', !!this.prefs[k]);
+        this.save();
+        this.apply();
+      });
+    });
+    panel.querySelector('#leReset').addEventListener('click', () => this.reset());
+  },
+};
+window.LayoutEditor = LayoutEditor;
+
 function init() {
   updateNotationBtn();
   updateTopbarCollapsed();
@@ -9270,6 +9633,19 @@ function init() {
   refreshProgressUI();
   setView(state.view);
   listAudioDevices(false).then(() => refreshTopbarValues());
+  // Layout editor: carica preferenze profilo e wire bottone
+  if (typeof LayoutEditor !== 'undefined') {
+    LayoutEditor.load();
+    const btn = document.getElementById('btnLayoutEdit');
+    if (btn) btn.addEventListener('click', () => LayoutEditor.toggle());
+  }
+  // Sync body.fb-visible — riusato da CSS Solo Mode per layout side-by-side senza :has()
+  const fbWrap = document.getElementById('fretboardWrap');
+  if (fbWrap) {
+    const syncFb = () => document.body.classList.toggle('fb-visible', !fbWrap.classList.contains('hidden'));
+    new MutationObserver(syncFb).observe(fbWrap, {attributes:true, attributeFilter:['class']});
+    syncFb();
+  }
   // ── Auto-backup prompt (ogni 7 giorni se XP > 50) ──
   setTimeout(() => {
     const last = progress.lastBackup || 0;
@@ -9287,6 +9663,16 @@ function init() {
   saveProgress();
 }
 init();
+
+// ─── FIX SCROLL: la rotellina verticale sopra container con overflow-x scrolla la pagina ───
+document.addEventListener('wheel', (e) => {
+  const wrap = e.target.closest && e.target.closest('.fretboard-wrap, .heatmap-grid, .lt-options, .ssc-chord-list, .badges-grid');
+  if (wrap && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+    const scroller = document.scrollingElement || document.documentElement;
+    scroller.scrollTop += e.deltaY;
+    e.preventDefault();
+  }
+}, { passive: false });
 
 // ─── PWA: register service worker + auto-reload on update ───
 if ('serviceWorker' in navigator) {
@@ -10469,12 +10855,18 @@ if ('serviceWorker' in navigator) {
     'soft-piano':    { label: 'Soft Piano',     type: 'sine',      baseOctave: 3, vol: 0.24 },
   };
 
-  // Modi (per generazione contestuale in key)
+  // Modi (per generazione contestuale in key). Ordine = cycle del dial scala.
   const RESOLVE_SCALES = {
-    major:  { steps:[0,2,4,5,7,9,11], qualities:['maj','min','min','maj','dom7','min','m7b5'] },
-    minor:  { steps:[0,2,3,5,7,8,10], qualities:['min','m7b5','maj','min','min','maj','dom7'] },
-    dorian: { steps:[0,2,3,5,7,9,10], qualities:['min','min','maj','dom7','min','m7b5','maj'] },
+    major:      { label:'Maj', steps:[0,2,4,5,7,9,11], qualities:['maj','min','min','maj','dom7','min','m7b5'] },
+    minor:      { label:'Min', steps:[0,2,3,5,7,8,10], qualities:['min','m7b5','maj','min','min','maj','dom7'] },
+    dorian:     { label:'Dor', steps:[0,2,3,5,7,9,10], qualities:['min','min','maj','dom7','min','m7b5','maj'] },
+    mixolydian: { label:'Mix', steps:[0,2,4,5,7,9,10], qualities:['dom7','min','m7b5','maj','min','min','maj'] },
+    lydian:     { label:'Lyd', steps:[0,2,4,6,7,9,11], qualities:['maj','dom7','min','m7b5','maj','min','min'] },
+    phrygian:   { label:'Phr', steps:[0,1,3,5,7,8,10], qualities:['min','maj','dom7','min','m7b5','maj','min'] },
+    harmonic:   { label:'HMin', steps:[0,2,3,5,7,8,11], qualities:['min','m7b5','maj','min','dom7','maj','m7b5'] },
+    melodic:    { label:'MMin', steps:[0,2,3,5,7,9,11], qualities:['min','min','maj','dom7','dom7','m7b5','m7b5'] },
   };
+  const RESOLVE_SCALE_KEYS = Object.keys(RESOLVE_SCALES); // ordine ciclico
 
   // Stato globale Resolve (persistito)
   const ResolveLS = {
@@ -10559,6 +10951,14 @@ if ('serviceWorker' in navigator) {
     },
     cycleKey(dir) {
       this.setKey(this.key + dir);
+    },
+    cycleScale(dir) {
+      const idx = RESOLVE_SCALE_KEYS.indexOf(this.scaleType);
+      const n = RESOLVE_SCALE_KEYS.length;
+      const next = ((idx + dir) % n + n) % n;
+      this.scaleType = RESOLVE_SCALE_KEYS[next];
+      this.persist();
+      this._render();
     },
     togglePlayStyle() {
       this.playStyle = (this.playStyle === 'chord') ? 'arpeggio' : 'chord';
@@ -10663,9 +11063,18 @@ if ('serviceWorker' in navigator) {
       overlay.className = 'rs-overlay';
       overlay.innerHTML = `
         <div class="rs-topbar">
-          <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
-          <div class="rs-title">resolve</div>
-          <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
+          <div class="rs-topbar-left">
+            <img src="icon.svg" class="rs-brand-logo" alt="">
+            <span class="rs-brand-name">Nemo</span>
+          </div>
+          <div class="rs-topbar-center">
+            <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
+            <div class="rs-title">resolve</div>
+            <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
+          </div>
+          <div class="rs-topbar-right">
+            <span class="rs-info-chip" id="rsInfoComplexity">— · 100</span>
+          </div>
         </div>
 
         <div class="rs-stage">
@@ -10702,15 +11111,17 @@ if ('serviceWorker' in navigator) {
           </button>
         </div>
 
-        <!-- Key picker (visibile solo se mode === 'key') -->
+        <!-- Key picker (visibile solo se mode === 'key') — 2 righe stack: nota sopra, scala sotto -->
         <div class="rs-key-picker hidden" id="rsKeyPicker">
-          <button class="rs-key-arrow" data-dir="-1">◀</button>
-          <div class="rs-key-strip" id="rsKeyStrip"></div>
-          <button class="rs-key-arrow" data-dir="1">▶</button>
-          <div class="rs-key-scale-toggle">
-            <button class="rs-scale-btn" data-scale="major">Maj</button>
-            <button class="rs-scale-btn" data-scale="minor">Min</button>
-            <button class="rs-scale-btn" data-scale="dorian">Dor</button>
+          <div class="rs-picker-row rs-key-row">
+            <button class="rs-key-arrow" data-key-dir="-1">◀</button>
+            <div class="rs-key-strip" id="rsKeyStrip"></div>
+            <button class="rs-key-arrow" data-key-dir="1">▶</button>
+          </div>
+          <div class="rs-picker-row rs-scale-row">
+            <button class="rs-key-arrow rs-scale-arrow" data-scale-dir="-1">◀</button>
+            <div class="rs-scale-strip" id="rsScaleStrip"></div>
+            <button class="rs-key-arrow rs-scale-arrow" data-scale-dir="1">▶</button>
           </div>
         </div>
 
@@ -10767,55 +11178,60 @@ if ('serviceWorker' in navigator) {
       dial.addEventListener('touchmove', (e) => { if (dragging) { onDialEvent(e); e.preventDefault(); } }, {passive:false});
       dial.addEventListener('touchend', () => dragging = false);
 
-      // Key picker arrows
-      document.querySelectorAll('#rsKeyPicker [data-dir]').forEach(b => {
-        b.addEventListener('click', () => this.cycleKey(parseInt(b.dataset.dir)));
+      // Frecce note
+      document.querySelectorAll('#rsKeyPicker [data-key-dir]').forEach(b => {
+        b.addEventListener('click', e => { e.stopPropagation(); this.cycleKey(parseInt(b.dataset.keyDir)); });
       });
-      document.querySelectorAll('#rsKeyPicker [data-scale]').forEach(b => {
-        b.addEventListener('click', () => {
-          this.scaleType = b.dataset.scale;
-          this.persist();
-          this._render();
-        });
+      // Frecce scala
+      document.querySelectorAll('#rsKeyPicker [data-scale-dir]').forEach(b => {
+        b.addEventListener('click', e => { e.stopPropagation(); this.cycleScale(parseInt(b.dataset.scaleDir)); });
       });
-      // Drag/swipe sul key picker container (parent stabile — la strip interna viene re-renderizzata)
-      const picker = document.getElementById('rsKeyPicker');
-      if (picker) {
-        let startX = null, lastSteps = 0, baseKey = 0;
-        const STEP_PX = 50;
-        const isInteractive = (target) => {
-          // Non intercettare drag se l'utente clicca su freccette o scale buttons
-          return target.closest('.rs-key-arrow,.rs-scale-btn,.rs-key-scale-toggle');
-        };
+
+      // Drag/swipe — listener separati per riga note e riga scala
+      const setupDrag = (rowSel, stepPx, getBase, applyStep) => {
+        const row = document.querySelector(rowSel);
+        if (!row) return;
+        let startX = null, lastSteps = 0, base = 0;
         const onStart = (e) => {
-          if (isInteractive(e.target)) return;
+          if (e.target.closest('.rs-key-arrow')) return; // freccia → click, non drag
           startX = (e.touches ? e.touches[0].clientX : e.clientX);
           lastSteps = 0;
-          baseKey = this.key;
-          picker.classList.add('dragging');
+          base = getBase();
+          row.classList.add('dragging');
         };
         const onMove = (e) => {
           if (startX == null) return;
           const x = (e.touches ? e.touches[0].clientX : e.clientX);
           const delta = startX - x;
-          const steps = Math.round(delta / STEP_PX);
+          const steps = Math.round(delta / stepPx);
           if (steps !== lastSteps) {
             lastSteps = steps;
-            this.setKey(baseKey + steps);
+            applyStep(base, steps);
           }
           if (e.cancelable) e.preventDefault();
         };
         const onEnd = () => {
-          if (startX !== null) picker.classList.remove('dragging');
+          if (startX !== null) row.classList.remove('dragging');
           startX = null;
         };
-        picker.addEventListener('mousedown', onStart);
+        row.addEventListener('mousedown', onStart);
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onEnd);
-        picker.addEventListener('touchstart', onStart, {passive:false});
-        picker.addEventListener('touchmove', onMove, {passive:false});
-        picker.addEventListener('touchend', onEnd);
-      }
+        row.addEventListener('touchstart', onStart, {passive:false});
+        row.addEventListener('touchmove', onMove, {passive:false});
+        row.addEventListener('touchend', onEnd);
+      };
+      setupDrag('#rsKeyPicker .rs-key-row', 50,
+        () => this.key,
+        (base, steps) => this.setKey(base + steps));
+      setupDrag('#rsKeyPicker .rs-scale-row', 60,
+        () => RESOLVE_SCALE_KEYS.indexOf(this.scaleType),
+        (base, steps) => {
+          const n = RESOLVE_SCALE_KEYS.length;
+          this.scaleType = RESOLVE_SCALE_KEYS[((base + steps) % n + n) % n];
+          this.persist();
+          this._render();
+        });
     },
 
     _cycleModeBtn() {
@@ -10857,6 +11273,8 @@ if ('serviceWorker' in navigator) {
       this._renderKeyPicker();
       this._renderSettings();
       document.getElementById('rsPlayIcon').textContent = this.playing ? '⏸' : '▶';
+      const infoEl = document.getElementById('rsInfoComplexity');
+      if (infoEl) infoEl.textContent = `${Math.round(this.complexity)} · 100`;
     },
 
     _renderDial() {
@@ -10941,21 +11359,34 @@ if ('serviceWorker' in navigator) {
       if (this.mode === 'key') {
         picker.classList.remove('hidden');
         const NN = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
-        // Strip: nota corrente al centro grande, due laterali piccole con opacità
-        const strip = document.getElementById('rsKeyStrip');
+        // Strip note
+        const keyStrip = document.getElementById('rsKeyStrip');
         const prev = NN[(this.key - 1 + 12) % 12];
         const prev2 = NN[(this.key - 2 + 12) % 12];
         const next = NN[(this.key + 1) % 12];
         const next2 = NN[(this.key + 2) % 12];
-        strip.innerHTML = `
+        keyStrip.innerHTML = `
           <span class="rs-key-side far">${prev2}</span>
           <span class="rs-key-side">${prev}</span>
           <span class="rs-key-main">${NN[this.key]}</span>
           <span class="rs-key-side">${next}</span>
           <span class="rs-key-side far">${next2}</span>
         `;
-        picker.querySelectorAll('[data-scale]').forEach(b =>
-          b.classList.toggle('active', b.dataset.scale === this.scaleType));
+        // Strip scala (mini-versione con stesso pattern)
+        const scaleStrip = document.getElementById('rsScaleStrip');
+        const N = RESOLVE_SCALE_KEYS.length;
+        const sIdx = RESOLVE_SCALE_KEYS.indexOf(this.scaleType);
+        const at = (off) => {
+          const i = ((sIdx + off) % N + N) % N;
+          return RESOLVE_SCALES[RESOLVE_SCALE_KEYS[i]].label;
+        };
+        scaleStrip.innerHTML = `
+          <span class="rs-scale-side far">${at(-2)}</span>
+          <span class="rs-scale-side">${at(-1)}</span>
+          <span class="rs-scale-main">${at(0)}</span>
+          <span class="rs-scale-side">${at(1)}</span>
+          <span class="rs-scale-side far">${at(2)}</span>
+        `;
       } else {
         picker.classList.add('hidden');
       }
