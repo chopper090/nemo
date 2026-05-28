@@ -9,6 +9,85 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Nemo — Fretboard & Ear Training</title>
+<!--
+═════════════════════════════════════════════════════════════════════
+TABLE OF CONTENTS — SOLO trainer/index.html  (~12.870 righe)
+═════════════════════════════════════════════════════════════════════
+CSS  <style>  (~30-3300)
+  100   Scroll/touch foundation
+  134   Layout grid
+  183   Layout force toggle (mobile/desktop override)
+  287   Header
+  386   Buttons
+  415   View tabs
+  440   Top bar (3-col)
+  591   Mobile optimized
+  743   Popovers
+  785   Display
+  883   Fretboard
+  928   Learn view
+  1118  Stats view
+  1236  Theory view
+  1492  Footer
+  1542  Audio meter
+  1560  Toast / Overlay / Focus / Path / Lesson
+  1834  Layout custom (vars dinamiche)
+  1927  Resolve UI       (rs-*)
+  2129  Account / profili / songs / composer
+  2225  Ear Training UI  (ear-*)
+  2305  Tuner UI         (tuner-*)
+  2441  Lesson test overlay
+  2512  Mastery polygon + badge toast
+  2605  Solo Mode base   (solo-*)
+  2763  Solo Mode fretboard layout
+
+HTML <body>  (~3300-3420)
+
+JS  <script>  (~3420-12860)
+  3430  Note trainer core / constants
+  3567  Chord qualities & songs
+  3807  Phases & levels
+  4002  Degree colors
+  4024  Synth (Web Audio playback)
+  4068  Helpers
+  4101  Mastery polygon (pilastri/tier)
+  4177  Account & migrations
+  4238  Progress / XP / streak
+  4403  Mastery polygon (formule SP)
+  4544  Song unlock logic
+  4666  App state
+  4707  DOM refs
+  4808  Drill modules
+  5458  Lesson engine
+  5525  Fretboard renderer
+  5594  View switch (Practice vs Path)
+  5644  Path view render
+  5745  Topbar / mode
+  5805  Popovers
+  5951  Audio
+  6105  Learn (lesson content modules 1-3)
+  6869  Modulo 4 — Scale e modi
+  7161  Modulo 5 — Armonia funzionale
+  7402  Modulo 6 — Applicazione pratica
+  7898  Theory mode quiz
+  7962  Lesson test
+  8735  Stats view analytics
+  9250  Session
+  9377  Hint / skip / pause
+  9432  Header buttons
+  9563  Keyboard shortcuts
+  9595  Init
+  9600  SongsLibrary
+  9763  Composer
+  10037 LayoutEditor
+  10300 Solo Mode core
+  10646 Setup-screen + grid picker
+  11059 SongCreator modale
+  11430 Resolve module      (Resolve / rs-*)
+  12096 Ear Training module (Ear / ear-*)
+  12430 Tuner module        (Tuner / tuner-*)
+═════════════════════════════════════════════════════════════════════
+-->
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -61,6 +140,17 @@
   --shadow-lg: 0 12px 36px rgba(20,18,12,0.18), 0 4px 12px rgba(20,18,12,0.10);
   --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Module brand accents (usabili anche fuori dal modulo, es. logo header) */
+  --c-ear:        #10b981;  /* verde — Ear Training */
+  --c-tuner:      #f59e0b;  /* giallo/oro — Tuner */
+  --c-resolve:    #ff4d6d;  /* rosa-rosso — Resolve */
+  --c-solo:       #0a84ff;  /* blu — Solo Mode (= --solo-acc nelle overlay) */
+  /* Dark neutrali condivisi (Solo/Tuner/Resolve overlays) */
+  --c-mute:       #7e8088;
+  --c-border-dk:  #1f1f22;
+  --c-surface-dk: #1a1a1d;
+
   color-scheme: light;
 }
 [data-theme="dark"] {
@@ -97,6 +187,65 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ════════════ FONT UTILITIES ════════════
+   Pattern ricorrente `font: <weight> 13px/1 'Inter',sans-serif` usato 100+ volte nel CSS.
+   Queste utility servono per NUOVI componenti (non sostituiscono retroattivamente le regole esistenti). */
+.f-ui-13-400 { font: 400 13px/1 var(--font-ui); }
+.f-ui-13-500 { font: 500 13px/1 var(--font-ui); }
+.f-ui-13-600 { font: 600 13px/1 var(--font-ui); }
+.f-ui-13-700 { font: 700 13px/1 var(--font-ui); }
+.f-mono-11   { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; }
+.f-serif-lg  { font: 300 32px/1 'Cormorant Garamond', serif; }
+
+/* ════════════ ONBOARDING (intro-overlay) ════════════ */
+.intro-overlay{
+  position:fixed;inset:0;z-index:11000;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(0,0,0,.78);backdrop-filter:blur(10px);
+  animation:soFadeIn .3s ease;font-family:'Inter',sans-serif
+}
+.intro-card{
+  width:min(560px,100%);background:#0f0f10;border:1px solid #1f1f22;
+  border-radius:var(--r-lg);padding:34px 30px;text-align:center;color:#fff;
+  box-shadow:0 30px 90px rgba(0,0,0,.6)
+}
+.intro-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
+.intro-logo{width:36px;height:36px;border-radius:8px}
+.intro-name{font:700 16px/1 'Inter',sans-serif;color:#fff;letter-spacing:.02em}
+.intro-title{font:300 32px/1.1 'Cormorant Garamond',serif;letter-spacing:.01em;color:#fff;margin-bottom:8px}
+.intro-sub{font:400 13px/1.5 'Inter',sans-serif;color:var(--c-mute,#7e8088);margin-bottom:24px}
+.intro-paths{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.intro-path{
+  background:#1a1a1d;border:1px solid #2a2a30;color:#fff;
+  border-radius:var(--r-md);padding:14px 16px;cursor:pointer;text-align:left;
+  display:flex;flex-direction:column;gap:4px;
+  transition:background .15s,border-color .15s,transform .12s
+}
+.intro-path:hover{background:#1f1f22;border-color:var(--c-solo,#0a84ff);transform:translateY(-1px)}
+.intro-path-title{font:300 22px/1 'Cormorant Garamond',serif;font-style:italic;letter-spacing:.02em;color:#fff}
+.intro-path[data-intro="solo"]  .intro-path-title b{color:var(--c-solo,#0a84ff);font-weight:300}
+.intro-path[data-intro="solve"] .intro-path-title b{color:var(--c-resolve);font-weight:300}
+.intro-path[data-intro="ear"]   .intro-path-title b{color:var(--c-ear);font-weight:300}
+.intro-path-desc{font:400 12px/1.4 'Inter',sans-serif;color:var(--c-mute,#7e8088)}
+.intro-skip{
+  background:transparent;border:0;color:var(--c-mute,#7e8088);cursor:pointer;
+  font:500 12px/1 'Inter',sans-serif;padding:8px 12px;letter-spacing:.05em
+}
+.intro-skip:hover{color:#fff}
+
+/* ════════════ A11Y: rispetta prefers-reduced-motion ════════════
+   Disabilita animazioni e transizioni per utenti che soffrono di motion sickness
+   o hanno la preferenza di sistema attiva (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ════════════ SCROLL E TOUCH FOUNDATION ════════════
    Una sola gerarchia di scroll: html scrolla naturalmente, body è solo flow container.
    Niente min-height su entrambi, niente overflow-y:auto annidato → touch responsivo. */
@@ -293,7 +442,7 @@ body.layout-force-desktop { display: block; }
 }
 /* ════════ HEADER · 3 zone bilanciate (CSS Grid 3-col simmetrico) ════════
    SX:    logo + Nemo + chips esperienza
-   CENTRO: app modes (solo · solve · ear · tüner · lab) — centrato matematicamente
+   CENTRO: app modes (solo · solve · ear · tune · lab) — centrato matematicamente
    DX:    opzioni layout (focus · manico · custom · vista · full · EN · tema)
    Le 3 zone hanno larghezza UGUALE 1fr → il centro è SEMPRE al centro reale. */
 .header {
@@ -331,21 +480,22 @@ body.layout-force-desktop { display: block; }
   .header-brand-chips { justify-content: center; }
 }
 
+/* Base condivisa per i logo mini (sølo, sølve, ear, tune). Override solo del colore per variante. */
+.logo-mini { font: 300 15px/1 'Cormorant Garamond', serif; letter-spacing: .02em; text-transform: lowercase; font-style: italic; }
+.logo-mini b { font-weight: 300; font-style: italic; }
+@media (max-width: 720px) { .logo-mini { font-size: 13px; } }
+
 /* Bottone EAR — coerente con sølo/sølve, accento verde per orecchio */
 .btn-ear { padding: 0 10px !important; min-width: auto !important; }
-.ear-logo-mini { font: 300 15px/1 'Cormorant Garamond', serif; letter-spacing: .02em; color: #10b981; text-transform: lowercase; font-style: italic; }
-.ear-logo-mini b { font-weight: 300; color: #10b981; font-style: italic; }
-body.ear-active .btn-ear { background: #10b981 !important; color: #fff !important; border-color: #10b981 !important; }
+.ear-logo-mini, .ear-logo-mini b { color: var(--c-ear); }
+body.ear-active .btn-ear { background: var(--c-ear) !important; color: #fff !important; border-color: var(--c-ear) !important; }
 body.ear-active .btn-ear .ear-logo-mini, body.ear-active .btn-ear .ear-logo-mini b { color: #fff; }
-@media (max-width: 720px) { .ear-logo-mini { font-size: 13px; } }
 
 /* Bottone Tuner — giallo/oro signature accordatore */
 .btn-tuner { padding: 0 10px !important; min-width: auto !important; }
-.tuner-logo-mini { font: 300 15px/1 'Cormorant Garamond', serif; letter-spacing: .02em; color: #f59e0b; text-transform: lowercase; font-style: italic; }
-.tuner-logo-mini b { font-weight: 300; color: #f59e0b; font-style: italic; }
-body.tuner-active .btn-tuner { background: #f59e0b !important; color: #fff !important; border-color: #f59e0b !important; }
+.tuner-logo-mini, .tuner-logo-mini b { color: var(--c-tuner); }
+body.tuner-active .btn-tuner { background: var(--c-tuner) !important; color: #fff !important; border-color: var(--c-tuner) !important; }
 body.tuner-active .btn-tuner .tuner-logo-mini, body.tuner-active .btn-tuner .tuner-logo-mini b { color: #fff; }
-@media (max-width: 720px) { .tuner-logo-mini { font-size: 13px; } }
 
 /* XP & Streak chips */
 .chip {
@@ -397,7 +547,7 @@ body.tuner-active .btn-tuner .tuner-logo-mini, body.tuner-active .btn-tuner .tun
 }
 .btn:hover { background: var(--surface-2); }
 .btn:active { transform: scale(0.97); }
-.btn:focus-visible { outline: 2px solid var(--accent-tab); outline-offset: 2px; }
+.btn:focus-visible { outline: 2px solid var(--accent-tab); outline-offset: 2px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-tab) 22%, transparent); }
 .btn-primary { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); }
 .btn-primary:hover { opacity: 0.85; background: var(--accent); }
 .btn-icon {
@@ -968,7 +1118,19 @@ body.view-fretboard-focus .fretboard-svg { height: auto; }
   border-color: var(--accent-tab); transform: translateY(-2px); box-shadow: var(--shadow-md);
 }
 .learn-lesson-card.locked {
-  background: var(--surface-2); color: var(--locked); cursor: not-allowed; opacity: 0.7;
+  background: var(--surface-2); color: var(--locked); cursor: not-allowed; opacity: 0.65;
+  border-style: dashed;
+}
+/* Lock icon visibile in alto a destra */
+.learn-lesson-card.locked::after {
+  content: '🔒';
+  position: absolute; top: 8px; right: 10px;
+  font-size: 13px; opacity: 0.7;
+  pointer-events: none;
+}
+/* Available (non locked / non completed): più "tappable" — affordance maggiore */
+.learn-lesson-card:not(.locked):not(.completed) {
+  border-color: var(--border-strong);
 }
 .learn-lesson-card.completed {
   border-color: var(--success-border);
@@ -1160,6 +1322,22 @@ body.view-fretboard-focus .fretboard-svg { height: auto; }
   border-radius: var(--r-sm);
   font: 500 13px/1.3 var(--font-ui);
 }
+/* Icone status (⚠ debole / ✓ forte) per leggibilità immediata in stats view */
+.weak-item::before, .strong-item::before {
+  content: ''; flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 700 12px/1 var(--font-ui);
+}
+.weak-item::before {
+  content: '!'; background: color-mix(in srgb, var(--accent-hot) 18%, transparent);
+  color: var(--accent-hot);
+}
+.strong-item::before {
+  content: '✓'; background: color-mix(in srgb, var(--success) 18%, transparent);
+  color: var(--success);
+}
+.weak-item { font-weight: 600; }
 .weak-item-label, .strong-item-label { flex: 1; min-width: 0; }
 .weak-item-bar {
   width: 100px; height: 6px;
@@ -1294,6 +1472,21 @@ body.view-fretboard-focus .fretboard-svg { height: auto; }
 .focus-mode-pill:hover { color: var(--text); border-color: var(--border-strong); }
 .focus-mode-pill.active {
   background: var(--accent-tab); color: #fff; border-color: var(--accent-tab);
+}
+.theory-only-known {
+  margin-left: auto;
+  background: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--text-muted) !important;
+  font-weight: 600;
+}
+.theory-only-known.active {
+  background: var(--success-bg) !important;
+  border-color: var(--success) !important;
+  color: var(--success) !important;
+}
+.theory-only-known[disabled] {
+  opacity: 0.45; cursor: not-allowed;
 }
 .theory-tonic-row {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -1925,19 +2118,14 @@ body.layout-no-sidebars .layout {
 .le-btn-reset:hover { color: var(--text); border-color: var(--text-subtle); }
 
 /* ════════════════════════════════════════════════════════════
-   RESOLVE · ear-training cieco — fullscreen overlay
+   RESOLVE · ear-training cieco — fullscreen overlay  [classi: .rs-*, .resolve-*]
    ════════════════════════════════════════════════════════════ */
 /* Bottone Resolve — speculare a "sølo" ma in rosa-rosso (signature Resolve) */
 .btn-resolve{padding:0 10px !important;min-width:auto !important}
-.resolve-logo-mini{font:300 15px/1 'Cormorant Garamond',serif;letter-spacing:.02em;color:#ff4d6d;text-transform:lowercase;font-style:italic}
-.resolve-logo-mini b{font-weight:300;color:#ff4d6d;font-style:italic}
-body.resolve-active .btn-resolve{background:#ff4d6d !important;color:#fff !important;border-color:#ff4d6d !important}
+.resolve-logo-mini, .resolve-logo-mini b { color: var(--c-resolve); }
+body.resolve-active .btn-resolve{background:var(--c-resolve) !important;color:#fff !important;border-color:var(--c-resolve) !important}
 body.resolve-active .btn-resolve .resolve-logo-mini,
 body.resolve-active .btn-resolve .resolve-logo-mini b{color:#fff}
-/* Mobile: stesso font ma più piccolo come solo-logo-mini */
-@media (max-width: 720px){
-  .resolve-logo-mini{font-size:13px}
-}
 
 .rs-overlay{
   position:fixed;inset:0;z-index:10600;background:#000;color:#fff;
@@ -1947,16 +2135,16 @@ body.resolve-active .btn-resolve .resolve-logo-mini b{color:#fff}
 .rs-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.resolve-active{overflow:hidden}
 
-/* Top bar Resolve — 3 sezioni (SX brand · CENTRO controlli · DX info) */
+/* Top bar Resolve — 3 sezioni con grid simmetrico per centrare perfettamente il titolo */
 .rs-topbar{
-  display:flex;align-items:center;justify-content:space-between;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
   padding:14px 22px;border-bottom:1px solid #1a1a1d;flex-shrink:0;gap:14px
 }
-.rs-topbar-left{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.rs-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
 .rs-brand-logo{width:24px;height:24px;border-radius:6px;opacity:.9}
 .rs-brand-name{font:700 13px/1 'Inter',sans-serif;color:#fff;letter-spacing:.02em}
-.rs-topbar-center{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:14px}
-.rs-topbar-right{flex:0 0 auto;display:flex;align-items:center;gap:8px}
+.rs-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px}
+.rs-topbar-right{justify-self:end;display:flex;align-items:center;gap:8px}
 .rs-info-chip{
   background:#0f0f10;border:1px solid #1f1f22;color:var(--solo-acc);
   border-radius:999px;padding:6px 12px;font:600 12px/1 'JetBrains Mono',monospace;letter-spacing:.1em
@@ -2223,7 +2411,7 @@ body.resolve-active{overflow:hidden}
 .cmp-help code{font-family:var(--font-mono);background:var(--surface);padding:1px 5px;border-radius:3px;color:var(--accent-tab)}
 
 /* ════════════════════════════════════════════════════════════
-   EAR · Interval ear training overlay (verde, stile minimal)
+   EAR · Interval ear training overlay (verde, stile minimal)  [classi: .ear-*]
    ════════════════════════════════════════════════════════════ */
 .ear-overlay{
   position:fixed;inset:0;z-index:10600;background:#000;color:#fff;
@@ -2232,15 +2420,15 @@ body.resolve-active{overflow:hidden}
 }
 .ear-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.ear-active{overflow:hidden}
-.ear-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
-.ear-topbar-left{display:flex;align-items:center;gap:8px}
+.ear-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
+.ear-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
 .ear-brand-logo{width:24px;height:24px;border-radius:6px}
 .ear-brand-name{font:700 13px/1 'Inter',sans-serif}
-.ear-topbar-center{flex:1;display:flex;align-items:center;justify-content:center;gap:14px}
+.ear-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px}
 .ear-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em}
 .ear-icon-btn{background:transparent;border:0;color:#7e8088;font-size:22px;cursor:pointer;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
 .ear-icon-btn:hover{background:#1a1a1d;color:#fff}
-.ear-topbar-right{display:flex;gap:8px;align-items:center}
+.ear-topbar-right{justify-self:end;display:flex;gap:8px;align-items:center}
 .ear-info-chip{background:#0f0f10;border:1px solid #1f1f22;color:#10b981;border-radius:999px;padding:6px 12px;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em}
 
 .ear-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:28px}
@@ -2269,6 +2457,11 @@ body.ear-active{overflow:hidden}
 .ear-opt-btn.correct small{color:rgba(255,255,255,.85)}
 .ear-opt-btn.wrong{background:#dc2626;color:#fff;border-color:#dc2626}
 .ear-opt-btn.wrong small{color:rgba(255,255,255,.85)}
+/* Single mode trick: due bottoni Sì/No grandi e contrastati */
+.ear-opt-yn{min-width:140px;font:300 32px/1.1 'Cormorant Garamond',serif;letter-spacing:.04em;padding:22px 18px}
+.ear-opt-yn small{font:500 11px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+.ear-opt-yes:hover{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.08)}
+.ear-opt-no:hover{border-color:#ff6b7a;color:#ff6b7a;background:rgba(255,107,122,.08)}
 
 .ear-feedback{font:600 14px/1.3 'Inter',sans-serif;text-align:center;min-height:20px;color:#7e8088}
 .ear-feedback.correct{color:#10b981}
@@ -2303,7 +2496,7 @@ body.ear-active{overflow:hidden}
 }
 
 /* ════════════════════════════════════════════════════════════
-   TUNER · accordatore minimal (palette gold/amber)
+   TUNER · accordatore minimal (palette gold/amber)  [classi: .tuner-*]
    ════════════════════════════════════════════════════════════ */
 .tuner-overlay{
   position:fixed;inset:0;z-index:10650;background:#0a0a0d;color:#fff;
@@ -2312,11 +2505,11 @@ body.ear-active{overflow:hidden}
 }
 .tuner-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.tuner-active{overflow:hidden}
-.tuner-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
-.tuner-topbar-left{display:flex;align-items:center;gap:8px}
+.tuner-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
+.tuner-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
 .tuner-brand-logo{width:24px;height:24px;border-radius:6px}
 .tuner-brand-name{font:700 13px/1 'Inter',sans-serif}
-.tuner-topbar-center{flex:1;display:flex;align-items:center;justify-content:center;gap:18px}
+.tuner-topbar-center{justify-self:center;display:flex;align-items:center;gap:18px}
 .tuner-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em}
 .tuner-tuning-name{
   font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#f59e0b;
@@ -2329,7 +2522,7 @@ body.tuner-active{overflow:hidden}
 .tuner-tuning-picker{position:fixed;inset:0;z-index:10700;display:flex;align-items:center;justify-content:center;font-family:-apple-system,'Inter',sans-serif}
 .tuner-picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.65);animation:soFadeIn .2s ease}
 .tuner-picker-sheet{
-  position:relative;background:#0f0f10;border:1px solid #1f1f22;border-radius:16px;
+  position:relative;background:#0f0f10;border:1px solid #1f1f22;border-radius:var(--r-lg);
   padding:18px 22px;width:min(440px,92vw);max-height:80vh;overflow-y:auto;
   box-shadow:0 24px 80px rgba(0,0,0,.55);
   animation:ltFadeOnly .2s ease-out
@@ -2354,6 +2547,17 @@ body.tuner-active{overflow:hidden}
 .tuner-icon-btn{background:transparent;border:0;color:#7e8088;font-size:22px;cursor:pointer;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
 .tuner-icon-btn:hover{background:#1a1a1d;color:#fff}
 .tuner-freq-chip{background:#0f0f10;border:1px solid #1f1f22;color:#a8aeba;border-radius:999px;padding:6px 12px;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.05em}
+.tuner-device-chip{
+  background:#0f0f10;border:1px solid #1f1f22;color:#10b981;
+  border-radius:999px;padding:6px 12px;font:600 11px/1 'JetBrains Mono',monospace;
+  cursor:pointer;letter-spacing:.04em;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  transition:all .15s
+}
+.tuner-device-chip:hover{background:#1a1a1d;border-color:#10b981}
+.tuner-device-chip::before{content:'🎙 ';font-size:10px}
+.tuner-cents-needle.saturated{box-shadow:0 0 14px rgba(239,68,68,.9);background:#dc2626}
+.tuner-string{cursor:pointer}
+.tuner-string:hover{border-color:#f59e0b}
 
 .tuner-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:32px}
 
@@ -2375,6 +2579,7 @@ body.tuner-active{overflow:hidden}
   margin:10px 0
 }
 .tuner-dot{
+  position:relative;
   font-size:42px;color:rgba(220,38,38,.18);
   transition:color .15s, transform .15s, text-shadow .2s;
   user-select:none
@@ -2384,6 +2589,14 @@ body.tuner-active{overflow:hidden}
   transform:scale(1.15);
   text-shadow:0 0 18px rgba(239,68,68,.7)
 }
+/* Micro-label sotto i dot: visibile solo quando il dot è attivo. */
+.tuner-dot-lbl{
+  position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.18em;
+  color:var(--c-mute,#7e8088);opacity:0;transition:opacity .2s, color .2s;
+  white-space:nowrap;text-transform:uppercase;pointer-events:none
+}
+.tuner-dot.active .tuner-dot-lbl{opacity:1;color:#ef4444}
 .tuner-note-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:180px}
 .tuner-note{
   font:300 140px/1 'Cormorant Garamond',serif;
@@ -2397,6 +2610,14 @@ body.tuner-active{overflow:hidden}
   text-shadow:0 0 40px rgba(16,185,129,.6);
   transform:scale(1.03)
 }
+@media (prefers-reduced-motion: no-preference){
+  @keyframes tuner-lock{
+    0%   { transform: scale(1.03); }
+    35%  { transform: scale(1.08); }
+    100% { transform: scale(1.03); }
+  }
+  .tuner-note.in-tune{ animation: tuner-lock 320ms ease-out; }
+}
 .tuner-octave{font:500 13px/1 'JetBrains Mono',monospace;color:#7e8088;letter-spacing:.12em}
 
 /* Cents meter */
@@ -2405,13 +2626,13 @@ body.tuner-active{overflow:hidden}
   position:relative;width:100%;height:4px;background:#1f1f22;border-radius:2px;overflow:visible
 }
 .tuner-cents-zero{
-  position:absolute;left:50%;top:-8px;width:2px;height:20px;background:#10b981;border-radius:1px;transform:translateX(-50%)
+  position:absolute;left:50%;top:-10px;width:2px;height:24px;background:#ef4444;border-radius:1px;transform:translateX(-50%)
 }
 .tuner-cents-needle{
-  position:absolute;left:50%;top:-6px;width:4px;height:16px;background:#ef4444;border-radius:2px;
-  transform:translateX(0);transition:transform .12s ease, background .25s
+  position:absolute;left:50%;top:-8px;width:4px;height:20px;background:#10b981;border-radius:2px;
+  transform:translateX(-50%);transition:left .12s ease, background .25s, box-shadow .25s
 }
-.tuner-cents-needle.in-tune{background:#10b981;box-shadow:0 0 12px rgba(16,185,129,.7)}
+.tuner-cents-needle.in-tune{background:#10b981;box-shadow:0 0 14px rgba(16,185,129,.85)}
 .tuner-cents-label{font:600 11px/1 'JetBrains Mono',monospace;color:#a8aeba;letter-spacing:.1em}
 
 .tuner-hint{font:500 13px/1 'Inter',sans-serif;color:#7e8088;text-align:center;letter-spacing:.05em}
@@ -2460,6 +2681,12 @@ body.tuner-active{overflow:hidden}
 .lt-level-stars{font:700 22px/1 var(--font-mono);color:#FFB800;letter-spacing:.1em;margin-bottom:6px}
 .lt-level-label{font:700 16px/1.2 var(--font-ui);margin-bottom:4px}
 .lt-level-meta{font:500 11px/1.4 var(--font-ui);color:var(--text-muted);margin-bottom:6px}
+.lt-level-pool{
+  font:500 10px/1.4 var(--font-mono);color:var(--text-subtle);
+  background:var(--surface-2);border:1px solid var(--border-subtle);
+  padding:4px 8px;border-radius:var(--r-sm);margin:0 0 8px;
+  display:inline-block;max-width:100%;text-align:center
+}
 .lt-level-xp{font:600 13px/1 var(--font-mono);color:var(--accent-tab);margin-bottom:10px}
 .lt-level-passed{font:500 11px/1 var(--font-mono);color:#FFB800;margin-bottom:10px}
 .lt-level-btn{
@@ -2561,17 +2788,24 @@ body.tuner-active{overflow:hidden}
 .badge-toast .bt-name{font:700 16px/1.2 var(--font-ui);color:#fff;margin-bottom:2px}
 .badge-toast .bt-xp{font:600 12px/1 var(--font-mono);color:#7e8088}
 
-/* Header buttons con label testuale chiara */
+/* Header buttons con label testuale chiara — pill compatto, low-emphasis */
 .btn-label{
   width:auto !important;min-width:auto !important;
-  padding:0 12px !important;font:600 12px/1 var(--font-ui);letter-spacing:.03em;
-  text-transform:none;color:var(--text-muted);
-  display:inline-flex;align-items:center;justify-content:center;gap:4px;height:34px
+  padding:0 11px !important;font:500 11px/1 var(--font-ui);letter-spacing:.04em;
+  text-transform:none;color:var(--text-subtle);
+  background:transparent;border:1px solid transparent;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;
+  border-radius:999px;transition:color .15s, background .15s, border-color .15s
 }
-.btn-label:hover{color:var(--text)}
-.btn-label.active,.btn-label.is-active{color:var(--accent-tab);background:var(--surface-2)}
-body.solo-mode .btn-label{color:var(--solo-mute);border-color:var(--solo-line)}
-body.solo-mode .btn-label:hover{color:var(--solo-fg)}
+.btn-label:hover{color:var(--text);background:var(--surface-2);border-color:var(--border-subtle)}
+.btn-label.active,.btn-label.is-active{color:var(--accent-tab);background:color-mix(in srgb, var(--accent-tab) 12%, transparent);border-color:color-mix(in srgb, var(--accent-tab) 30%, transparent)}
+body.solo-mode .btn-label{color:var(--solo-mute);border-color:transparent}
+body.solo-mode .btn-label:hover{color:var(--solo-fg);background:rgba(255,255,255,.04);border-color:var(--solo-line)}
+/* Divider sottile per separare cluster logici nell'header-right */
+.header-divider{
+  display:inline-block;width:1px;height:18px;background:var(--border-subtle);
+  margin:0 4px;opacity:.7
+}
 /* Default: mostra label completa, nascondi icona */
 .btn-label .btn-l-icon{display:none}
 .btn-label .btn-l-full{display:inline}
@@ -2641,11 +2875,25 @@ body.solo-mode[data-solo-vibe="warm"]{--solo-bg:#0d0805;--solo-acc:#ff6b35;--sol
    ════════════════════════════════════════════════════════════ */
 body.solo-mode{background:var(--solo-bg) !important}
 body.solo-mode .layout{background:var(--solo-bg)}
-/* Mostra il bottone setup dedicato di Solo */
+/* Mostra il bottone setup dedicato di Solo, stile coerente con ear/sølve/tune (cerchio icon-btn) */
 body.solo-mode #btnSoloPanel{
   display:inline-flex !important;
-  background:var(--solo-card);color:var(--solo-acc);border:1px solid var(--solo-line)
+  align-items:center;justify-content:center;
+  width:38px;height:38px;border-radius:50%;padding:0;
+  background:transparent;color:var(--solo-mute);border:1px solid var(--solo-line);
+  font-size:18px;line-height:1;transition:background .15s,color .15s,border-color .15s
 }
+body.solo-mode #btnSoloPanel:hover{
+  background:rgba(255,255,255,.06);color:var(--solo-fg);border-color:var(--solo-acc)
+}
+/* In solo-mode pulisci l'header dai bottoni utility (Focus/Manico/Custom/Vista/Full)
+   per avere un look pulito stile ear/sølve/tune — restano: brand, modal switchers, ⚙ Solo, EN, Tema */
+body.solo-mode #btnFocus,
+body.solo-mode #btnFretboard,
+body.solo-mode #btnLayoutEdit,
+body.solo-mode #btnLayoutMode,
+body.solo-mode #btnFullscreen,
+body.solo-mode .header-divider{display:none !important}
 /* Nascondi solo Teoria/Percorso/Stats nelle viewtabs (UI dense incompatibili) */
 body.solo-mode .viewtab[data-view="theory"],
 body.solo-mode .viewtab[data-view="path"],
@@ -2776,6 +3024,28 @@ body.solo-mode .layout{
       "fretboard display"
       "footer    footer" !important;
   }
+  body.solo-mode.fb-visible[data-solo-fb-pos="top"] .layout{
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto auto 1fr auto !important;
+    grid-template-areas:
+      "header"
+      "viewtabs"
+      "topbar"
+      "fretboard"
+      "display"
+      "footer" !important;
+  }
+  body.solo-mode.fb-visible[data-solo-fb-pos="bottom"] .layout{
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto 1fr auto auto !important;
+    grid-template-areas:
+      "header"
+      "viewtabs"
+      "topbar"
+      "display"
+      "fretboard"
+      "footer" !important;
+  }
   body.solo-mode.fb-visible .grid-display{align-self:center;padding:20px}
   body.solo-mode.fb-visible .grid-fretboard{align-self:center}
   body.solo-mode.fb-visible .display-degree{font-size:clamp(140px,16vw,240px) !important}
@@ -2856,6 +3126,11 @@ body.solo-mode .solo-intervals-strip .deg.hi{color:var(--solo-acc);font-weight:7
 /* Next preview */
 body.solo-mode .solo-next-preview{
   position:absolute;bottom:28px;left:0;right:0;text-align:center;pointer-events:none
+}
+/* Quando il fretboard è visibile, NEXT ROOT va in flow normale (sotto i gradi),
+   così resta tra la nota+gradi e il manico invece di sovrapporsi. */
+body.solo-mode.fb-visible .solo-next-preview{
+  position:static;margin-top:32px
 }
 body.solo-mode .solo-next-preview .nlbl{
   font:400 11px/1 'Inter',sans-serif;letter-spacing:.28em;text-transform:uppercase;
@@ -3119,6 +3394,33 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
 </head>
 <body>
 
+<!-- ONBOARDING (mostrato solo al primo launch — chiave localStorage nemoIntroShown) -->
+<div class="intro-overlay" id="introOverlay" style="display:none" aria-modal="true" role="dialog">
+  <div class="intro-card">
+    <div class="intro-brand">
+      <img src="icon.svg" class="intro-logo" alt="">
+      <span class="intro-name">Nemo</span>
+    </div>
+    <h2 class="intro-title">Fretboard &amp; Ear Training</h2>
+    <p class="intro-sub">Tre strade per cominciare. Puoi sempre cambiare dopo.</p>
+    <div class="intro-paths">
+      <button class="intro-path" data-intro="solo">
+        <span class="intro-path-title">s<b>ø</b>lo</span>
+        <span class="intro-path-desc">Drill rapidi · trova note, gradi, scale e accordi sul manico.</span>
+      </button>
+      <button class="intro-path" data-intro="solve">
+        <span class="intro-path-title">s<b>ø</b>lve</span>
+        <span class="intro-path-desc">Ear training cieco · suono accordi, tu trovi le note.</span>
+      </button>
+      <button class="intro-path" data-intro="ear">
+        <span class="intro-path-title"><b>e</b>ar</span>
+        <span class="intro-path-desc">Riconoscimento intervalli · trick mode su intervalli simili.</span>
+      </button>
+    </div>
+    <button class="intro-skip" id="introSkip">Esplora da solo →</button>
+  </div>
+</div>
+
 <div class="layout" id="layout">
 
   <!-- HEADER -->
@@ -3143,9 +3445,9 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
       <button class="btn btn-icon btn-focus-exit" id="btnFocusExit" title="Esci focus (ESC)">✕</button>
       <button class="btn btn-icon" id="btnSoloPanel" title="Solo · Setup" style="display:none">⚙</button>
       <button class="btn btn-icon btn-solo" id="btnSolo" title="Solo Mode — minimal focus (S)"><span class="solo-logo-mini">s<b>ø</b>lo</span></button>
-      <button class="btn btn-icon btn-resolve" id="btnResolve" title="Resolve — ear training cieco (R)"><span class="resolve-logo-mini">s<b>ø</b>lve</span></button>
-      <button class="btn btn-icon btn-ear" id="btnEar" title="EAR — interval ear training (E)"><span class="ear-logo-mini"><b>e</b>ar</span></button>
-      <button class="btn btn-icon btn-tuner" id="btnTuner" title="Tuner — accordatore (U)"><span class="tuner-logo-mini">t<b>ü</b>ner</span></button>
+      <button class="btn btn-icon btn-resolve" id="btnResolve" title="Resolve — ear training cieco (R)"><span class="logo-mini resolve-logo-mini">s<b>ø</b>lve</span></button>
+      <button class="btn btn-icon btn-ear" id="btnEar" title="EAR — interval ear training (E)"><span class="logo-mini ear-logo-mini"><b>e</b>ar</span></button>
+      <button class="btn btn-icon btn-tuner" id="btnTuner" title="Tune — accordatore (U)"><span class="logo-mini tuner-logo-mini">t<b>u</b>ne</span></button>
       <a class="btn btn-icon btn-label btn-lab" id="btnFretboardLab" href="fretboard-lab.html" target="_blank" rel="noopener" title="Apri Fretboard Lab (nuova scheda)" style="text-decoration:none;color:inherit;"><span class="btn-l-full">Lab ↗</span><span class="btn-l-icon">🧪</span></a>
     </div>
     <!-- DX · Opzioni di visualizzazione e layout -->
@@ -3155,6 +3457,7 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
       <button class="btn btn-icon btn-label" id="btnLayoutEdit" title="Personalizza dimensioni / spaziature"><span class="btn-l-full">Custom</span><span class="btn-l-icon">≣</span></button>
       <button class="btn btn-icon btn-label" id="btnLayoutMode" title="Forza layout: Auto / Mobile / Desktop (L)"><span class="btn-l-full">Vista</span><span class="btn-l-icon">📱</span></button>
       <button class="btn btn-icon btn-label" id="btnFullscreen" title="Schermo intero"><span class="btn-l-full">Full</span><span class="btn-l-icon">⛶</span></button>
+      <span class="header-divider" aria-hidden="true"></span>
       <button class="btn btn-icon btn-label" id="btnNotation" title="Notazione (EN/IT)">EN</button>
       <button class="btn btn-icon btn-label" id="btnTheme" title="Tema (T)"><span class="btn-l-full">Tema</span><span class="btn-l-icon">☀</span></button>
       <button class="btn btn-icon btn-label" id="btnView" title="Vista (V)" style="display:none">Vista</button>
@@ -4769,6 +5072,39 @@ const dom = {
 //  DRILL MODULES
 // ═══════════════════════════════════════════════════════════
 
+// Helper adaptive: pesca un elemento dall'array `pool` con weight inverso all'accuracy.
+// `statsCategory` = 'practice' (di solito) · `keyFn(item)` produce la key che indicizza progress.stats.
+// Item mai visto → peso = 1.4 (priorità esplorazione). Item con bassa accuracy → peso alto fino a 1.5.
+// Item con alta accuracy → peso minimo 0.2. Se solo 1 item nel pool, ritorna quello.
+function pickWeakItem(pool, statsCategory, keyFn) {
+  if (!Array.isArray(pool) || pool.length === 0) return null;
+  if (pool.length === 1) return pool[0];
+  ensureStats();
+  const stats = progress?.stats?.[statsCategory] || {};
+  const weights = pool.map(item => {
+    const k = keyFn(item);
+    const s = k ? stats[k] : null;
+    if (!s || !s.seen) return 1.4;
+    const acc = s.correct / s.seen;
+    // Range 0.2 (forte) .. 1.5 (debole)
+    return Math.max(0.2, 1.5 - acc);
+  });
+  const tot = weights.reduce((a,b)=>a+b, 0);
+  let r = Math.random() * tot;
+  for (let i = 0; i < pool.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
+// È attiva la modalità adaptive sul drill corrente? (Solo Mode toggle)
+function isAdaptiveActive() {
+  try { return !!(window.Solo && Solo.active && Solo.adaptiveDifficulty); }
+  catch(e) { return false; }
+}
+
+
 // ─── NOTE DRILL ───
 const NoteDrill = {
   id: 'note', label: 'Nota', topbarControls: [],
@@ -4778,8 +5114,16 @@ const NoteDrill = {
     const allowed = this._config.allowedNotes || [0,1,2,3,4,5,6,7,8,9,10,11];
     let n;
     let tries = 0;
-    do { n = allowed[Math.floor(Math.random() * allowed.length)]; tries++; }
-    while (n === this._targetNoteIdx && state.total > 0 && allowed.length > 1 && tries < 20);
+    // Se Solo Adaptive è attivo, pesca per debolezza (60% del tempo) — altrimenti random
+    const useAdaptive = isAdaptiveActive() && Math.random() < 0.6;
+    if (useAdaptive) {
+      // Filtra fuori il target precedente per evitare ripetizione
+      const filtered = allowed.length > 1 ? allowed.filter(x => x !== this._targetNoteIdx) : allowed;
+      n = pickWeakItem(filtered, 'practice', idx => `note:${idx}`);
+    } else {
+      do { n = allowed[Math.floor(Math.random() * allowed.length)]; tries++; }
+      while (n === this._targetNoteIdx && state.total > 0 && allowed.length > 1 && tries < 20);
+    }
     this._targetNoteIdx = n;
     state.locked = false; state.stableCount = 0; state.lastDetectedIdx = -1;
     state.total++;
@@ -4875,8 +5219,14 @@ const IntervalDrill = {
     const allowed = this._config.allowedIntervals || [0,1,2,3,4,5,6,7,8,9,10,11];
     if (this._config.rootRandom) state.tonic = Math.floor(Math.random() * 12);
     let s; let tries = 0;
-    do { s = allowed[Math.floor(Math.random() * allowed.length)]; tries++; }
-    while (s === this._targetIntervalSem && state.total > 0 && allowed.length > 1 && tries < 20);
+    const useAdaptive = isAdaptiveActive() && Math.random() < 0.6;
+    if (useAdaptive) {
+      const filtered = allowed.length > 1 ? allowed.filter(x => x !== this._targetIntervalSem) : allowed;
+      s = pickWeakItem(filtered, 'practice', sem => `interval:${DEGREE_LABELS[sem]}`);
+    } else {
+      do { s = allowed[Math.floor(Math.random() * allowed.length)]; tries++; }
+      while (s === this._targetIntervalSem && state.total > 0 && allowed.length > 1 && tries < 20);
+    }
     this._targetIntervalSem = s;
     state.locked = false; state.stableCount = 0; state.lastDetectedIdx = -1;
     state.total++;
@@ -7927,6 +8277,308 @@ const LESSON_TEST_LEVELS = {
   hard:     { label:'Difficile',stars:2, n:15, pass:0.90, xp:50,  icon:'★★☆' },
   master:   { label:'Maestro',  stars:3, n:20, pass:0.95, xp:120, icon:'★★★' },
 };
+
+// ═══════════════════════════════════════════════════════════
+//  LESSON CONCEPT AUTO-DERIVE — scansione lesson.sections
+// ═══════════════════════════════════════════════════════════
+// Helper: estrae concetti citati nei testi/quickcheck di una lezione,
+// per popolare un restrict automatico quando manca la mappatura esplicita.
+// Conservativo: ritorna restrict SOLO per livello standard (1★);
+// hard/master = null → tier default (pool più ampio).
+const CONCEPT_DETECTORS = {
+  // chord names: cerca string match esatto (boundary-aware) sui nomi formali
+  chordNames: [
+    {tok:'Maj7', name:'Maj7'},{tok:'min7', name:'min7'},
+    {tok:'m7b5', name:'m7b5'},{tok:'dim7', name:'dim7'},
+    {tok:'min(Maj7)', name:'min(Maj7)'},
+    {tok:'sus2', name:'sus2'},{tok:'sus4', name:'sus4'},
+    {tok:'dim', name:'dim'},{tok:'aug', name:'aug'},
+    {tok:'Maj', name:'Maj'},{tok:'min', name:'min'},
+    {tok:'maj7', name:'Maj7'},{tok:'7', name:'7'} // ultimo per non avere falsi positivi prima
+  ],
+  // intervalSem: regex su pattern "b3", "3", "P5", "b5" — uso DEGREE_LABELS reverse
+  intervalSem: null,   // popolato run-time da extractDegreesFromText
+  // earSem: stesso pattern di intervalSem ma applicato solo se la lezione menziona "ascolt" o "orecchio"
+  earSem: null,
+};
+
+// Estrae numeri di semitoni dai degree label citati nel testo.
+// Es: "b3, 3, 5, b7" → [3,4,7,10]. Mantiene unicità.
+function extractSemFromText(text) {
+  if (!text || !DEGREE_LABELS) return [];
+  const found = new Set();
+  for (let sem = 1; sem <= 11; sem++) {
+    const lbl = DEGREE_LABELS[sem];
+    if (!lbl) continue;
+    // boundary match: il label tra non-word characters
+    const re = new RegExp(`(?:^|[^\\w])${lbl.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}(?:[^\\w]|$)`);
+    if (re.test(text)) found.add(sem);
+  }
+  return Array.from(found).sort((a,b) => a - b);
+}
+
+// Estrae chord names trovati nel testo (boundary-aware).
+function extractChordsFromText(text) {
+  if (!text) return [];
+  const found = new Set();
+  for (const {tok, name} of CONCEPT_DETECTORS.chordNames) {
+    // Boundary: prima e dopo non-alphanumeric
+    const re = new RegExp(`(?:^|[^A-Za-z0-9])${tok.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}(?:[^A-Za-z0-9]|$)`);
+    if (re.test(text)) found.add(name);
+  }
+  return Array.from(found);
+}
+
+// Concatena tutto il testo "user-facing" di una lesson (intro, text content, quickcheck, callout).
+function lessonAllText(lesson) {
+  if (!lesson) return '';
+  const parts = [lesson.intro || ''];
+  for (const s of (lesson.sections || [])) {
+    if (s.title) parts.push(s.title);
+    if (s.content) parts.push(s.content);
+    if (s.text) parts.push(s.text);
+    if (s.q) parts.push(s.q);
+    if (Array.isArray(s.options)) parts.push(s.options.join(' '));
+    if (s.correct) parts.push(String(s.correct));
+  }
+  return parts.join(' | ');
+}
+
+// Costruisce un Set di concetti per famiglia basato sull'UNIONE delle lessons completate.
+// Usato dal toggle "Solo concetti studiati" in Theory libera.
+function getKnownConcepts() {
+  const acc = { chordNames: new Set(), intervalSem: new Set(), earSem: new Set(),
+                majScaleSem: new Set(), chromaticSem: new Set(), extensionLabels: new Set() };
+  const completed = progress?.completedLessons || {};
+  const ids = Object.keys(completed).map(k => parseInt(k)).filter(n => !isNaN(n));
+  for (const id of ids) {
+    // 1) Mappa globale (più ampia di standard → usiamo livello master se presente, altrimenti hard, altrimenti standard)
+    const map = LESSON_QUIZ_RESTRICTIONS[id];
+    let entry = map?.master || map?.hard || map?.standard;
+    if (!entry) {
+      // 2) Auto-derive
+      const lesson = (typeof LESSONS !== 'undefined') ? LESSONS.find(l => l.id === id) : null;
+      const auto = lesson ? autoDeriveRestrict(lesson) : null;
+      entry = auto?.standard;
+    }
+    if (!entry || typeof entry !== 'object') continue;
+    for (const key of Object.keys(acc)) {
+      if (Array.isArray(entry[key])) entry[key].forEach(v => acc[key].add(v));
+    }
+  }
+  const out = {};
+  let nonEmpty = false;
+  for (const key of Object.keys(acc)) {
+    if (acc[key].size) {
+      out[key] = Array.from(acc[key]);
+      nonEmpty = true;
+    }
+  }
+  return nonEmpty ? out : null;
+}
+
+// Restrict automatico per livello standard (1★). Hard/master tornano null (= tier default).
+function autoDeriveRestrict(lesson) {
+  if (!lesson) return null;
+  const text = lessonAllText(lesson);
+  const chordNames = extractChordsFromText(text);
+  const intervalSem = extractSemFromText(text);
+  const mentionsEar = /ascolt|orecchio|sound|suono/i.test(text);
+  const restrictStd = {};
+  if (chordNames.length)  restrictStd.chordNames  = chordNames;
+  if (intervalSem.length) restrictStd.intervalSem = intervalSem;
+  if (intervalSem.length && mentionsEar) restrictStd.earSem = intervalSem;
+  if (!Object.keys(restrictStd).length) return null;
+  return { standard: restrictStd, hard: null, master: null };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LESSON QUIZ RESTRICTIONS — Coerenza didattica
+// ═══════════════════════════════════════════════════════════
+// Mappa lesson.id → restrictByLevel: { standard|hard|master: {keyFamily: [pool]} }
+// Quando un livello del LessonTest viene avviato, il pool del Theory generator
+// viene ristretto SOLO ai concetti effettivamente introdotti dalla lezione
+// (per il livello base ★) e si allarga progressivamente con 2★ e 3★.
+//
+// keyFamily corrisponde alle chiavi in Theory._tieredPools:
+//   chordNames     → CHORD_FORMULAS_THEORY.name (es. 'Maj','min','Maj7','m7b5')
+//   intervalSem    → semitoni 1..11 per intervalSemitones
+//   majScaleSem    → semitoni della scala maggiore per noteInScale
+//   chromaticSem   → semitoni per noteFromChromaticDegree
+//   extensionLabels→ label EXTENDED_DEGREES per noteFromExtension
+//   earSem         → semitoni per intervalByEar / intervalByEarHarmonic
+//
+// Se una lezione NON è qui dentro, il LessonTest usa i pool tiered di default
+// (_tieredPools), già differenziati per ★/★★/★★★.
+const LESSON_QUIZ_RESTRICTIONS = {
+  // ─── MODULO 1 ───
+  4: { // "Cosa è un intervallo" — introduce 12 intervalli base con nomi
+    standard: { intervalSem: [5,7], earSem: [5,7] },                              // solo 4ª e 5ª (consonanti)
+    hard:     { intervalSem: [3,4,5,7,9], earSem: [3,4,5,7] },                    // + terze e 6ª maggiore
+    master:   { intervalSem: [1,2,3,4,5,6,7,8,9,10,11], earSem: null }            // tutto
+  },
+  5: { // "La triade 1-3-5" — introduce Maj e min, accenna a dim/aug
+    standard: { chordNames: ['Maj','min'] },
+    hard:     { chordNames: ['Maj','min','dim','aug'] },
+    master:   { chordNames: ['Maj','min','dim','aug','sus2','sus4'] }
+  },
+  // ─── MODULO 2 ───
+  6: { // "Tonica e Ottava"
+    standard: { intervalSem: [12 % 12 || 0], earSem: [12 % 12 || 0] }, // ottava soltanto
+    hard:     { intervalSem: [5,7], earSem: [5,7] },
+    master:   { intervalSem: [3,4,5,7], earSem: [3,4,5,7] }
+  },
+  7: { // "Quinta giusta (P5)"
+    standard: { intervalSem: [7], earSem: [7] },
+    hard:     { intervalSem: [5,7], earSem: [5,7] },                              // + quarta (per distinguere)
+    master:   { intervalSem: [5,7,6], earSem: [5,7,6] }                           // + tritono (la confusion zone)
+  },
+  8: { // "Quarta giusta"
+    standard: { intervalSem: [5], earSem: [5] },
+    hard:     { intervalSem: [5,7], earSem: [5,7] },
+    master:   { intervalSem: [5,6,7], earSem: [5,6,7] }
+  },
+  9: { // "Terze (3 e b3)" — il bivio armonico
+    standard: { intervalSem: [3,4], earSem: [3,4] },
+    hard:     { intervalSem: [3,4,5,7], earSem: [3,4,5,7] },
+    master:   { intervalSem: [3,4,5,7,8,9], earSem: [3,4,5,7,8,9] }
+  },
+  10: { // "Seste (6 e b6)" — inversioni delle terze
+    standard: { intervalSem: [8,9], earSem: [8,9] },
+    hard:     { intervalSem: [3,4,8,9], earSem: [3,4,8,9] },
+    master:   { intervalSem: [3,4,5,7,8,9], earSem: [3,4,5,7,8,9] }
+  },
+  11: { // "Settime (7 e b7)" — tensione vs rilassamento
+    standard: { intervalSem: [10,11], earSem: [10,11], chordNames: ['Maj7','min7','7'] },
+    hard:     { intervalSem: [5,7,10,11], earSem: [5,7,10,11], chordNames: ['Maj7','min7','7','m7b5'] },
+    master:   { intervalSem: [1,2,3,4,5,7,8,9,10,11], earSem: null, chordNames: null }
+  },
+  12: { // "Seconde e tritono"
+    standard: { intervalSem: [1,2], earSem: [1,2] },
+    hard:     { intervalSem: [1,2,6], earSem: [1,2,6] },
+    master:   { intervalSem: [1,2,5,6,7], earSem: [1,2,5,6,7] }
+  },
+  13: { // "Intervalli composti (9, 11, 13)" — extensions
+    standard: { extensionLabels: ['9'] },
+    hard:     { extensionLabels: ['9','11','13'] },
+    master:   { extensionLabels: ['9','b9','#9','11','#11','13','b13'] }
+  },
+  // ─── MODULO 3 ───
+  15: { standard: { chordNames: ['Maj'] }, hard: { chordNames: ['Maj','min'] }, master: { chordNames: ['Maj','min','sus2','sus4'] } },
+  16: { standard: { chordNames: ['min'] }, hard: { chordNames: ['Maj','min'] }, master: { chordNames: ['Maj','min','dim','aug'] } },
+  17: { standard: { chordNames: ['dim','aug'] }, hard: { chordNames: ['Maj','min','dim','aug'] }, master: { chordNames: ['Maj','min','dim','aug','m7b5'] } },
+  18: { standard: { chordNames: ['sus2','sus4'] }, hard: { chordNames: ['Maj','min','sus2','sus4'] }, master: null },
+
+  // ─── MODULO 4: SCALE E MODI ───
+  // Per scale, restringi intervalSem/earSem ai gradi caratteristici del modo studiato
+  26: { // Scala maggiore (Ionica): 1-2-3-4-5-6-7
+    standard: { majScaleSem: [4,7], intervalSem: [4,7] },           // i 2 gradi della triade (3 e 5)
+    hard:     { majScaleSem: [0,2,4,5,7,9,11], intervalSem: [2,4,5,7,9,11] },
+    master:   null
+  },
+  27: { // Scala minore naturale (Eolia): b3, b6, b7 caratterizzanti
+    standard: { intervalSem: [3,8,10], earSem: [3,8,10] },           // i 3 "abbassamenti" rispetto al maj
+    hard:     { intervalSem: [2,3,5,7,8,10], earSem: [2,3,5,7,8,10] },
+    master:   null
+  },
+  29: { // Pentatonica minore: 1-b3-4-5-b7
+    standard: { intervalSem: [3,5,7,10], earSem: [3,5,7,10] },
+    hard:     { intervalSem: [3,5,6,7,10], earSem: [3,5,6,7,10] },   // + blue note
+    master:   null
+  },
+  30: { // Scala blues: pent minore + b5
+    standard: { intervalSem: [3,5,6,7,10], earSem: [3,5,6,7,10] },
+    hard:     { intervalSem: [3,5,6,7,8,10], earSem: [3,5,6,7,8,10] },
+    master:   null
+  },
+  31: { // Dorico (ii): minore con 6 naturale
+    standard: { intervalSem: [3,9], earSem: [3,9] },                 // b3 e 6 (le 2 caratterizzanti)
+    hard:     { intervalSem: [2,3,5,7,9,10], earSem: [2,3,5,7,9,10] },
+    master:   null
+  },
+  32: { // Frigio (iii): minore con b2
+    standard: { intervalSem: [1,3], earSem: [1,3] },                 // b2 e b3 (le caratterizzanti)
+    hard:     { intervalSem: [1,3,5,7,8,10], earSem: [1,3,5,7,8,10] },
+    master:   null
+  },
+  33: { // Lidio (IV): maggiore con #4
+    standard: { intervalSem: [4,6], earSem: [4,6] },                 // 3 e #4 (la distintiva)
+    hard:     { intervalSem: [2,4,6,7,9,11], earSem: [2,4,6,7,9,11] },
+    master:   null
+  },
+  34: { // Misolidio (V): maggiore con b7
+    standard: { intervalSem: [4,10], earSem: [4,10] },               // 3 e b7 (la distintiva)
+    hard:     { intervalSem: [2,4,5,7,9,10], earSem: [2,4,5,7,9,10] },
+    master:   null
+  },
+  35: { // Locrio (vii): minore con b2 e b5
+    standard: { intervalSem: [1,3,6,8,10], earSem: [1,3,6,8,10] },
+    hard:     { intervalSem: [1,3,5,6,8,10], earSem: [1,3,5,6,8,10] },
+    master:   null
+  },
+  36: { // Pentatonica maggiore: 1-2-3-5-6
+    standard: { intervalSem: [2,4,7,9], earSem: [2,4,7,9] },
+    hard:     null,
+    master:   null
+  },
+  37: { // Minore melodica (jazz): 1-2-b3-4-5-6-7
+    standard: { intervalSem: [3,9,11], earSem: [3,9,11] },           // b3, 6, 7 = "minore jazz"
+    hard:     { intervalSem: [2,3,5,7,9,11], earSem: [2,3,5,7,9,11] },
+    master:   null
+  },
+  38: { // Minore armonica: 1-2-b3-4-5-b6-7
+    standard: { intervalSem: [3,8,11], earSem: [3,8,11] },           // b3, b6, 7 sensibile
+    hard:     { intervalSem: [2,3,5,7,8,11], earSem: [2,3,5,7,8,11] },
+    master:   null
+  },
+
+  // ─── MODULO 5: ARMONIA FUNZIONALE ───
+  41: { // I 7 gradi diatonici (triadi armonizzate scala maggiore)
+    standard: { chordNames: ['Maj','min'] },                          // I, ii, iii, IV, V, vi sono solo Maj/min
+    hard:     { chordNames: ['Maj','min','dim'] },                    // + vii° (dim)
+    master:   { chordNames: ['Maj','min','dim','Maj7','min7','7','m7b5'] }
+  },
+  42: { // Funzione armonica T-S-D
+    standard: { chordNames: ['Maj','min'] },
+    hard:     { chordNames: ['Maj','min','dim'] },
+    master:   { chordNames: ['Maj','min','dim','Maj7','min7','7','m7b5'] }
+  },
+  43: { // Cadenza V-I (autentica)
+    standard: { chordNames: ['Maj','7'] },                            // V e V7
+    hard:     { chordNames: ['Maj','min','7','Maj7'] },
+    master:   null
+  },
+  45: { // I-IV-V (blues, rock)
+    standard: { chordNames: ['Maj','7'] },
+    hard:     { chordNames: ['Maj','min','7'] },
+    master:   { chordNames: ['Maj','min','7','Maj7','min7'] }
+  },
+  46: { // ii-V-I jazz
+    standard: { chordNames: ['Maj7','min7','7'] },
+    hard:     { chordNames: ['Maj7','min7','7','m7b5'] },             // + ii-V-I minor
+    master:   null
+  },
+  48: { // Sostituzione di tritono (b II7 al posto di V7)
+    standard: { chordNames: ['7'] },
+    hard:     { chordNames: ['7','Maj7','min7'] },
+    master:   { chordNames: ['7','Maj7','min7','m7b5','dim7'] }
+  },
+
+  // ─── MODULO 6: APPLICAZIONE (improv) ───
+  // Restrict più "morbidi" perché l'applicazione richiede vocabolario ampio.
+  // Solo standard ristretto, hard/master aprono al pool tiered.
+  55: { // Improv modale — esaltare la nota caratteristica
+    standard: { earSem: [1,3,4,6,9,10,11] },                          // le note caratterizzanti dei 7 modi
+    hard:     null,
+    master:   null
+  },
+  56: { // Improv sui changes
+    standard: { chordNames: ['Maj7','min7','7','m7b5'] },
+    hard:     null,
+    master:   null
+  },
+  // L51-L54, L57-L60 lasciate al tier default (concetti troppo trasversali per restrict utile)
+};
 const LessonTest = {
   lesson: null,
   level: null,
@@ -7935,6 +8587,26 @@ const LessonTest = {
   results: [], // per badge ★/★★/★★★
   startTime: 0,
 
+  // Genera una descrizione human-readable del pool ristretto per il livello dato.
+  // Fallback automatico se mancano restrict espliciti: prova autoDeriveRestrict.
+  _describePool(lessonId, levelKey) {
+    let r = LESSON_QUIZ_RESTRICTIONS[lessonId]?.[levelKey];
+    let autoTag = '';
+    if (!r) {
+      const lesson = (typeof LESSONS !== 'undefined') ? LESSONS.find(l => l.id === lessonId) : null;
+      const auto = lesson ? autoDeriveRestrict(lesson) : null;
+      r = auto?.[levelKey];
+      if (r) autoTag = ' · auto';
+    }
+    if (!r) return '';
+    const parts = [];
+    if (r.chordNames)      parts.push(`accordi: ${r.chordNames.join(', ')}`);
+    if (r.intervalSem)     parts.push(`intervalli: ${r.intervalSem.map(s => DEGREE_LABELS[s] || s).join(', ')}`);
+    if (r.earSem)          parts.push(`a orecchio: ${r.earSem.map(s => DEGREE_LABELS[s] || s).join(', ')}`);
+    if (r.extensionLabels) parts.push(`tensioni: ${r.extensionLabels.join(', ')}`);
+    return parts.length ? parts.join(' · ') + autoTag : '';
+  },
+
   openOverlay(lesson) {
     this.lesson = lesson;
     const tests = progress.lessonTests?.[lesson.id] || {};
@@ -7942,11 +8614,13 @@ const LessonTest = {
       const lvl = LESSON_TEST_LEVELS[key];
       const t = tests[key];
       const passed = t?.passed;
+      const poolDesc = this._describePool(lesson.id, key);
       return `
         <div class="lt-level-card ${passed?'passed':''}" data-level="${key}">
           <div class="lt-level-stars">${lvl.icon}</div>
           <div class="lt-level-label">${lvl.label}</div>
           <div class="lt-level-meta">${lvl.n} domande · ${(lvl.pass*100).toFixed(0)}% per passare</div>
+          ${poolDesc ? `<div class="lt-level-pool" title="Pool ristretto per coerenza con la lezione">Pool: ${poolDesc}</div>` : ''}
           <div class="lt-level-xp">+${lvl.xp} XP</div>
           ${passed ? `<div class="lt-level-passed">✓ Passato · ${(t.accuracy*100).toFixed(0)}%</div>` : ''}
           <button class="lt-level-btn">${passed ? 'Riprova' : 'Inizia'}</button>
@@ -7985,13 +8659,41 @@ const LessonTest = {
   close() {
     const o = document.getElementById('lessonTestOverlay');
     if (o) o.classList.remove('show');
+    if (this._resetTheoryDifficulty) this._resetTheoryDifficulty();
   },
 
   startTest(levelKey) {
     this.level = levelKey;
     this.correct = 0; this.total = 0; this.results = [];
     this.startTime = Date.now();
+    // ─── Didattica adattiva ────────────────────────────────────────
+    // Setta il pool di Theory in base al livello selezionato:
+    //   1★ Standard  → pool fondamentali (triadi base, intervalli consonanti)
+    //   2★ Hard      → + settime classiche, terze, alterati comuni
+    //   3★ Master    → pool completo (incl. m7b5, dim7, tritono, tensioni)
+    const lvl = LESSON_TEST_LEVELS[levelKey];
+    Theory._difficulty = lvl?.stars || 1;
+    // Override esplicito per coerenza didattica (priorità decrescente):
+    //   1) lesson.quiz.restrictByLevel       → schema per-lezione inline
+    //   2) LESSON_QUIZ_RESTRICTIONS[id][lvl] → mappa globale curata
+    //   3) autoDeriveRestrict(lesson)[lvl]   → euristica su sections (fallback automatico per lessons non mappate)
+    //   4) fallback → pool tiered standard di _tieredPools
+    const inLessonRestrict = this.lesson?.quiz?.restrictByLevel?.[levelKey];
+    const globalRestrict   = LESSON_QUIZ_RESTRICTIONS[this.lesson?.id]?.[levelKey];
+    let autoRestrict = null;
+    if (!inLessonRestrict && !globalRestrict) {
+      const autoMap = autoDeriveRestrict(this.lesson);
+      autoRestrict = autoMap?.[levelKey];
+    }
+    const restrict = inLessonRestrict || globalRestrict || autoRestrict || null;
+    Theory._restrictToConcepts = (restrict && typeof restrict === 'object') ? restrict : null;
     this.nextQuestion();
+  },
+
+  // Reset difficoltà adattiva quando il test si chiude (apertura overlay, retry, close, finish)
+  _resetTheoryDifficulty() {
+    Theory._difficulty = 3;       // ritorna al pool completo per la modalità Theory libera
+    Theory._restrictToConcepts = null;
   },
 
   // Recupera pool: prima da lesson.quiz.pool se esiste, altrimenti dal FOCUS_MODES corrispondente.
@@ -8161,6 +8863,8 @@ const LessonTest = {
     const lvl = LESSON_TEST_LEVELS[this.level];
     const accuracy = this.correct / lvl.n;
     const passed = accuracy >= lvl.pass;
+    // Reset difficoltà adattiva: il prossimo test parte clean
+    this._resetTheoryDifficulty();
     if (!progress.lessonTests[this.lesson.id]) progress.lessonTests[this.lesson.id] = {};
     const prev = progress.lessonTests[this.lesson.id][this.level] || { attempts:0, passed:false };
     const firstPass = passed && !prev.passed;
@@ -8208,6 +8912,74 @@ const Theory = {
   lastResponseMs: 0,
   fastCount: 0,
 
+  // ─── DIFFICOLTÀ ADATTIVA ──────────────────────────────────────────
+  // _difficulty: 1=standard (★) · 2=hard (★★) · 3=master (★★★)
+  // Settato da LessonTest.startTest(); in modalità Theory libera resta 3 (pool completo).
+  // _restrictToConcepts: array opzionale di chord names / sem / degree label per filtrare ulteriormente.
+  _difficulty: 3,
+  _restrictToConcepts: null,
+  // Toggle UI: se true, in modalità Theory libera filtra il pool ai concetti
+  // appresi (unione delle lessons completate). Indipendente da LessonTest.
+  onlyKnown: localStorage.getItem('nt-theory-only-known') === '1',
+
+  // Pool tiered per ogni "famiglia" di generator.
+  // Standard (1★) = solo i concetti FONDAMENTALI introdotti nei primi moduli.
+  // Hard (2★)     = + concetti intermedi (settime, gradi cromatici principali).
+  // Master (3★)   = pool completo, incluso alterati / tritono / m7b5 / dim7.
+  _tieredPools: {
+    // CHORD_FORMULAS_THEORY → filtrato per `name`
+    chordNames: {
+      1: ['Maj','min','dim','aug','sus2','sus4'],                            // triadi base
+      2: ['Maj','min','dim','aug','sus2','sus4','Maj7','min7','7'],           // + settime classiche
+      3: null                                                                  // tutto (incl. m7b5, dim7, min(Maj7))
+    },
+    // Semitoni 1..11
+    intervalSem: {
+      1: [3,4,5,7,12 % 12 || 12].filter(s=>s>=1&&s<=11).concat([0]).filter(s=>s>=1&&s<=11),
+      2: [1,2,3,4,5,7,8,9],
+      3: null
+    },
+    // Gradi della scala maggiore (sem)
+    majScaleSem: {
+      1: [4,7],                          // 3 e 5 (i fondamentali della triade)
+      2: [0,2,4,5,7,9,11],               // tutti i 7 gradi naturali
+      3: [0,2,4,5,7,9,11]
+    },
+    // Gradi cromatici per noteFromChromaticDegree (b3 b6 b7 #4 ecc.)
+    chromaticSem: {
+      1: [2,4,5,7,9,11],                 // solo naturali della maj
+      2: [1,2,3,4,5,7,8,9,10,11],        // + alterati comuni
+      3: null
+    },
+    // EXTENDED_DEGREES labels (9, b9, #9, 11, #11, 13, b13)
+    extensionLabels: {
+      1: ['9'],
+      2: ['9','11','13','b9'],
+      3: null
+    },
+    // Intervalli percepiti a orecchio
+    earSem: {
+      1: [5,7],                          // 4ª e 5ª giuste — consonanti
+      2: [3,4,5,7],                      // + terze
+      3: null                            // tutto incluso tritono e settime
+    }
+  },
+
+  // Ritorna il pool filtrato per il livello corrente, oppure il fallback (pool completo).
+  // _restrictToConcepts può essere:
+  //   • Array       → override globale (legacy, applicato a qualsiasi key)
+  //   • Object {key: [...]} → override per famiglia specifica (es. {chordNames:['Maj','min'], earSem:[5,7]})
+  _poolFor(key, fallback) {
+    if (this._restrictToConcepts) {
+      if (Array.isArray(this._restrictToConcepts)) return this._restrictToConcepts;
+      if (this._restrictToConcepts[key]) return this._restrictToConcepts[key];
+    }
+    const tiered = this._tieredPools[key];
+    if (!tiered) return fallback;
+    const lvl = Math.max(1, Math.min(3, this._difficulty || 3));
+    return tiered[lvl] || fallback;
+  },
+
   pickTonic() {
     return this.fixedTonic >= 0 ? this.fixedTonic : Math.floor(Math.random() * 12);
   },
@@ -8222,8 +8994,24 @@ const Theory = {
     localStorage.setItem('nt-theory-mode', m);
     this.next();
   },
+
+  setOnlyKnown(v) {
+    this.onlyKnown = !!v;
+    localStorage.setItem('nt-theory-only-known', v ? '1' : '0');
+    // Quando il toggle cambia, applica/rimuove il restrict
+    if (this.onlyKnown) {
+      this._restrictToConcepts = getKnownConcepts();
+    } else {
+      this._restrictToConcepts = null;
+    }
+    this.next();
+  },
   start() {
     this.correct = 0; this.total = 0; this.streak = 0; this.fastCount = 0;
+    // Applica restrict "Solo concetti studiati" se il toggle è ON (caricato da LS al boot)
+    if (this.onlyKnown && !this._restrictToConcepts) {
+      this._restrictToConcepts = getKnownConcepts();
+    }
     this.next();
   },
   next() {
@@ -8265,7 +9053,9 @@ const Theory = {
   // ─── Question generators ───
 
   chordStructure() {
-    const c = rand(CHORD_FORMULAS_THEORY);
+    const allowed = this._poolFor('chordNames', null);
+    const pool = allowed ? CHORD_FORMULAS_THEORY.filter(c => allowed.includes(c.name)) : CHORD_FORMULAS_THEORY;
+    const c = rand(pool);
     const others = sampleN(CHORD_FORMULAS_THEORY.filter(x => x.tones !== c.tones), 3);
     return {
       tag: 'Struttura accordo',
@@ -8276,7 +9066,9 @@ const Theory = {
     };
   },
   chordStructureReverse() {
-    const c = rand(CHORD_FORMULAS_THEORY);
+    const allowed = this._poolFor('chordNames', null);
+    const pool = allowed ? CHORD_FORMULAS_THEORY.filter(c => allowed.includes(c.name)) : CHORD_FORMULAS_THEORY;
+    const c = rand(pool);
     const others = sampleN(CHORD_FORMULAS_THEORY.filter(x => x.name !== c.name), 3);
     return {
       tag: 'Identificazione accordo',
@@ -8287,7 +9079,9 @@ const Theory = {
     };
   },
   intervalSemitones() {
-    const sem = 1 + Math.floor(Math.random() * 11);
+    const allowed = this._poolFor('intervalSem', null);
+    const pool = allowed ? allowed.filter(s => s >= 1 && s <= 11) : null;
+    const sem = (pool && pool.length) ? rand(pool) : (1 + Math.floor(Math.random() * 11));
     const correct = `${DEGREE_LABELS[sem]} · ${(state.notation === 'it' ? INTERVAL_NAMES_IT : INTERVAL_NAMES_EN)[sem]}`;
     const wrongs = sampleN([...Array(12).keys()].filter(s => s !== sem), 3)
       .map(s => `${DEGREE_LABELS[s]} · ${(state.notation === 'it' ? INTERVAL_NAMES_IT : INTERVAL_NAMES_EN)[s]}`);
@@ -8302,9 +9096,10 @@ const Theory = {
   noteInScale() {
     // "Qual è la 3 di G maggiore?" — solo gradi della scala maggiore (1-7, sempre naturali)
     const tonic = this.pickTonic();
-    const intervals = MAJOR_SCALE;
-    const degIdx = Math.floor(Math.random() * 7);
-    const degSem = intervals[degIdx];
+    const allowedSem = this._poolFor('majScaleSem', null);
+    const intervals = allowedSem ? allowedSem.filter(s => MAJOR_SCALE.includes(s)) : MAJOR_SCALE;
+    const pool = intervals.length ? intervals : MAJOR_SCALE;
+    const degSem = pool[Math.floor(Math.random() * pool.length)];
     const degLabel = DEGREE_LABELS[degSem];
     const tonicNames = state.notation === 'it' ? NOTES_IT : NOTES_EN;
     // Scelta enharmonic: tonalità con bemolli (F, Bb, Eb, Ab, Db) → spelling con bemolli
@@ -8323,7 +9118,9 @@ const Theory = {
   },
   noteFromChromaticDegree() {
     // "Qual è la b5 di F?" — enarmonia: degree con 'b' → spelling con bemolle
-    const sem = 1 + Math.floor(Math.random() * 11);
+    const allowed = this._poolFor('chromaticSem', null);
+    const pool = allowed ? allowed.filter(s => s >= 1 && s <= 11) : null;
+    const sem = (pool && pool.length) ? rand(pool) : (1 + Math.floor(Math.random() * 11));
     const tonic = this.pickTonic();
     const degLabel = DEGREE_LABELS[sem];
     const noteName = notesArrayFor(state.notation, shouldUseFlats(degLabel));
@@ -8340,7 +9137,9 @@ const Theory = {
   },
   noteFromExtension() {
     // "Qual è la b9 di B?" — enarmonia coerente con label (b9 → bemolle, #11 → diesis)
-    const ext = rand(EXTENDED_DEGREES);
+    const allowed = this._poolFor('extensionLabels', null);
+    const pool = allowed ? EXTENDED_DEGREES.filter(e => allowed.includes(e.label)) : EXTENDED_DEGREES;
+    const ext = rand(pool.length ? pool : EXTENDED_DEGREES);
     const tonic = this.pickTonic();
     const noteName = notesArrayFor(state.notation, shouldUseFlats(ext.label));
     const tonicNames = state.notation === 'it' ? NOTES_IT : NOTES_EN;
@@ -8393,7 +9192,9 @@ const Theory = {
   },
   intervalByEar() {
     // Intervallo RELATIVO puro — risposta = solo grado (b3, 5, b7…)
-    const sem = 1 + Math.floor(Math.random() * 11);
+    const allowed = this._poolFor('earSem', null);
+    const pool = allowed ? allowed.filter(s => s >= 1 && s <= 11) : null;
+    const sem = (pool && pool.length) ? rand(pool) : (1 + Math.floor(Math.random() * 11));
     const root = 55 + Math.floor(Math.random() * 16);
     const correct = DEGREE_LABELS[sem];
     const wrongs = sampleN([...Array(12).keys()].filter(s => s !== sem && s !== 0), 3)
@@ -8408,7 +9209,9 @@ const Theory = {
     };
   },
   intervalByEarHarmonic() {
-    const sem = 1 + Math.floor(Math.random() * 11);
+    const allowed = this._poolFor('earSem', null);
+    const pool = allowed ? allowed.filter(s => s >= 1 && s <= 11) : null;
+    const sem = (pool && pool.length) ? rand(pool) : (1 + Math.floor(Math.random() * 11));
     const root = 55 + Math.floor(Math.random() * 16);
     const correct = DEGREE_LABELS[sem];
     const wrongs = sampleN([...Array(12).keys()].filter(s => s !== sem && s !== 0), 3)
@@ -8532,8 +9335,17 @@ const Theory = {
       const active = val === this.fixedTonic;
       return `<button class="theory-tonic-pill ${active ? 'active' : ''}" data-tonic="${val}">${n}</button>`;
     }).join('');
+    const known = getKnownConcepts();
+    const knownCount = known ? Object.values(known).reduce((a,arr)=>a+arr.length,0) : 0;
+    const onlyKnownToggle = `
+      <button class="focus-mode-pill theory-only-known ${this.onlyKnown ? 'active' : ''}"
+              id="theoryOnlyKnown"
+              title="Filtra le domande ai soli concetti già visti nelle lezioni completate (${knownCount} concetti)"
+              ${knownCount === 0 ? 'disabled' : ''}>
+        📚 Solo concetti studiati ${knownCount ? `(${knownCount})` : '(nessuno)'}
+      </button>`;
     dom.theoryView.innerHTML = `
-      <div class="focus-mode-row">${modeSelector}</div>
+      <div class="focus-mode-row">${modeSelector}${onlyKnownToggle}</div>
       <div class="theory-tonic-row">
         <span>Tonica fissa:</span>
         <div class="theory-tonic-pills">${tonicPills}</div>
@@ -8557,8 +9369,11 @@ const Theory = {
       </div>
     `;
     dom.theoryView.querySelectorAll('.focus-mode-pill').forEach(p => {
+      if (p.id === 'theoryOnlyKnown') return; // gestito separatamente sotto
       p.addEventListener('click', () => this.setMode(p.dataset.mode));
     });
+    const okBtn = dom.theoryView.querySelector('#theoryOnlyKnown');
+    if (okBtn) okBtn.addEventListener('click', () => this.setOnlyKnown(!this.onlyKnown));
     dom.theoryView.querySelectorAll('.theory-tonic-pill').forEach(p => {
       p.addEventListener('click', () => this.setTonic(parseInt(p.dataset.tonic)));
     });
@@ -10317,6 +11132,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       <div class="solo-drawer-label">Workout</div>
       <div class="solo-drawer-group">
         <div class="solo-drawer-row"><span class="lbl">Find Root First</span><button class="solo-switch" data-toggle="findRootFirst"></button></div>
+        <div class="solo-drawer-row" title="Pesca più spesso le note/intervalli/accordi su cui hai meno accuracy"><span class="lbl">Adaptive (pratica i punti deboli)</span><button class="solo-switch" data-toggle="adaptiveDifficulty"></button></div>
         <div class="solo-drawer-row"><span class="lbl">Durata sessione</span>
           <select class="solo-drawer-select" data-select="durationSec">
             <option value="0">∞ (nessun limite)</option>
@@ -10360,6 +11176,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     showIntervals: ls.get('showIntervals', true),
     showNext: ls.get('showNext', true),
     findRootFirst: ls.get('findRootFirst', false),
+    adaptiveDifficulty: ls.get('adaptiveDifficulty', false),  // pesca più spesso le note/intervalli deboli
     durationSec: ls.get('durationSec', 0),  // 0 = infinito
     autoSkipSec: ls.get('autoSkipSec', 0),
     fbPosition: ls.get('fbPosition', 'right'),       // right | left | top | bottom
@@ -10398,7 +11215,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const btnPanel = document.getElementById('btnSoloPanel');
     if(btnPanel) btnPanel.style.display = Solo.active ? '' : 'none';
     // Save
-    ['active','vibe','chromeMinimal','showFretboard','showIntervals','showNext','findRootFirst','durationSec','autoSkipSec','fbPosition','fbOrientation']
+    ['active','vibe','chromeMinimal','showFretboard','showIntervals','showNext','findRootFirst','adaptiveDifficulty','durationSec','autoSkipSec','fbPosition','fbOrientation']
       .forEach(k=>ls.set(k, Solo[k]));
     // Refresh display overlays
     decorateDisplay();
@@ -10514,8 +11331,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       if(!s || !s.currentDrill) return '—';
       const drill = s.currentDrill;
       if(typeof drill.peekNext === 'function') return drill.peekNext();
-      // Fallback: per drill basati su tonic mostra la tonic corrente
-      const NOTES_EN = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      // Fallback: per drill basati su tonic mostra la tonic corrente (usa NOTES_EN globale)
       return NOTES_EN[s.tonic] || '—';
     } catch(e){ return '—'; }
   }
@@ -11388,6 +12204,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   window.SoloSetup = { render: renderSoloSetup, getOpts: getDrillOpts };
 
   // ════════════════════════════════════════════════════════════
+  //  HELPER condiviso per i moduli Resolve/Ear/Tuner
+  //  Registra un click handler su tutti i [data-<attr>] dentro container.
+  //  Esempio: wireDataButtons(body, 'mode', v => { this.mode = v; this.persist(); this._render(); })
+  // ════════════════════════════════════════════════════════════
+  function wireDataButtons(container, attr, handler) {
+    container.querySelectorAll(`[data-${attr}]`).forEach(b => {
+      b.addEventListener('click', () => handler(b.dataset[attr], b));
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════
   //  RESOLVE — pratica ear-training cieca
   //  L'app suona accordi, l'utente trova le note a orecchio.
   //  Dial 0-100 = complessità armonica + dissonanze.
@@ -11503,6 +12330,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       this.persist();
       this._renderDial();
       this._renderWaves();
+      // Aggiorna la chip "N · 100" live durante il drag (non solo al render completo)
+      const infoEl = document.getElementById('rsInfoComplexity');
+      if (infoEl) infoEl.textContent = `${this.complexity} · 100`;
     },
 
     setMode(m) {
@@ -11630,16 +12460,16 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.innerHTML = `
         <div class="rs-topbar">
           <div class="rs-topbar-left">
+            <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
             <img src="icon.svg" class="rs-brand-logo" alt="">
             <span class="rs-brand-name">Nemo</span>
           </div>
           <div class="rs-topbar-center">
-            <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
             <div class="rs-title">resolve</div>
-            <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
           </div>
           <div class="rs-topbar-right">
             <span class="rs-info-chip" id="rsInfoComplexity">— · 100</span>
+            <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
           </div>
         </div>
 
@@ -12006,15 +12836,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
       // Wire
-      body.querySelectorAll('[data-inst]').forEach(b => b.addEventListener('click', () => {
-        this.instrument = b.dataset.inst; this.persist(); this._renderSettings();
-      }));
-      body.querySelectorAll('[data-dur]').forEach(b => b.addEventListener('click', () => {
-        this.chordDurationSec = parseInt(b.dataset.dur); this.persist(); this._renderSettings();
-      }));
-      body.querySelectorAll('[data-arp]').forEach(b => b.addEventListener('click', () => {
-        this.arpeggio = b.dataset.arp; this.persist(); this._renderSettings();
-      }));
+      wireDataButtons(body, 'inst', v => { this.instrument = v; this.persist(); this._renderSettings(); });
+      wireDataButtons(body, 'dur',  v => { this.chordDurationSec = parseInt(v); this.persist(); this._renderSettings(); });
+      wireDataButtons(body, 'arp',  v => { this.arpeggio = v; this.persist(); this._renderSettings(); });
       document.getElementById('rsTogglePractice').addEventListener('click', () => {
         this.practiceMode = !this.practiceMode; this.persist(); this._renderSettings(); this._renderChordLabel();
       });
@@ -12132,17 +12956,17 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.innerHTML = `
         <div class="ear-topbar">
           <div class="ear-topbar-left">
+            <button class="ear-icon-btn" id="earClose" title="Chiudi (E / ESC)">←</button>
             <img src="icon.svg" class="ear-brand-logo" alt="">
             <span class="ear-brand-name">Nemo</span>
           </div>
           <div class="ear-topbar-center">
-            <button class="ear-icon-btn" id="earClose" title="Chiudi (E / ESC)">←</button>
             <div class="ear-title">ear</div>
-            <button class="ear-icon-btn" id="earSettingsBtn" title="Impostazioni">⚙</button>
           </div>
           <div class="ear-topbar-right">
             <span class="ear-info-chip" id="earModeChip">recognition</span>
             <span class="ear-info-chip" id="earStreakChip">🔥 0</span>
+            <button class="ear-icon-btn" id="earSettingsBtn" title="Impostazioni">⚙</button>
           </div>
         </div>
         <div class="ear-stage">
@@ -12200,7 +13024,17 @@ window.addEventListener('DOMContentLoaded', async () => {
       let sem;
       let pool;
       if (this.mode === 'single') {
-        sem = this.singleSem;
+        // Trick mode: 50% suona il target, 50% un intervallo vicino (1-2 semitoni)
+        // per costringere l'orecchio a distinguere "è questo o no?"
+        if (Math.random() < 0.5) {
+          sem = this.singleSem;
+        } else {
+          const t = this.singleSem;
+          const candidates = EAR_INTERVALS
+            .map(i => i.sem)
+            .filter(s => s !== t && Math.abs(s - t) >= 1 && Math.abs(s - t) <= 2);
+          sem = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : t;
+        }
       } else if (this.mode === 'compare') {
         const pair = EAR_CONFUSION_PAIRS[this.comparePair];
         sem = Math.random() < 0.5 ? pair.a : pair.b;
@@ -12219,6 +13053,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const root = this._pickRoot();
       let direction = this.direction;
       if (direction === 'mixed') direction = ['ascending','descending','harmonic'][Math.floor(Math.random()*3)];
+      else if (direction === 'melodic') direction = Math.random() < 0.5 ? 'ascending' : 'descending';
       this.current = { sem, root, direction };
       this._renderQuestion();
       // auto-play
@@ -12251,9 +13086,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       if (streakChip) streakChip.textContent = '🔥 ' + this.streak;
       if (fb) fb.textContent = '';
       let title = '', poolForAnswers = [];
-      if (this.mode === 'single') {
-        title = `Single Focus · ${EAR_INTERVALS.find(i=>i.sem===this.singleSem)?.label}`;
-        poolForAnswers = [this.singleSem];  // unica risposta, ma serve disambiguazione
+      const isSingleTrick = (this.mode === 'single');
+      if (isSingleTrick) {
+        const tInfo = EAR_INTERVALS.find(i => i.sem === this.singleSem);
+        title = `È ${tInfo?.label} (${tInfo?.name}) ?`;
       } else if (this.mode === 'compare') {
         const pair = EAR_CONFUSION_PAIRS[this.comparePair];
         title = `Compare · ${pair.desc}`;
@@ -12263,16 +13099,53 @@ window.addEventListener('DOMContentLoaded', async () => {
         poolForAnswers = this.intervals.length ? this.intervals : [3,4,5,7];
       }
       if (lbl) lbl.textContent = title;
-      // Bottoni risposta (multi-choice)
       if (opts) {
-        opts.innerHTML = poolForAnswers.map(s => {
-          const info = EAR_INTERVALS.find(i => i.sem === s);
-          return `<button class="ear-opt-btn" data-sem="${s}">${info?info.label:s}<small>${info?info.name:''}</small></button>`;
-        }).join('');
-        opts.querySelectorAll('.ear-opt-btn').forEach(b => {
-          b.addEventListener('click', () => this._answer(parseInt(b.dataset.sem), b));
-        });
+        if (isSingleTrick) {
+          // Single = trick mode: SÌ/NO sull'identità con il target
+          opts.innerHTML = `
+            <button class="ear-opt-btn ear-opt-yn ear-opt-yes" data-yn="yes">SÌ<small>è il target</small></button>
+            <button class="ear-opt-btn ear-opt-yn ear-opt-no"  data-yn="no">NO<small>è un altro intervallo</small></button>
+          `;
+          opts.querySelectorAll('.ear-opt-btn').forEach(b => {
+            b.addEventListener('click', () => this._answerYesNo(b.dataset.yn === 'yes', b));
+          });
+        } else {
+          opts.innerHTML = poolForAnswers.map(s => {
+            const info = EAR_INTERVALS.find(i => i.sem === s);
+            return `<button class="ear-opt-btn" data-sem="${s}">${info?info.label:s}<small>${info?info.name:''}</small></button>`;
+          }).join('');
+          opts.querySelectorAll('.ear-opt-btn').forEach(b => {
+            b.addEventListener('click', () => this._answer(parseInt(b.dataset.sem), b));
+          });
+        }
       }
+    },
+
+    _answerYesNo(isYes, btn){
+      if (!this.current) return;
+      const isTarget = (this.current.sem === this.singleSem);
+      const correct = (isYes === isTarget);
+      if (!this.stats[this.singleSem]) this.stats[this.singleSem] = {seen:0,correct:0};
+      this.stats[this.singleSem].seen++;
+      if (correct) {
+        this.stats[this.singleSem].correct++;
+        this.streak++;
+        btn.classList.add('correct');
+      } else {
+        this.streak = 0;
+        btn.classList.add('wrong');
+      }
+      this.persist();
+      const fb = document.getElementById('earFeedback');
+      if (fb) {
+        const actual = EAR_INTERVALS.find(i => i.sem === this.current.sem);
+        const target = EAR_INTERVALS.find(i => i.sem === this.singleSem);
+        fb.textContent = correct
+          ? (isTarget ? `✓ Esatto · era ${target?.label}` : `✓ Esatto · era ${actual?.label} (non il target)`)
+          : (isTarget ? `✗ Era ${target?.label} (il target)` : `✗ Era ${actual?.label} (${actual?.name}), non il target`);
+        fb.className = 'ear-feedback ' + (correct ? 'correct' : 'wrong');
+      }
+      setTimeout(() => this._next(), 1500);
     },
 
     _answer(sem, btn){
@@ -12317,7 +13190,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         ['single','Single · 1 intervallo, varia root/ottava'],
         ['compare','Compare · 2 intervalli simili a confronto'],
       ];
-      const directions = [['mixed','Misto'],['ascending','Ascendente'],['descending','Discendente'],['harmonic','Armonico']];
+      const directions = [
+        ['melodic','Melodico (asc/desc)'],
+        ['harmonic','Armonico (simultaneo)'],
+        ['mixed','Misto'],
+        ['ascending','Solo ascendente'],
+        ['descending','Solo discendente']
+      ];
       const roots = [['random','Random'],['fixed','Fisso'],['octaves','Stessa nota, ottave diverse']];
       const timbres = [['piano','Piano'],['guitar','Guitar'],['sine','Sine']];
       body.innerHTML = `
@@ -12357,7 +13236,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
       // Wire
-      body.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { this.mode = b.dataset.mode; this.persist(); this._renderSettings(); this._next(); }));
+      wireDataButtons(body, 'mode',   v => { this.mode = v; this.persist(); this._renderSettings(); this._next(); });
+      wireDataButtons(body, 'single', v => { this.singleSem = parseInt(v); this.persist(); this._renderSettings(); this._next(); });
+      wireDataButtons(body, 'pair',   v => { this.comparePair = parseInt(v); this.persist(); this._renderSettings(); this._next(); });
+      wireDataButtons(body, 'dir',    v => { this.direction = v; this.persist(); this._renderSettings(); });
+      wireDataButtons(body, 'rm',     v => { this.rootMode = v; this.persist(); this._renderSettings(); });
+      wireDataButtons(body, 'tim',    v => { this.timbre = v; this.persist(); this._renderSettings(); });
+      // data-int: toggle in array, logica multi-line → lasciato inline
       body.querySelectorAll('[data-int]').forEach(b => b.addEventListener('click', () => {
         const sem = parseInt(b.dataset.int);
         if (this.intervals.includes(sem)) this.intervals = this.intervals.filter(x => x !== sem);
@@ -12365,11 +13250,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (this.intervals.length === 0) this.intervals = [sem];  // mai vuoto
         this.persist(); this._renderSettings();
       }));
-      body.querySelectorAll('[data-single]').forEach(b => b.addEventListener('click', () => { this.singleSem = parseInt(b.dataset.single); this.persist(); this._renderSettings(); this._next(); }));
-      body.querySelectorAll('[data-pair]').forEach(b => b.addEventListener('click', () => { this.comparePair = parseInt(b.dataset.pair); this.persist(); this._renderSettings(); this._next(); }));
-      body.querySelectorAll('[data-dir]').forEach(b => b.addEventListener('click', () => { this.direction = b.dataset.dir; this.persist(); this._renderSettings(); }));
-      body.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { this.rootMode = b.dataset.rm; this.persist(); this._renderSettings(); }));
-      body.querySelectorAll('[data-tim]').forEach(b => b.addEventListener('click', () => { this.timbre = b.dataset.tim; this.persist(); this._renderSettings(); }));
     },
   };
 
@@ -12398,11 +13278,33 @@ window.addEventListener('DOMContentLoaded', async () => {
     audioCtx: null, analyser: null, stream: null, buffer: null, rafId: null,
     inTuneSince: 0,
 
-    open(){
+    async _checkMicPermission(){
+      // Permission API non sempre supporta 'microphone' (Firefox/Safari), gestiamo silenziosamente
+      try {
+        if (!navigator.permissions || !navigator.permissions.query) return 'unknown';
+        const res = await navigator.permissions.query({ name: 'microphone' });
+        return res.state; // 'granted' | 'denied' | 'prompt'
+      } catch(e) { return 'unknown'; }
+    },
+
+    async open(){
       this.active = true;
       document.body.classList.add('tuner-active');
       this._ensureDom();
       document.getElementById('tunerOverlay').classList.add('show');
+      // Se il browser ha già concesso il permesso (o noi lo abbiamo salvato come grant), parti subito.
+      // Altrimenti mostra hint chiaro e parti comunque (il prompt apparirà su utente click implicito di apertura).
+      const state = await this._checkMicPermission();
+      let savedGrant = false;
+      try { savedGrant = localStorage.getItem('nt-mic-granted') === '1'; } catch(e){}
+      const hint = document.getElementById('tunerHint');
+      if (state === 'denied') {
+        if (hint) hint.textContent = 'Microfono bloccato. Concedi il permesso dalle impostazioni del browser.';
+        return;
+      }
+      if (state === 'prompt' && !savedGrant && hint) {
+        hint.textContent = 'Autorizza il microfono per accordare…';
+      }
       this._startMic();
     },
 
@@ -12422,15 +13324,16 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.innerHTML = `
         <div class="tuner-topbar">
           <div class="tuner-topbar-left">
+            <button class="tuner-icon-btn" id="tunerClose" title="Chiudi (U / ESC)">←</button>
             <img src="icon.svg" class="tuner-brand-logo" alt="">
             <span class="tuner-brand-name">Nemo</span>
           </div>
           <div class="tuner-topbar-center">
-            <button class="tuner-icon-btn" id="tunerClose" title="Chiudi (U / ESC)">←</button>
-            <div class="tuner-title">tüner</div>
-            <button class="tuner-tuning-name" id="tunerTuningName" title="Click per cambiare accordatura (app-wide)">Standard ▾</button>
+            <div class="tuner-title">tune</div>
           </div>
           <div class="tuner-topbar-right">
+            <button class="tuner-tuning-name" id="tunerTuningName" title="Click per cambiare accordatura (app-wide)">Standard ▾</button>
+            <button class="tuner-device-chip" id="tunerDeviceChip" title="Click per cambiare input audio">Default</button>
             <span class="tuner-freq-chip" id="tunerFreqChip">— Hz</span>
           </div>
         </div>
@@ -12439,12 +13342,12 @@ window.addEventListener('DOMContentLoaded', async () => {
           <div class="tuner-strings" id="tunerStrings"></div>
           <!-- Display principale: pallino sx · NOTA · pallino dx -->
           <div class="tuner-display">
-            <div class="tuner-dot tuner-dot-left" id="tunerDotLeft" title="Allentare (corda troppo tesa)">●</div>
+            <div class="tuner-dot tuner-dot-left" id="tunerDotLeft" title="Allentare (corda troppo tesa)">●<span class="tuner-dot-lbl">slack</span></div>
             <div class="tuner-note-wrap">
               <div class="tuner-note" id="tunerNote">—</div>
               <div class="tuner-octave" id="tunerOctave">&nbsp;</div>
             </div>
-            <div class="tuner-dot tuner-dot-right" id="tunerDotRight" title="Tendere (corda troppo allentata)">●</div>
+            <div class="tuner-dot tuner-dot-right" id="tunerDotRight" title="Tendere (corda troppo allentata)">●<span class="tuner-dot-lbl">taut</span></div>
           </div>
           <!-- Cents meter -->
           <div class="tuner-cents">
@@ -12461,7 +13364,16 @@ window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('tunerClose').addEventListener('click', () => this.close());
       // Click sul nome accordatura → popup picker (cambia tuning app-wide)
       document.getElementById('tunerTuningName').addEventListener('click', () => this._openTuningPicker());
+      // Click sul chip device → popup picker dispositivo audio
+      document.getElementById('tunerDeviceChip').addEventListener('click', () => this._openDevicePicker());
       this._renderStrings();
+      // Click sulle corde → forza target sticky su quella corda
+      document.querySelectorAll('#tunerStrings .tuner-string').forEach(el => {
+        el.addEventListener('click', () => {
+          this._lockedStringIdx = parseInt(el.dataset.origIdx);
+          this._lockExpiresMs = performance.now() + 30000; // 30s di lock manuale
+        });
+      });
     },
 
     _openTuningPicker(){
@@ -12537,27 +13449,109 @@ window.addEventListener('DOMContentLoaded', async () => {
       }).join('');
     },
 
-    async _startMic(){
+    async _startMic(deviceId){
       try {
-        if (!this.audioCtx) {
-          this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        await this._stopMic();
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
+        // Usa device selezionato (Scarlett, ecc.). Se null usa il default del sistema.
+        const did = deviceId || (typeof selectedAudioDeviceId !== 'undefined' ? selectedAudioDeviceId : null);
         this.stream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+          audio: {
+            echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+            ...(did ? { deviceId: { exact: did } } : {})
+          }
         });
         const src = this.audioCtx.createMediaStreamSource(this.stream);
         this.analyser = this.audioCtx.createAnalyser();
-        this.analyser.fftSize = 2048;
+        this.analyser.fftSize = 4096;  // FFT più grande = più stabilità su frequenze basse
         src.connect(this.analyser);
         this.buffer = new Float32Array(this.analyser.fftSize);
+        // Reset smoothing state
+        this._smoothedMidi = null;
+        this._lockedStringIdx = null;
+        this._lockExpiresMs = 0;
+        this._lastHintState = null;
+        this._lastHintChangeMs = 0;
         this._loop();
+        // Salva flag "permission concesso" — su prossime aperture saltiamo subito al mic senza messaggi
+        try { localStorage.setItem('nt-mic-granted', '1'); } catch(e){}
         const hint = document.getElementById('tunerHint');
         if (hint) hint.textContent = 'Suona una corda alla volta';
+        await this._refreshDeviceChip();
       } catch (e) {
+        // Permission rifiutata o errore reale: pulisci il flag così la prossima apertura lo riproverà
+        try { localStorage.removeItem('nt-mic-granted'); } catch(_){}
         const hint = document.getElementById('tunerHint');
         if (hint) hint.textContent = 'Microfono non disponibile: ' + (e.message || e);
       }
+    },
+
+    async _refreshDeviceChip(){
+      const chip = document.getElementById('tunerDeviceChip');
+      if (!chip) return;
+      try {
+        let devs = (typeof cachedAudioDevices !== 'undefined' && cachedAudioDevices.length)
+          ? cachedAudioDevices
+          : await navigator.mediaDevices.enumerateDevices().then(d => d.filter(x => x.kind === 'audioinput'));
+        const did = (typeof selectedAudioDeviceId !== 'undefined' && selectedAudioDeviceId)
+          ? selectedAudioDeviceId
+          : devs[0]?.deviceId;
+        const cur = devs.find(x => x.deviceId === did) || devs[0];
+        if (cur) chip.textContent = (cur.label || 'Mic').replace(/^Default - /,'').slice(0, 28);
+      } catch(e){}
+    },
+
+    async _openDevicePicker(){
+      const old = document.getElementById('tunerDevicePicker');
+      if (old) { old.remove(); return; }
+      const picker = document.createElement('div');
+      picker.id = 'tunerDevicePicker';
+      picker.className = 'tuner-tuning-picker';
+      let devs = [];
+      try {
+        // Assicura permesso prima dell'enumerate (per ottenere i label completi)
+        if (typeof listAudioDevices === 'function') await listAudioDevices(true);
+        devs = (typeof cachedAudioDevices !== 'undefined' && cachedAudioDevices.length)
+          ? cachedAudioDevices
+          : await navigator.mediaDevices.enumerateDevices().then(d => d.filter(x => x.kind === 'audioinput'));
+      } catch(e){}
+      const did = (typeof selectedAudioDeviceId !== 'undefined' && selectedAudioDeviceId) ? selectedAudioDeviceId : devs[0]?.deviceId;
+      picker.innerHTML = `
+        <div class="tuner-picker-backdrop"></div>
+        <div class="tuner-picker-sheet">
+          <div class="tuner-picker-head">
+            <h4>Input audio</h4>
+            <button class="tuner-picker-close">×</button>
+          </div>
+          <div class="tuner-picker-list">
+            ${devs.length === 0 ? '<div style="padding:14px;color:#7e8088;font-size:13px;text-align:center">Nessun dispositivo input rilevato. Concedi il permesso microfono prima.</div>' : devs.map(d => `
+              <button class="tuner-picker-opt ${d.deviceId === did ? 'active' : ''}" data-did="${d.deviceId}">
+                <span class="tuner-opt-name">${d.label || 'Microfono ' + d.deviceId.slice(0,6)}</span>
+                <span class="tuner-opt-notes">${d.deviceId === did ? '✓ Attivo' : 'Click per usare'}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div class="tuner-picker-hint">Scegli il dispositivo (es. Focusrite Scarlett 2i2). La scelta vale anche per Pratica audio.</div>
+        </div>
+      `;
+      document.body.appendChild(picker);
+      const close = () => picker.remove();
+      picker.querySelector('.tuner-picker-backdrop').addEventListener('click', close);
+      picker.querySelector('.tuner-picker-close').addEventListener('click', close);
+      picker.querySelectorAll('[data-did]').forEach(b => {
+        b.addEventListener('click', async () => {
+          const did = b.dataset.did;
+          if (typeof setAudioDevice === 'function') setAudioDevice(did);
+          else if (typeof selectedAudioDeviceId !== 'undefined') {
+            window.selectedAudioDeviceId = did;
+            localStorage.setItem('nt-audio-device', did);
+          }
+          close();
+          // Riavvia il mic con il nuovo device
+          await this._startMic(did);
+        });
+      });
     },
 
     _stopMic(){
@@ -12587,33 +13581,89 @@ window.addEventListener('DOMContentLoaded', async () => {
     },
 
     _processPitch(freq){
-      // 1. Trova nota target più vicina fra le corde della tuning
       const tn = TUNINGS[state.tuning];
       const detectedMidi = freqToMidi(freq);
-      // Per ogni corda, calcola la versione MIDI più vicina a detectedMidi
-      // Tuning notes sono pitch class (0-11). Cerchiamo la nota della corda
-      // alla giusta ottava (tipicamente E2=40, A2=45, D3=50, G3=55, B3=59, E4=64 standard)
-      let bestMidi = null, bestDiff = Infinity, bestStringIdx = -1;
-      tn.notes.forEach((pitchClass, i) => {
-        // Trova l'ottava più vicina a detectedMidi
-        const pc = ((pitchClass % 12) + 12) % 12;
-        // Cerca il MIDI con stesso pc più vicino a detectedMidi
-        const candidate = Math.round((detectedMidi - pc) / 12) * 12 + pc;
-        const diff = Math.abs(detectedMidi - candidate);
-        if (diff < bestDiff) { bestDiff = diff; bestMidi = candidate; bestStringIdx = i; }
+      // EMA smoothing — riduce l'oscillazione casuale del pitch detection
+      if (this._smoothedMidi == null) this._smoothedMidi = detectedMidi;
+      else this._smoothedMidi = this._smoothedMidi * 0.65 + detectedMidi * 0.35;
+      const smoothedMidi = this._smoothedMidi;
+
+      // ── TARGET STICKY ──
+      // Calcola per ogni corda il MIDI nominale "principale" (l'ottava standard di chitarra)
+      // tn.notes è pitch class 0-11, ordine alto→basso. Mappiamo ad ottave realistiche di chitarra.
+      // Per Standard [E,B,G,D,A,E] → MIDI [64, 59, 55, 50, 45, 40] (high→low).
+      // Generalizziamo: prendiamo l'ottava più ragionevole rispetto al detectedMidi cumulativo.
+      const stringMidis = tn.notes.map((pc, i) => {
+        // Usiamo ottave di chitarra tipiche: 6 corde da E2 (40) a E4 (64), step ~5 semitoni.
+        // Per qualsiasi tuning, distribuiamo le corde su un range "chitarra" (low→high).
+        // tn.notes[0] è alta (index 0), tn.notes[N-1] è bassa.
+        const N = tn.notes.length;
+        // Calcoliamo target octave-base partendo dalla corda bassa standard (40 = E2)
+        // Approssimazione: assume corde distanziate ~5 semitoni
+        const lowIdx = N - 1;  // indice corda bassa
+        const stringFromLow = lowIdx - i;  // 0 per la più bassa
+        const baseMidiLow = 40;  // E2 come riferimento basso
+        // Aggiusta per la pitch class:
+        const pcLow = ((tn.notes[lowIdx] % 12) + 12) % 12;
+        const pcCur = ((pc % 12) + 12) % 12;
+        // Distanza dalla bassa in semitoni (somma 5 per ogni corda + delta pc)
+        let semFromLow = stringFromLow * 5;
+        // Aggiusta perché pc reale può differire da +5
+        let candidate = baseMidiLow + semFromLow;
+        // Allinea a pitch class corretta
+        candidate = Math.round((candidate - pcCur) / 12) * 12 + pcCur;
+        return candidate;
       });
-      if (bestMidi == null) return;
-      const cents = Math.round((detectedMidi - bestMidi) * 100);
-      // 2. Render UI
-      this._renderTuning(freq, bestMidi, cents, bestStringIdx);
+
+      // Determina quale corda è attualmente "puntata"
+      // 1. Se c'è un lock manuale attivo, usalo
+      // 2. Altrimenti, trova la corda più vicina al pitch smussato
+      // 3. Stickiness: non cambiare target finché diff > 250 cents da quello attuale
+      let stringIdx;
+      const now = performance.now();
+      if (this._lockedStringIdx != null && this._lockExpiresMs > now) {
+        stringIdx = this._lockedStringIdx;
+      } else {
+        // Trova nuova corda
+        let best = 0, bestDiff = Infinity;
+        stringMidis.forEach((m, i) => {
+          const d = Math.abs(smoothedMidi - m);
+          if (d < bestDiff) { bestDiff = d; best = i; }
+        });
+        // Sticky: se c'è già un target precedente e non siamo molto più vicini a un'altra, mantieni
+        if (this._lockedStringIdx != null) {
+          const prevDiff = Math.abs(smoothedMidi - stringMidis[this._lockedStringIdx]);
+          // Switch solo se nuovo target è almeno 2.5 semitoni più vicino
+          if (best !== this._lockedStringIdx && prevDiff - bestDiff < 2.5) {
+            stringIdx = this._lockedStringIdx;
+          } else {
+            stringIdx = best;
+            this._lockedStringIdx = best;
+          }
+        } else {
+          stringIdx = best;
+          this._lockedStringIdx = best;
+        }
+      }
+      const targetMidi = stringMidis[stringIdx];
+      // Cents = distanza dal TARGET (non dalla nota più vicina). Può essere ±1200+.
+      const cents = Math.round((smoothedMidi - targetMidi) * 100);
+
+      this._renderTuning(freq, smoothedMidi, targetMidi, cents, stringIdx);
     },
 
-    _renderTuning(freq, targetMidi, cents, stringIdx){
+    _renderTuning(freq, detectedMidi, targetMidi, cents, stringIdx){
       const NN = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
       const NN_IT = ['Do','Do♯','Re','Mi♭','Mi','Fa','Fa♯','Sol','La♭','La','Si♭','Si'];
       const names = (typeof state !== 'undefined' && state.notation === 'it') ? NN_IT : NN;
-      const noteIdx = ((targetMidi % 12) + 12) % 12;
-      const octave = Math.floor(targetMidi / 12) - 1;
+      // La nota TARGET (sempre quella della corda da accordare)
+      const tNoteIdx = ((targetMidi % 12) + 12) % 12;
+      const tOctave = Math.floor(targetMidi / 12) - 1;
+      // La nota DETECTED (quella che stai suonando ora)
+      const dRound = Math.round(detectedMidi);
+      const dNoteIdx = ((dRound % 12) + 12) % 12;
+      const dOctave = Math.floor(dRound / 12) - 1;
+
       const noteEl = document.getElementById('tunerNote');
       const octEl = document.getElementById('tunerOctave');
       const freqEl = document.getElementById('tunerFreqChip');
@@ -12622,40 +13672,75 @@ window.addEventListener('DOMContentLoaded', async () => {
       const dotL = document.getElementById('tunerDotLeft');
       const dotR = document.getElementById('tunerDotRight');
       const hint = document.getElementById('tunerHint');
-      if (noteEl) noteEl.textContent = names[noteIdx];
-      if (octEl) octEl.textContent = `${octave}`;
-      if (freqEl) freqEl.textContent = freq.toFixed(1) + ' Hz';
-      if (centsEl) centsEl.textContent = (cents >= 0 ? '+' : '') + cents + ' cent';
 
-      // Threshold per "in tune": ±3 cents stabili
+      // Mostra SEMPRE la nota TARGET grande (es. "E") — devi sapere DOVE arrivare.
+      // Sotto, in piccolo: la nota corrente che stai suonando.
+      if (noteEl) noteEl.textContent = names[tNoteIdx];
+      if (octEl) {
+        if (Math.abs(cents) <= 3) octEl.textContent = `${tOctave} · ✓`;
+        else octEl.textContent = `target ${tOctave} · ora: ${names[dNoteIdx]}${dOctave}`;
+      }
+      if (freqEl) freqEl.textContent = freq.toFixed(1) + ' Hz';
+      if (centsEl) {
+        const cl = cents > 1200 ? '+1200+' : cents < -1200 ? '−1200+' : ((cents >= 0 ? '+' : '') + cents);
+        centsEl.textContent = cl + ' cent dal target';
+      }
+
       const inTune = Math.abs(cents) <= 3;
-      const sharp  = cents > 3;   // troppo alto → allentare (loosen)
-      const flat   = cents < -3;  // troppo basso → tendere (tighten)
+      const sharp  = cents > 3;
+      const flat   = cents < -3;
 
       if (noteEl) {
         noteEl.classList.toggle('in-tune', inTune);
         noteEl.classList.toggle('sharp', sharp);
         noteEl.classList.toggle('flat', flat);
       }
-      if (dotL) dotL.classList.toggle('active', sharp);  // sinistra = ▼ allenta
-      if (dotR) dotR.classList.toggle('active', flat);   // destra = ▲ tendi
+      if (dotL) dotL.classList.toggle('active', sharp);
+      if (dotR) dotR.classList.toggle('active', flat);
 
-      // Needle: -50 → +50 cents mappato su -100% → +100%
+      // ── NEEDLE: scala ±50 cents per movimento ampio e leggibile.
+      // Posizionamento via `left` (relativo al parent) invece di translateX (relativo al needle).
+      // Pos: -1 = sinistra completa, 0 = centro, +1 = destra completa.
+      // cents > 0 (sharp = troppo alto) → needle a DESTRA della linea rossa centrale.
+      // cents < 0 (flat = troppo basso) → needle a SINISTRA.
       if (needle) {
-        const pos = Math.max(-50, Math.min(50, cents)) / 50;  // -1 → +1
-        needle.style.transform = `translateX(${pos * 100}%)`;
+        const SCALE = 20; // ±20 cents = full bar width (scala ampia per movimento ben visibile)
+        const capped = Math.max(-SCALE, Math.min(SCALE, cents));
+        const posPercent = (capped / SCALE) * 50; // -50% → +50% relativo al parent
+        needle.style.left = `calc(50% + ${posPercent}%)`;
         needle.classList.toggle('in-tune', inTune);
+        needle.classList.toggle('saturated', Math.abs(cents) > SCALE);
       }
-      // Stringa highlight — confronta con data-orig-idx perché il display è reversed
+
+      // Stringa highlight
       document.querySelectorAll('#tunerStrings .tuner-string').forEach(el => {
         const oi = parseInt(el.dataset.origIdx);
         el.classList.toggle('active', oi === stringIdx);
         el.classList.toggle('in-tune', oi === stringIdx && inTune);
       });
-      if (hint) {
-        if (inTune) hint.textContent = '✓ In tune';
-        else if (sharp) hint.textContent = '▼ Allenta la corda';
-        else if (flat)  hint.textContent = '▲ Tendi la corda';
+
+      // HINT debounced: cambia solo se lo stato è stabile per ≥350ms
+      // Altrimenti continua a mostrare l'ultimo
+      const now = performance.now();
+      let newState;
+      if (inTune) newState = 'in-tune';
+      else if (sharp) newState = 'loosen';
+      else if (flat)  newState = 'tighten';
+      if (newState !== this._lastHintState) {
+        if (!this._pendingHint || this._pendingHint.state !== newState) {
+          this._pendingHint = { state: newState, since: now };
+        }
+        if (now - this._pendingHint.since >= 350) {
+          this._lastHintState = newState;
+          this._pendingHint = null;
+          if (hint) {
+            if (newState === 'in-tune') hint.textContent = '✓ In tune';
+            else if (newState === 'loosen')  hint.textContent = '▼ Allenta la corda (troppo alta)';
+            else if (newState === 'tighten') hint.textContent = '▲ Tendi la corda (troppo bassa)';
+          }
+        }
+      } else {
+        this._pendingHint = null;
       }
     },
   };
@@ -12673,6 +13758,41 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Escape' && Tuner.active) Tuner.close();
   });
   window.Tuner = Tuner;
+
+  // ════════════════════════════════════════════════════════════
+  //  ONBOARDING · sheet al primo launch
+  //  Mostra l'overlay #introOverlay se l'utente non l'ha già visto.
+  //  Click su una path button → dismiss + apre il modulo selezionato.
+  // ════════════════════════════════════════════════════════════
+  (function initIntro(){
+    const KEY = 'nemoIntroShown';
+    const overlay = document.getElementById('introOverlay');
+    if (!overlay) return;
+    let seen = false;
+    try { seen = localStorage.getItem(KEY) === '1'; } catch(e){}
+    if (!seen) overlay.style.display = 'flex';
+    function dismiss(){
+      overlay.style.display = 'none';
+      try { localStorage.setItem(KEY, '1'); } catch(e){}
+    }
+    const skip = document.getElementById('introSkip');
+    if (skip) skip.addEventListener('click', dismiss);
+    overlay.querySelectorAll('[data-intro]').forEach(b => {
+      b.addEventListener('click', () => {
+        const which = b.dataset.intro;
+        dismiss();
+        setTimeout(() => {
+          try {
+            if (which === 'solo')  document.getElementById('btnSolo')?.click();
+            else if (which === 'solve') document.getElementById('btnResolve')?.click();
+            else if (which === 'ear')   document.getElementById('btnEar')?.click();
+            else if (which === 'tune')  document.getElementById('btnTuner')?.click();
+          } catch(e) { console.warn('intro launch:', e); }
+        }, 120);
+      });
+    });
+  })();
+
 })();
 </script>
 </body>
