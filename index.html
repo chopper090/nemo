@@ -186,6 +186,46 @@ JS  <script>  (~3420-12860)
   color-scheme: dark;
 }
 
+/* ════════════ ULTRA-DARK THEME ════════════
+   Palette estrema per sessioni notturne / pratica lunga. Saturazione ridotta,
+   contrasti meno aggressivi, accent leggermente desaturati per ridurre affaticamento. */
+[data-theme="ultra-dark"] {
+  --bg: #07070a;
+  --surface: #0e0e13;
+  --surface-2: #14141a;
+  --surface-3: #1c1c24;
+  --border: #1f1f28;
+  --border-strong: #2e2e3a;
+  --border-subtle: #15151c;
+  --text: #c8c5bb;
+  --text-muted: #8a8f9a;
+  --text-subtle: #5e636c;
+  --text-inverse: #07070a;
+  --accent: #c8c5bb;
+  --accent-hot: #d65665;
+  --accent-tab: #6580ff;
+  --hot-bg: #2a1216;
+  --hot-border: #6a1f29;
+  --hot-text: #d68a93;
+  --success: #3aa86a;
+  --success-bg: #0a3a1c;
+  --success-border: #134e26;
+  --warning: #d49b1f;
+  --warning-bg: #2e1c05;
+  --warning-border: #663d0a;
+  --xp: #d4a52d;
+  --xp-bg: #2c2008;
+  --streak: #d96940;
+  --locked: #3a3e48;
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.40);
+  --shadow-lg: 0 12px 36px rgba(0,0,0,0.75), 0 4px 12px rgba(0,0,0,0.55);
+  /* Override modulo accent colors per coerenza nell'ultra-dark */
+  --c-mute:       #6a6e78;
+  --c-border-dk:  #16161c;
+  --c-surface-dk: #14141a;
+  color-scheme: dark;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ════════════ FONT UTILITIES ════════════
@@ -197,6 +237,46 @@ JS  <script>  (~3420-12860)
 .f-ui-13-700 { font: 700 13px/1 var(--font-ui); }
 .f-mono-11   { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; }
 .f-serif-lg  { font: 300 32px/1 'Cormorant Garamond', serif; }
+
+/* ════════════ SOLO-MODE TOPBAR (overlay-style) ════════════
+   Visibile solo in body.solo-mode. Replica il layout degli overlay (ear/solve/tune)
+   per garantire coerenza visiva: ← back · Nemo home · module switcher · ⚙ settings. */
+.solo-mode-topbar { display: none; }
+body.solo-mode .solo-mode-topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--solo-line, #1a1a1d);
+  gap: 14px;
+  background: var(--solo-bg, #000);
+  position: sticky; top: 0; z-index: 100;
+}
+.solo-mtb-left { justify-self: start; display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
+.solo-mtb-center { justify-self: center; display: flex; align-items: center; gap: 14px; min-width: 0; }
+.solo-mtb-right { justify-self: end; display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; justify-content: flex-end; }
+.solo-mtb-icon-btn {
+  background: transparent; border: 0; color: var(--solo-mute, #7e8088);
+  font-size: 22px; cursor: pointer;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.solo-mtb-icon-btn:hover { background: rgba(255,255,255,.06); color: var(--solo-fg, #fff); }
+.solo-mtb-home-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: 0; padding: 4px 8px; border-radius: 8px;
+  cursor: pointer; color: var(--solo-fg, #fff);
+  transition: background .15s;
+}
+.solo-mtb-home-btn:hover { background: rgba(255,255,255,.06); }
+.solo-mtb-logo { width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; }
+.solo-mtb-name { font: 700 13px/1 'Inter', sans-serif; color: var(--solo-fg, #fff); letter-spacing: .02em; }
+@media (max-width: 720px) { .solo-mtb-name { display: none; } }
+
+/* In solo-mode: nascondi l'header normale dell'app (la topbar overlay-style lo sostituisce) */
+body.solo-mode .header { display: none !important; }
+body.solo-mode .grid-header { display: none !important; }
 
 /* ════════════ ONBOARDING (intro-overlay) ════════════ */
 .intro-overlay{
@@ -227,6 +307,8 @@ JS  <script>  (~3420-12860)
 .intro-path[data-intro="solo"]  .intro-path-title b{color:var(--c-solo,#0a84ff);font-weight:300}
 .intro-path[data-intro="solve"] .intro-path-title b{color:var(--c-resolve);font-weight:300}
 .intro-path[data-intro="ear"]   .intro-path-title b{color:var(--c-ear);font-weight:300}
+.intro-path[data-intro="tune"]  .intro-path-title b{color:var(--c-tuner,#f59e0b);font-weight:300}
+.intro-path[data-intro="nemo"]  .intro-path-title b{color:#ECE9E0;font-weight:300}
 .intro-path-desc{font:400 12px/1.4 'Inter',sans-serif;color:var(--c-mute,#7e8088)}
 .intro-skip{
   background:transparent;border:0;color:var(--c-mute,#7e8088);cursor:pointer;
@@ -412,8 +494,9 @@ body.layout-force-desktop .stats-inline { display: none !important; }
 body.layout-force-desktop .header { padding: 14px 20px; }
 body.layout-force-desktop .header-left h1 { font-size: 22px; }
 body.layout-force-desktop .btn-label { padding: 0 14px !important; height: 36px; font-size: 13px; }
-body.layout-force-desktop .btn-label .btn-l-full { display: inline; }
-body.layout-force-desktop .btn-label .btn-l-icon { display: none; }
+/* Default coerente: icona compatta in tutti i breakpoint (no label-full per consistency) */
+body.layout-force-desktop .btn-label .btn-l-full { display: none; }
+body.layout-force-desktop .btn-label .btn-l-icon { display: inline; }
 body.layout-force-desktop .chip-goal,
 body.layout-force-desktop .chip-league { display: inline-flex !important; }
 /* Display generoso */
@@ -455,7 +538,13 @@ body.layout-force-desktop { display: block; }
 .header-left  { justify-self: start;  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-actions { justify-self: center; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .header-right { justify-self: end;    display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.header-logo { width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0; }
+.header-logo {
+  width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+  /* L'SVG ha già il suo bg scuro #18191E + elementi a gradient (orecchio + nota).
+     Non sovrapporre background CSS: lascia che l'icona renderizzi pulita. */
+}
 .header-left h1 {
   font: 700 17px/1.2 var(--font-ui);
   letter-spacing: -0.02em;
@@ -484,6 +573,67 @@ body.layout-force-desktop { display: block; }
 .logo-mini { font: 300 15px/1 'Cormorant Garamond', serif; letter-spacing: .02em; text-transform: lowercase; font-style: italic; }
 .logo-mini b { font-weight: 300; font-style: italic; }
 @media (max-width: 720px) { .logo-mini { font-size: 13px; } }
+
+/* Home button (Nemo): cliccabile in tutti gli overlay per tornare alla home (chiude overlay) */
+.tuner-home-btn, .ear-home-btn, .rs-home-btn, .phrase-home-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: 0; padding: 4px 8px; border-radius: 8px;
+  cursor: pointer; color: inherit;
+  transition: background .15s;
+}
+.tuner-home-btn:hover, .ear-home-btn:hover, .rs-home-btn:hover, .phrase-home-btn:hover {
+  background: rgba(255,255,255,.06);
+}
+.tuner-home-btn .tuner-brand-name,
+.ear-home-btn   .ear-brand-name,
+.rs-home-btn    .rs-brand-name,
+.phrase-home-btn .phrase-brand-name {
+  font: 700 13px/1 'Inter', sans-serif; color: #fff; letter-spacing: .02em;
+}
+@media (max-width: 720px) {
+  .tuner-home-btn .tuner-brand-name,
+  .ear-home-btn   .ear-brand-name,
+  .rs-home-btn    .rs-brand-name,
+  .phrase-home-btn .phrase-brand-name { display: none; }
+}
+
+/* Module switcher: replicato in ogni overlay topbar per navigazione rapida tra moduli.
+   Il modulo attivo (.is-active) è evidenziato; gli altri sono click-to-open. */
+.module-switcher { display: inline-flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+.module-switcher .mod-btn {
+  background: transparent; border: 1px solid transparent;
+  padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  color: #6a6e78; transition: color .15s, background .15s, border-color .15s;
+  font: 300 15px/1 'Cormorant Garamond', serif; letter-spacing: .02em; font-style: italic;
+  white-space: nowrap;
+}
+.module-switcher .mod-btn-logo {
+  padding: 4px 6px; display: inline-flex; align-items: center; justify-content: center;
+}
+.module-switcher .mod-btn-logo img {
+  width: 22px; height: 22px; display: block;
+}
+.module-switcher .mod-btn:hover { color: #fff; background: rgba(255,255,255,.06); }
+.module-switcher .mod-btn b { font-weight: 300; font-style: italic; }
+.module-switcher .mod-btn.is-active { background: rgba(255,255,255,.08); }
+.module-switcher .mod-btn[data-module="solo"].is-active   { color: var(--c-solo,#0a84ff); background: color-mix(in srgb, var(--c-solo,#0a84ff) 18%, transparent); }
+.module-switcher .mod-btn[data-module="solo"].is-active b  { color: var(--c-solo,#0a84ff); }
+.module-switcher .mod-btn[data-module="solo"] b           { color: var(--c-solo,#0a84ff); }
+.module-switcher .mod-btn[data-module="solve"].is-active  { color: var(--c-resolve); background: color-mix(in srgb, var(--c-resolve) 18%, transparent); }
+.module-switcher .mod-btn[data-module="solve"], .module-switcher .mod-btn[data-module="solve"] b { color: var(--c-resolve); }
+.module-switcher .mod-btn[data-module="ear"].is-active    { color: var(--c-ear); background: color-mix(in srgb, var(--c-ear) 18%, transparent); }
+.module-switcher .mod-btn[data-module="ear"], .module-switcher .mod-btn[data-module="ear"] b { color: var(--c-ear); }
+.module-switcher .mod-btn[data-module="tune"].is-active   { color: var(--c-tuner); background: color-mix(in srgb, var(--c-tuner) 18%, transparent); }
+.module-switcher .mod-btn[data-module="tune"], .module-switcher .mod-btn[data-module="tune"] b { color: var(--c-tuner); }
+.module-switcher .mod-btn[data-module="nemo"], .module-switcher .mod-btn[data-module="nemo"] b { color: #ECE9E0; }
+.module-switcher .mod-btn[data-module="nemo"].is-active { color: #fff; background: rgba(255,255,255,.10); }
+.module-switcher .mod-btn[data-module="lab"]  { font: 600 11px/1 'JetBrains Mono', monospace; letter-spacing: .12em; font-style: normal; text-transform: none; color: #8a8f9a; }
+.module-switcher .mod-btn[data-module="lab"] b { font-weight: 600; color: #8a8f9a; font-style: normal; }
+.module-switcher .mod-btn[data-module="lab"]:hover { color: #fff; }
+/* Stato non-attivo: leggermente desaturati per dare risalto al modulo corrente */
+.module-switcher .mod-btn:not(.is-active) { opacity: .55; }
+.module-switcher .mod-btn:not(.is-active):hover { opacity: 1; }
+@media (max-width: 640px) { .module-switcher .mod-btn { font-size: 13px; padding: 5px 8px; } }
 
 /* Bottone EAR — coerente con sølo/sølve, accento verde per orecchio */
 .btn-ear { padding: 0 10px !important; min-width: auto !important; }
@@ -2140,11 +2290,11 @@ body.resolve-active{overflow:hidden}
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
   padding:14px 22px;border-bottom:1px solid #1a1a1d;flex-shrink:0;gap:14px
 }
-.rs-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
-.rs-brand-logo{width:24px;height:24px;border-radius:6px;opacity:.9}
+.rs-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.rs-brand-logo{width:24px;height:24px;border-radius:6px;opacity:.9;flex-shrink:0}
 .rs-brand-name{font:700 13px/1 'Inter',sans-serif;color:#fff;letter-spacing:.02em}
-.rs-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px}
-.rs-topbar-right{justify-self:end;display:flex;align-items:center;gap:8px}
+.rs-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px;min-width:0}
+.rs-topbar-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;flex-wrap:wrap;justify-content:flex-end}
 .rs-info-chip{
   background:#0f0f10;border:1px solid #1f1f22;color:var(--solo-acc);
   border-radius:999px;padding:6px 12px;font:600 12px/1 'JetBrains Mono',monospace;letter-spacing:.1em
@@ -2346,7 +2496,12 @@ body.resolve-active{overflow:hidden}
 .bp-close:hover{background:var(--surface-2);color:var(--text)}
 
 /* ════════════ SONGS LIBRARY ════════════ */
+/* Span full width: senza grid-area esplicita, songsView finirebbe in una cella stretta della grid (1fr).
+   Forzo grid-column: 1 / -1 quando visibile, così il max-width centra correttamente. */
 .songs-view{padding:18px 20px;max-width:1200px;margin:0 auto;width:100%}
+.songs-view:not(.hidden){grid-column:1 / -1}
+/* Analogamente per le altre view "fullwidth" che hanno sidebar adiacenti in desktop */
+.learn-view:not(.hidden), .stats-view:not(.hidden), .theory-view:not(.hidden), .path-view:not(.hidden){grid-column:1 / -1}
 .sl-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
 .sl-filters{display:flex;gap:6px;flex-wrap:wrap}
 .sl-filter{background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:8px 14px;font:600 12px/1 var(--font-ui);cursor:pointer}
@@ -2421,14 +2576,14 @@ body.resolve-active{overflow:hidden}
 .ear-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.ear-active{overflow:hidden}
 .ear-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
-.ear-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
-.ear-brand-logo{width:24px;height:24px;border-radius:6px}
+.ear-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.ear-brand-logo{width:24px;height:24px;border-radius:6px;flex-shrink:0}
 .ear-brand-name{font:700 13px/1 'Inter',sans-serif}
-.ear-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px}
+.ear-topbar-center{justify-self:center;display:flex;align-items:center;gap:14px;min-width:0}
 .ear-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em}
 .ear-icon-btn{background:transparent;border:0;color:#7e8088;font-size:22px;cursor:pointer;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
 .ear-icon-btn:hover{background:#1a1a1d;color:#fff}
-.ear-topbar-right{justify-self:end;display:flex;gap:8px;align-items:center}
+.ear-topbar-right{justify-self:end;display:flex;gap:8px;align-items:center;min-width:0;overflow:hidden;flex-wrap:wrap;justify-content:flex-end}
 .ear-info-chip{background:#0f0f10;border:1px solid #1f1f22;color:#10b981;border-radius:999px;padding:6px 12px;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em}
 
 .ear-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:28px}
@@ -2496,6 +2651,78 @@ body.ear-active{overflow:hidden}
 }
 
 /* ════════════════════════════════════════════════════════════
+   PHRASE RECORDER · timing accuracy via mic + metronome  [classi: .phrase-*]
+   ════════════════════════════════════════════════════════════ */
+.phrase-overlay{
+  position:fixed;inset:0;z-index:10650;background:#000;color:#fff;
+  display:none;flex-direction:column;font-family:-apple-system,'Inter',sans-serif
+}
+.phrase-overlay.show{display:flex;animation:soFadeIn .3s ease}
+body.phrase-active{overflow:hidden}
+.phrase-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
+.phrase-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
+.phrase-brand-logo{width:24px;height:24px;border-radius:6px}
+.phrase-brand-name{font:700 13px/1 'Inter',sans-serif}
+.phrase-topbar-center{justify-self:center}
+.phrase-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em;font-style:italic}
+.phrase-topbar-right{justify-self:end;display:flex;align-items:center;gap:10px}
+.phrase-icon-btn{background:transparent;border:0;color:#7e8088;font-size:22px;cursor:pointer;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.phrase-icon-btn:hover{background:#1a1a1d;color:#fff}
+.phrase-bpm-wrap{display:flex;align-items:center;gap:8px;background:#0f0f10;border:1px solid #1f1f22;border-radius:999px;padding:6px 12px}
+.phrase-bpm-lbl{font:600 10px/1 'JetBrains Mono',monospace;color:#7e8088;letter-spacing:.14em;text-transform:uppercase}
+.phrase-bpm-input{background:transparent;border:0;color:#fff;font:600 14px/1 'JetBrains Mono',monospace;width:46px;text-align:right;outline:0}
+.phrase-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;gap:24px;overflow-y:auto}
+
+.phrase-idle{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;max-width:520px}
+.phrase-big-num{font:300 96px/1 'Cormorant Garamond',serif;color:#fff}
+.phrase-big-num span{font-size:32px;color:#7e8088;margin-left:6px}
+.phrase-meta{font:500 13px/1 'JetBrains Mono',monospace;color:#7e8088;letter-spacing:.1em}
+.phrase-howto{font:400 14px/1.6 'Inter',sans-serif;color:#a8aeba;max-width:480px}
+.phrase-start-btn{background:#10b981;color:#fff;border:0;border-radius:999px;padding:14px 32px;font:600 14px/1 'Inter',sans-serif;cursor:pointer;letter-spacing:.05em;transition:filter .15s,transform .12s}
+.phrase-start-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.phrase-hint{font:400 12px/1 'Inter',sans-serif;color:#7e8088}
+
+.phrase-countdown{display:flex;flex-direction:column;align-items:center;gap:14px}
+.phrase-cd-num{font:300 160px/1 'Cormorant Garamond',serif;color:var(--c-tuner,#f59e0b)}
+.phrase-cd-lbl{font:500 13px/1 'Inter',sans-serif;color:#7e8088;letter-spacing:.2em;text-transform:uppercase}
+
+.phrase-rec{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:820px}
+.phrase-rec-dot{width:14px;height:14px;border-radius:50%;background:#ef4444;animation:phrasePulse 1s infinite}
+@keyframes phrasePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.phrase-rec-time{font:300 64px/1 'Cormorant Garamond',serif;color:#fff;letter-spacing:.02em}
+.phrase-rec-beat{font:600 22px/1 'JetBrains Mono',monospace;color:var(--c-tuner,#f59e0b);letter-spacing:.3em;min-height:24px}
+.phrase-rec-canvas{width:100%;max-width:800px;height:100px;background:#0a0a0d;border:1px solid #1f1f22;border-radius:var(--r-lg)}
+.phrase-rec-onsets{font:500 12px/1 'JetBrains Mono',monospace;color:#7e8088}
+.phrase-stop-btn{background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:999px;padding:8px 22px;font:600 12px/1 'Inter',sans-serif;cursor:pointer;letter-spacing:.05em}
+.phrase-stop-btn:hover{background:rgba(239,68,68,.1)}
+
+.phrase-result{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:540px}
+.phrase-result-acc{text-align:center}
+.phrase-acc-num{font:300 120px/1 'Cormorant Garamond',serif;color:#10b981}
+.phrase-acc-num span{font-size:48px;color:#7e8088;margin-left:6px}
+.phrase-acc-lbl{font:500 12px/1 'Inter',sans-serif;color:#7e8088;letter-spacing:.2em;text-transform:uppercase;margin-top:6px}
+.phrase-result-meta{font:500 13px/1.5 'Inter',sans-serif;color:#a8aeba;text-align:center}
+.phrase-result-meta strong{color:#fff}
+.phrase-result-table{width:100%;max-width:420px;border-collapse:collapse;font:500 12px/1.4 'JetBrains Mono',monospace}
+.phrase-result-table th{text-align:left;padding:8px;color:#7e8088;border-bottom:1px solid #1f1f22;text-transform:uppercase;letter-spacing:.1em;font-size:10px}
+.phrase-result-table td{padding:6px 8px;color:#fff;border-bottom:1px solid #161618}
+.phrase-result-table tr.good td:last-child{color:#10b981}
+.phrase-result-table tr.ok td:last-child{color:#f59e0b}
+.phrase-result-table tr.late td:last-child{color:#ef4444}
+.phrase-empty{font:400 13px/1.5 'Inter',sans-serif;color:#7e8088;text-align:center;padding:20px}
+.phrase-actions{display:flex;gap:10px;margin-top:6px}
+.phrase-action-btn{background:#1a1a1d;color:#fff;border:1px solid #2a2a30;border-radius:var(--r-md);padding:10px 22px;font:600 13px/1 'Inter',sans-serif;cursor:pointer;transition:background .15s}
+.phrase-action-btn:hover{background:#22222a}
+.phrase-action-done{background:#10b981;border-color:#10b981}
+.phrase-action-done:hover{filter:brightness(1.1)}
+@media (max-width:640px){
+  .phrase-big-num{font-size:72px}
+  .phrase-rec-time{font-size:48px}
+  .phrase-acc-num{font-size:88px}
+  .phrase-cd-num{font-size:120px}
+}
+
+/* ════════════════════════════════════════════════════════════
    TUNER · accordatore minimal (palette gold/amber)  [classi: .tuner-*]
    ════════════════════════════════════════════════════════════ */
 .tuner-overlay{
@@ -2506,10 +2733,12 @@ body.ear-active{overflow:hidden}
 .tuner-overlay.show{display:flex;animation:soFadeIn .3s ease}
 body.tuner-active{overflow:hidden}
 .tuner-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 22px;border-bottom:1px solid #1a1a1d;gap:14px}
-.tuner-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px}
-.tuner-brand-logo{width:24px;height:24px;border-radius:6px}
+.tuner-topbar-left{justify-self:start;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.tuner-brand-logo{width:24px;height:24px;border-radius:6px;flex-shrink:0}
 .tuner-brand-name{font:700 13px/1 'Inter',sans-serif}
-.tuner-topbar-center{justify-self:center;display:flex;align-items:center;gap:18px}
+.tuner-topbar-center{justify-self:center;display:flex;align-items:center;gap:18px;min-width:0}
+.tuner-topbar-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:720px){.tuner-topbar-right .tuner-freq-chip{display:none}}
 .tuner-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em}
 .tuner-tuning-name{
   font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#f59e0b;
@@ -2788,6 +3017,9 @@ body.tuner-active{overflow:hidden}
 .badge-toast .bt-name{font:700 16px/1.2 var(--font-ui);color:#fff;margin-bottom:2px}
 .badge-toast .bt-xp{font:600 12px/1 var(--font-mono);color:#7e8088}
 
+/* Feature nascoste (in memoria nel codice ma non più mostrate) */
+.hidden-feature { display: none !important; }
+
 /* Header buttons con label testuale chiara — pill compatto, low-emphasis */
 .btn-label{
   width:auto !important;min-width:auto !important;
@@ -2806,9 +3038,12 @@ body.solo-mode .btn-label:hover{color:var(--solo-fg);background:rgba(255,255,255
   display:inline-block;width:1px;height:18px;background:var(--border-subtle);
   margin:0 4px;opacity:.7
 }
-/* Default: mostra label completa, nascondi icona */
-.btn-label .btn-l-icon{display:none}
-.btn-label .btn-l-full{display:inline}
+/* Default: icona compatta SEMPRE (coerenza desktop/mobile) — nascondiamo la label full.
+   Per ripristinare etichette su un singolo bottone, aggiungere classe `.btn-label-text`. */
+.btn-label .btn-l-icon{display:inline}
+.btn-label .btn-l-full{display:none}
+.btn-label.btn-label-text .btn-l-icon{display:none}
+.btn-label.btn-label-text .btn-l-full{display:inline}
 
 /* Mobile (<720px) e quando la barra è stretta: icon-only per stare in 1 riga */
 @media (max-width: 720px){
@@ -2901,7 +3136,8 @@ body.solo-mode .viewtab[data-view="songs"],
 body.solo-mode .viewtab[data-view="stats"]{display:none !important}
 /* Header skin */
 body.solo-mode .header{background:transparent;border-bottom-color:var(--solo-line);box-shadow:none}
-body.solo-mode .header-logo{filter:brightness(0) invert(1);opacity:.85}
+/* Logo Nemo in solo: renderizza pulito (rimosso filter brightness/invert che lo trasformava in silhouette bianca) */
+body.solo-mode .solo-mtb-logo{opacity:.95}
 body.solo-mode .header h1{font:300 22px/1 'Cormorant Garamond',serif;color:var(--solo-fg)}
 /* Topbar skin Solo — minimal raffinato, frecce in grigio scuro, separatori sottili */
 body.solo-mode .topbar{background:transparent;border-color:rgba(255,255,255,.04)}
@@ -3153,7 +3389,10 @@ body.solo-mode .fretboard-wrap{background:var(--solo-bg);border-color:var(--solo
 body.solo-mode .fretboard-container{filter:saturate(.85)}
 
 /* Footer compatto */
-body.solo-mode .footer{background:transparent;border-color:var(--solo-line)}
+body.solo-mode .footer{background:var(--solo-bg);border-color:var(--solo-line);padding:6px 10px;position:sticky;bottom:0;z-index:40}
+/* In solo-mode senza fretboard: comprimi la viewport per evitare scroll verticale */
+body.solo-mode:not(.fb-visible) .grid-display{padding:8px 12px;min-height:auto}
+body.solo-mode:not(.fb-visible) .display{min-height:auto;padding:8px}
 body.solo-mode .stat-inline-value{color:var(--solo-fg)}
 body.solo-mode .stat-inline-label{color:var(--solo-mute)}
 body.solo-mode .btn-primary{background:var(--solo-acc);border-color:var(--solo-acc);color:#fff;border-radius:14px;font-weight:600}
@@ -3227,51 +3466,51 @@ body.solo-mode .topbar-tab.active::before{color:var(--solo-acc)}
    M1 · Setup-screen + picker
    ════════════════════════════════════════════════════════════ */
 body.solo-mode .solo-setup-sheet{
-  width:100%;max-width:520px;margin:0 auto;padding:24px 4px;
+  width:100%;max-width:480px;margin:0 auto;padding:12px 4px;
   font-family:'Inter',-apple-system,sans-serif;color:var(--solo-fg);
   animation:soloNoteIn .35s cubic-bezier(.2,.7,.2,1)
 }
 body.solo-mode .solo-setup-section-label{
-  font:600 11px/1 'Inter',sans-serif;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--solo-mute);padding:0 6px 12px
+  font:600 10px/1 'Inter',sans-serif;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--solo-mute);padding:0 6px 6px
 }
-body.solo-mode .solo-setup-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+body.solo-mode .solo-setup-cards{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 body.solo-mode .solo-setup-card{
-  background:var(--solo-card);border-radius:16px;padding:18px 20px;cursor:pointer;
+  background:var(--solo-card);border-radius:12px;padding:10px 14px;cursor:pointer;
   transition:background .15s,transform .1s;border:1px solid transparent
 }
 body.solo-mode .solo-setup-card:hover{background:#1a1a1d}
 body.solo-mode .solo-setup-card:active{transform:scale(.99)}
 body.solo-mode .solo-setup-card .ssc-label{
-  font:700 22px/1.2 'Inter',sans-serif;color:var(--solo-fg);margin-bottom:4px
+  font:700 17px/1.2 'Inter',sans-serif;color:var(--solo-fg);margin-bottom:2px
 }
 body.solo-mode .solo-setup-card .ssc-value{
-  font:400 14px/1.3 'Inter',sans-serif;color:var(--solo-mute)
+  font:400 12px/1.2 'Inter',sans-serif;color:var(--solo-mute)
 }
 body.solo-mode .solo-setup-group{
-  background:var(--solo-card);border-radius:14px;overflow:hidden;margin-bottom:22px
+  background:var(--solo-card);border-radius:12px;overflow:hidden;margin-bottom:12px
 }
 body.solo-mode .solo-setup-row{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px;border-bottom:1px solid var(--solo-line);cursor:pointer
+  padding:9px 14px;border-bottom:1px solid var(--solo-line);cursor:pointer
 }
 body.solo-mode .solo-setup-row:last-child{border-bottom:0}
 body.solo-mode .solo-setup-row[data-opt-cycle]:hover{background:#1a1a1d}
-body.solo-mode .solo-setup-row .ssr-lbl{font-size:15px;color:var(--solo-fg)}
-body.solo-mode .solo-setup-row .ssr-val{font-size:14px;color:var(--solo-acc)}
+body.solo-mode .solo-setup-row .ssr-lbl{font-size:13px;color:var(--solo-fg)}
+body.solo-mode .solo-setup-row .ssr-val{font-size:12px;color:var(--solo-acc)}
 body.solo-mode .solo-setup-row .ssr-select{
   background:transparent;border:1px solid var(--solo-line);color:var(--solo-acc);
-  border-radius:8px;padding:7px 10px;font:500 14px/1.2 'Inter',sans-serif;cursor:pointer;
+  border-radius:8px;padding:5px 8px;font:500 12px/1.2 'Inter',sans-serif;cursor:pointer;
   appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--solo-acc) 50%),linear-gradient(135deg,var(--solo-acc) 50%,transparent 50%);
-  background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:28px
+  background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:26px
 }
 body.solo-mode .solo-setup-row .ssr-select:focus{outline:0;border-color:var(--solo-acc)}
 body.solo-mode .solo-setup-row .ssr-select option{background:#1c1c1f;color:#fff}
 
 body.solo-mode .solo-setup-cta{
   display:block;width:100%;background:var(--solo-acc);color:#fff;border:0;
-  border-radius:14px;padding:18px;font:600 17px/1 'Inter',sans-serif;cursor:pointer;
-  margin-top:10px;transition:filter .15s,transform .1s
+  border-radius:12px;padding:12px;font:600 15px/1 'Inter',sans-serif;cursor:pointer;
+  margin-top:6px;transition:filter .15s,transform .1s
 }
 body.solo-mode .solo-setup-cta:hover{filter:brightness(1.1)}
 body.solo-mode .solo-setup-cta:active{transform:scale(.98)}
@@ -3402,23 +3641,43 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
       <span class="intro-name">Nemo</span>
     </div>
     <h2 class="intro-title">Fretboard &amp; Ear Training</h2>
-    <p class="intro-sub">Tre strade per cominciare. Puoi sempre cambiare dopo.</p>
+    <p class="intro-sub">Scegli da dove cominciare. Puoi sempre cambiare dopo.</p>
     <div class="intro-paths">
       <button class="intro-path" data-intro="solo">
-        <span class="intro-path-title">s<b>ø</b>lo</span>
+        <span class="intro-path-title">S<b>ø</b>lo</span>
         <span class="intro-path-desc">Drill rapidi · trova note, gradi, scale e accordi sul manico.</span>
       </button>
       <button class="intro-path" data-intro="solve">
-        <span class="intro-path-title">s<b>ø</b>lve</span>
+        <span class="intro-path-title">S<b>ø</b>lve</span>
         <span class="intro-path-desc">Ear training cieco · suono accordi, tu trovi le note.</span>
       </button>
       <button class="intro-path" data-intro="ear">
-        <span class="intro-path-title"><b>e</b>ar</span>
+        <span class="intro-path-title"><b>E</b>ar</span>
         <span class="intro-path-desc">Riconoscimento intervalli · trick mode su intervalli simili.</span>
+      </button>
+      <button class="intro-path" data-intro="tune">
+        <span class="intro-path-title">T<b>u</b>ne</span>
+        <span class="intro-path-desc">Accordatore · regola la chitarra prima di suonare.</span>
+      </button>
+      <button class="intro-path" data-intro="nemo">
+        <span class="intro-path-title"><b>Nemo</b></span>
+        <span class="intro-path-desc">Home · esplora tutti i moduli e personalizza il percorso.</span>
       </button>
     </div>
     <button class="intro-skip" id="introSkip">Esplora da solo →</button>
   </div>
+</div>
+
+<!-- SOLO-MODE TOPBAR: visibile solo in body.solo-mode (sostituisce l'header normale).
+     Replica layout overlay: ← + Nemo home + module switcher (sølo★) + ⚙ settings -->
+<div class="solo-mode-topbar" id="soloModeTopbar">
+  <div class="solo-mtb-left"></div>
+  <div class="solo-mtb-center">
+    <button class="solo-mtb-icon-btn" id="soloMtbBack" title="Esci dalla modalità Solo (S / ESC)">←</button>
+    <span id="soloMtbSwitcher"><!-- module switcher iniettato da JS --></span>
+    <button class="solo-mtb-icon-btn" id="soloMtbSettings" title="Opzioni Solo">⚙</button>
+  </div>
+  <div class="solo-mtb-right"></div>
 </div>
 
 <div class="layout" id="layout">
@@ -3452,9 +3711,9 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
     </div>
     <!-- DX · Opzioni di visualizzazione e layout -->
     <div class="header-right">
-      <button class="btn btn-icon btn-label" id="btnFocus" title="Focus mode (F)"><span class="btn-l-full">Focus</span><span class="btn-l-icon">⛶</span></button>
+      <button class="btn btn-icon btn-label" id="btnFocus" title="Focus mode (F)"><span class="btn-l-full">F</span><span class="btn-l-icon">F</span></button>
       <button class="btn btn-icon btn-label" id="btnFretboard" title="Mostra/nascondi manico"><span class="btn-l-full">Manico</span><span class="btn-l-icon">🎸</span></button>
-      <button class="btn btn-icon btn-label" id="btnLayoutEdit" title="Personalizza dimensioni / spaziature"><span class="btn-l-full">Custom</span><span class="btn-l-icon">≣</span></button>
+      <button class="btn btn-icon btn-label hidden-feature" id="btnLayoutEdit" title="Personalizza dimensioni / spaziature (nascosto)"><span class="btn-l-full">Custom</span><span class="btn-l-icon">≣</span></button>
       <button class="btn btn-icon btn-label" id="btnLayoutMode" title="Forza layout: Auto / Mobile / Desktop (L)"><span class="btn-l-full">Vista</span><span class="btn-l-icon">📱</span></button>
       <button class="btn btn-icon btn-label" id="btnFullscreen" title="Schermo intero"><span class="btn-l-full">Full</span><span class="btn-l-icon">⛶</span></button>
       <span class="header-divider" aria-hidden="true"></span>
@@ -4946,6 +5205,7 @@ const state = {
                 return parseInt(stored);
               })(),
   showFretboard: localStorage.getItem('nt-fretboard') !== 'false', // default true
+  showHeatMap: localStorage.getItem('nt-heatmap') === 'true',       // overlay frequenze sul fretboard
   focusMode:  localStorage.getItem('nt-focus') === 'true',
   viewMode:   localStorage.getItem('nt-view') || 'note',
   layoutMode: localStorage.getItem('nt-layout-mode') || 'auto', // 'auto' | 'mobile' | 'desktop'
@@ -5868,6 +6128,34 @@ function renderFretboard() {
     }
   }
   for (let f = 1; f <= NUM_FRETS; f++) svg += `<text class="fb-fret-num" x="${(fX(f-1)+fX(f))/2}" y="${sY(numStrings-1)+14}">${f}</text>`;
+
+  // ── Heat map layer (dietro tutto il resto) ──
+  // Mostra l'intensità delle pitch class più suonate, usando progress.stats.notesPlayed.
+  // Visualizzazione: cerchi blu→rosso con alpha proporzionale alla frequenza,
+  // sotto i marker dei target. Toggle via state.showHeatMap (Solo drawer).
+  if (state.showHeatMap && progress?.stats?.notesPlayed) {
+    const np = progress.stats.notesPlayed || {};
+    const counts = Object.values(np).filter(v => v > 0);
+    if (counts.length) {
+      const maxCount = Math.max(...counts, 1);
+      for (let s = 0; s < numStrings; s++) {
+        for (let f = 0; f <= NUM_FRETS; f++) {
+          const noteIdx = (strings[s] + f) % 12;
+          const count = np[noteIdx] || 0;
+          if (count <= 0) continue;
+          const intensity = Math.min(1, count / maxCount); // 0..1
+          const cx = f === 0 ? padL + nutW/2 - nr - 4 : (fX(f-1)+fX(f))/2;
+          const cy = sY(s);
+          const hue = Math.round(200 - intensity * 200); // 200=blu → 0=rosso
+          const sat = Math.round(60 + intensity * 30);
+          const lig = Math.round(35 + intensity * 20);
+          const alpha = (0.18 + intensity * 0.40).toFixed(2);
+          const r = (nr * (0.85 + intensity * 0.5)).toFixed(1);
+          svg += `<circle class="fb-heat" cx="${cx}" cy="${cy}" r="${r}" fill="hsla(${hue},${sat}%,${lig}%,${alpha})" style="pointer-events:none"/>`;
+        }
+      }
+    }
+  }
 
   const tonicIdx = state.tonic;
   for (let s = 0; s < numStrings; s++) {
@@ -10237,10 +10525,30 @@ dom.btnNotation.addEventListener('click', () => {
     else if (state.view === 'path' && typeof renderPathView === 'function') renderPathView();
   } catch(e){ console.warn('notation re-render:', e); }
 });
+// Theme cycle: light → dark → ultra-dark → light
+const THEME_CYCLE = ['light', 'dark', 'ultra-dark'];
+const THEME_META = { light:'☀ Light', dark:'🌙 Dark', 'ultra-dark':'⚫ Ultra-dark' };
+const THEME_ICON = { light:'☀', dark:'🌙', 'ultra-dark':'⚫' };
+function applyThemeMeta(theme) {
+  const meta = THEME_META[theme] || theme;
+  const icon = THEME_ICON[theme] || '☀';
+  if (dom.btnTheme) {
+    dom.btnTheme.title = `Tema: ${meta} (T per ciclare)`;
+    // Sostituisci l'icona dentro il bottone (compat con struttura btn-l-full/btn-l-icon)
+    const iconSpan = dom.btnTheme.querySelector('.btn-l-icon');
+    const fullSpan = dom.btnTheme.querySelector('.btn-l-full');
+    if (iconSpan) iconSpan.textContent = icon;
+    if (fullSpan) fullSpan.textContent = icon;
+  }
+}
+applyThemeMeta(document.documentElement.getAttribute('data-theme') || 'dark');
 dom.btnTheme.addEventListener('click', () => {
-  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const idx = THEME_CYCLE.indexOf(cur);
+  const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('fretboard-lab-theme', next);
+  applyThemeMeta(next);
 });
 // Fullscreen API toggle
 const btnFs = document.getElementById('btnFullscreen');
@@ -11105,6 +11413,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       <div class="solo-drawer-group">
         <div class="solo-drawer-row"><span class="lbl">Chrome minimal</span><button class="solo-switch" data-toggle="chromeMinimal"></button></div>
         <div class="solo-drawer-row"><span class="lbl">Mostra fretboard</span><button class="solo-switch" data-toggle="showFretboard"></button></div>
+        <div class="solo-drawer-row" title="Overlay heat map: cerchi colorati sotto le note, intensità basata sulla frequenza di suono in pratica"><span class="lbl">Heat map note suonate</span><button class="solo-switch" data-toggle="showHeatMap"></button></div>
         <div class="solo-drawer-row"><span class="lbl">Intervals strip</span><button class="solo-switch" data-toggle="showIntervals"></button></div>
         <div class="solo-drawer-row"><span class="lbl">Next preview</span><button class="solo-switch" data-toggle="showNext"></button></div>
       </div>
@@ -11157,6 +11466,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
     </div>
+    <div class="solo-drawer-section">
+      <div class="solo-drawer-label">Strumenti avanzati</div>
+      <div class="solo-drawer-group">
+        <button class="solo-drawer-row" id="soloOpenPhrase" style="background:transparent;border:0;color:#fff;width:100%;cursor:pointer;text-align:left">
+          <span class="lbl">📹 Phrase Recorder (10s timing)</span>
+          <span class="val">P</span>
+        </button>
+      </div>
+    </div>
     <div class="solo-drawer-section" style="opacity:.65;font-size:12px;padding:0 6px;color:#7e8088;line-height:1.5">
       <b style="color:#fff">Solo Mode</b> nasconde tutto tranne la nota target — stile minimal ispirato a <a href="https://solotrainer.app" target="_blank" rel="noopener" style="color:var(--solo-acc,#0a84ff)">solotrainer.app</a>. Premi <b style="color:#fff">S</b> per attivare/disattivare.
     </div>
@@ -11173,6 +11491,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     vibe: ls.get('vibe', 'solo'),
     chromeMinimal: ls.get('chromeMinimal', true),
     showFretboard: ls.get('showFretboard', false),
+    showHeatMap:   ls.get('showHeatMap', false),
     showIntervals: ls.get('showIntervals', true),
     showNext: ls.get('showNext', true),
     findRootFirst: ls.get('findRootFirst', false),
@@ -11215,8 +11534,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     const btnPanel = document.getElementById('btnSoloPanel');
     if(btnPanel) btnPanel.style.display = Solo.active ? '' : 'none';
     // Save
-    ['active','vibe','chromeMinimal','showFretboard','showIntervals','showNext','findRootFirst','adaptiveDifficulty','durationSec','autoSkipSec','fbPosition','fbOrientation']
+    ['active','vibe','chromeMinimal','showFretboard','showHeatMap','showIntervals','showNext','findRootFirst','adaptiveDifficulty','durationSec','autoSkipSec','fbPosition','fbOrientation']
       .forEach(k=>ls.set(k, Solo[k]));
+    // Sync heat map flag con state + refresh fretboard
+    try {
+      state.showHeatMap = !!Solo.showHeatMap;
+      localStorage.setItem('nt-heatmap', state.showHeatMap ? 'true' : 'false');
+      if (typeof renderFretboard === 'function') renderFretboard();
+    } catch(e){}
     // Refresh display overlays
     decorateDisplay();
     // Timer
@@ -11372,6 +11697,23 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
   if(btnPanel) btnPanel.addEventListener('click', openDrawer);
 
+  // ─── Solo-mode topbar (overlay-style coerente con ear/solve/tune) ───
+  const soloMtb = document.getElementById('soloModeTopbar');
+  if (soloMtb) {
+    // Inietta module switcher con sølo★ attivo
+    const switcherSlot = document.getElementById('soloMtbSwitcher');
+    if (switcherSlot && typeof moduleSwitcherHtml === 'function') {
+      switcherSlot.innerHTML = moduleSwitcherHtml('solo');
+      if (typeof wireModuleSwitcher === 'function') wireModuleSwitcher(soloMtb, 'solo');
+    }
+    // ← back: esce da solo-mode
+    document.getElementById('soloMtbBack')?.addEventListener('click', () => {
+      Solo.active = false; apply();
+    });
+    // ⚙ settings: apre solo drawer
+    document.getElementById('soloMtbSettings')?.addEventListener('click', openDrawer);
+  }
+
   function openDrawer(){
     drawer.classList.add('open');
     backdrop.classList.add('show');
@@ -11394,6 +11736,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       Solo[k] = !Solo[k];
       apply();
     });
+  });
+  // Button: apri Phrase Recorder
+  const openPhraseBtn = drawer.querySelector('#soloOpenPhrase');
+  if (openPhraseBtn) openPhraseBtn.addEventListener('click', () => {
+    try { if (typeof Phrase !== 'undefined') Phrase.open(); } catch(e){}
   });
   // Drawer select dropdowns
   drawer.querySelectorAll('[data-select]').forEach(sel=>{
@@ -12214,6 +12561,59 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // ─── Module switcher: chiude il modulo corrente e apre quello richiesto ───
+  function moduleSwitcherHtml(currentModule) {
+    const items = [
+      ['nemo','logo'],         // Home (logo) — sinistra del gruppo
+      ['solo','S','ø','lo'],
+      ['solve','S','ø','lve'],
+      ['ear','','E','ar'],
+      ['tune','T','u','ne'],
+      ['lab','L','a','b'],     // Link a fretboard-lab.html — destra del gruppo
+    ];
+    return `<div class="module-switcher">${
+      items.map(item => {
+        const m = item[0];
+        const active = (m === currentModule) ? 'is-active' : '';
+        if (item[1] === 'logo') {
+          return `<button class="mod-btn mod-btn-logo ${active}" data-module="${m}" type="button" title="Nemo home"><img src="icon.svg" alt="Nemo"></button>`;
+        }
+        const [, pre, bold, post] = item;
+        return `<button class="mod-btn ${active}" data-module="${m}" type="button">${pre}<b>${bold}</b>${post}</button>`;
+      }).join('')
+    }</div>`;
+  }
+  function switchModule(target, current) {
+    if (target === current) return;
+    // Chiude il modulo attualmente attivo
+    try {
+      if (current === 'ear'   && typeof Ear   !== 'undefined') Ear.close();
+      if (current === 'solve' && typeof Resolve !== 'undefined') Resolve.close();
+      if (current === 'tune'  && typeof Tuner !== 'undefined') Tuner.close();
+      if (current === 'solo'  && typeof Solo  !== 'undefined') { Solo.active = false; if (typeof Solo.apply === 'function') Solo.apply(); }
+    } catch(e) {}
+    // Target speciali: nemo (home) e lab (link esterno)
+    if (target === 'nemo') return;   // close-only, la home è già visibile dopo close
+    if (target === 'lab')  { window.location.href = 'fretboard-lab.html'; return; }
+    // Apre il target dopo un micro-delay (per evitare race su animazioni)
+    setTimeout(() => {
+      try {
+        if (target === 'ear'   && typeof Ear   !== 'undefined') Ear.open();
+        else if (target === 'solve' && typeof Resolve !== 'undefined') Resolve.open();
+        else if (target === 'tune'  && typeof Tuner !== 'undefined') Tuner.open();
+        else if (target === 'solo'  && typeof Solo  !== 'undefined') { Solo.active = true; if (typeof Solo.apply === 'function') Solo.apply(); }
+      } catch(e) {}
+    }, 80);
+  }
+  function wireModuleSwitcher(container, currentModule) {
+    container.querySelectorAll('.module-switcher .mod-btn').forEach(b => {
+      b.addEventListener('click', () => switchModule(b.dataset.module, currentModule));
+    });
+  }
+  window.switchModule = switchModule;
+  window.moduleSwitcherHtml = moduleSwitcherHtml;
+  window.wireModuleSwitcher = wireModuleSwitcher;
+
   // ════════════════════════════════════════════════════════════
   //  RESOLVE — pratica ear-training cieca
   //  L'app suona accordi, l'utente trova le note a orecchio.
@@ -12459,17 +12859,14 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.className = 'rs-overlay';
       overlay.innerHTML = `
         <div class="rs-topbar">
-          <div class="rs-topbar-left">
-            <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
-            <img src="icon.svg" class="rs-brand-logo" alt="">
-            <span class="rs-brand-name">Nemo</span>
-          </div>
+          <div class="rs-topbar-left"></div>
           <div class="rs-topbar-center">
-            <div class="rs-title">resolve</div>
+            <button class="rs-icon-btn" id="rsClose" title="Chiudi (R / ESC)">←</button>
+            ${moduleSwitcherHtml('solve')}
+            <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
           </div>
           <div class="rs-topbar-right">
             <span class="rs-info-chip" id="rsInfoComplexity">— · 100</span>
-            <button class="rs-icon-btn" id="rsSettings" title="Impostazioni">⚙</button>
           </div>
         </div>
 
@@ -12536,6 +12933,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     _wireDom() {
       document.getElementById('rsClose').addEventListener('click', () => this.close());
+      const rsOverlay = document.getElementById('resolveOverlay');
+      if (rsOverlay && typeof wireModuleSwitcher === 'function') wireModuleSwitcher(rsOverlay, 'solve');
       document.getElementById('rsSettings').addEventListener('click', () => this._toggleSettings(true));
       document.getElementById('rsCloseSettings').addEventListener('click', () => this._toggleSettings(false));
       document.getElementById('rsPlayBtn').addEventListener('click', () => this.togglePlay());
@@ -12955,18 +13354,15 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.className = 'ear-overlay';
       overlay.innerHTML = `
         <div class="ear-topbar">
-          <div class="ear-topbar-left">
-            <button class="ear-icon-btn" id="earClose" title="Chiudi (E / ESC)">←</button>
-            <img src="icon.svg" class="ear-brand-logo" alt="">
-            <span class="ear-brand-name">Nemo</span>
-          </div>
+          <div class="ear-topbar-left"></div>
           <div class="ear-topbar-center">
-            <div class="ear-title">ear</div>
+            <button class="ear-icon-btn" id="earClose" title="Chiudi (E / ESC)">←</button>
+            ${moduleSwitcherHtml('ear')}
+            <button class="ear-icon-btn" id="earSettingsBtn" title="Impostazioni">⚙</button>
           </div>
           <div class="ear-topbar-right">
             <span class="ear-info-chip" id="earModeChip">recognition</span>
             <span class="ear-info-chip" id="earStreakChip">🔥 0</span>
-            <button class="ear-icon-btn" id="earSettingsBtn" title="Impostazioni">⚙</button>
           </div>
         </div>
         <div class="ear-stage">
@@ -12983,6 +13379,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('earClose').addEventListener('click', () => this.close());
       document.getElementById('earPlay').addEventListener('click', () => this._playCurrent());
       document.getElementById('earSettingsBtn').addEventListener('click', () => this._toggleSettings());
+      if (typeof wireModuleSwitcher === 'function') wireModuleSwitcher(overlay, 'ear');
     },
 
     _activeNodes: [],
@@ -13056,8 +13453,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       else if (direction === 'melodic') direction = Math.random() < 0.5 ? 'ascending' : 'descending';
       this.current = { sem, root, direction };
       this._renderQuestion();
-      // auto-play
-      setTimeout(() => this._playCurrent(), 200);
+      // No auto-play — l'utente avvia con il tasto ▶
     },
 
     _playCurrent(){
@@ -13323,13 +13719,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.className = 'tuner-overlay';
       overlay.innerHTML = `
         <div class="tuner-topbar">
-          <div class="tuner-topbar-left">
-            <button class="tuner-icon-btn" id="tunerClose" title="Chiudi (U / ESC)">←</button>
-            <img src="icon.svg" class="tuner-brand-logo" alt="">
-            <span class="tuner-brand-name">Nemo</span>
-          </div>
+          <div class="tuner-topbar-left"></div>
           <div class="tuner-topbar-center">
-            <div class="tuner-title">tune</div>
+            <button class="tuner-icon-btn" id="tunerClose" title="Chiudi (U / ESC)">←</button>
+            ${moduleSwitcherHtml('tune')}
+            <button class="tuner-icon-btn" id="tunerSettingsBtn" title="Opzioni device + tuning">⚙</button>
           </div>
           <div class="tuner-topbar-right">
             <button class="tuner-tuning-name" id="tunerTuningName" title="Click per cambiare accordatura (app-wide)">Standard ▾</button>
@@ -13362,6 +13756,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       `;
       document.body.appendChild(overlay);
       document.getElementById('tunerClose').addEventListener('click', () => this.close());
+      // Module switcher (sølo/sølve/ear/tune)
+      if (typeof wireModuleSwitcher === 'function') wireModuleSwitcher(overlay, 'tune');
+      // Settings: apre device picker (l'opzione principale del tuner)
+      const tSet = document.getElementById('tunerSettingsBtn');
+      if (tSet) tSet.addEventListener('click', () => this._openDevicePicker());
       // Click sul nome accordatura → popup picker (cambia tuning app-wide)
       document.getElementById('tunerTuningName').addEventListener('click', () => this._openTuningPicker());
       // Click sul chip device → popup picker dispositivo audio
@@ -13758,6 +14157,322 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Escape' && Tuner.active) Tuner.close();
   });
   window.Tuner = Tuner;
+
+  // ════════════════════════════════════════════════════════════
+  //  PHRASE RECORDER · registra 10s di frase + misura timing accuracy
+  //  Mic-based onset detection (RMS spike + decay) vs beat grid (BPM).
+  //  Output: accuracy% + lista scarti in ms.
+  // ════════════════════════════════════════════════════════════
+  const Phrase = {
+    active: false,
+    audioCtx: null, analyser: null, stream: null, rafId: null,
+    bpm: parseInt(localStorage.getItem('nt-phrase-bpm') || '90'),
+    durationSec: 10,
+    state: 'idle',  // 'idle' | 'countdown' | 'rec' | 'result'
+    onsets: [],     // array di {t: secondi da rec start}
+    beats: [],      // beat attesi calcolati da BPM
+    metronomeTimer: null,
+    recStartMs: 0,
+
+    async open(){
+      this.active = true;
+      this._ensureDom();
+      document.body.classList.add('phrase-active');
+      document.getElementById('phraseOverlay').classList.add('show');
+      this._setState('idle');
+    },
+    close(){
+      this.active = false;
+      document.body.classList.remove('phrase-active');
+      this._stopAudio();
+      this._stopMetronome();
+      if (this.rafId) cancelAnimationFrame(this.rafId);
+      const el = document.getElementById('phraseOverlay');
+      if (el) el.classList.remove('show');
+    },
+
+    setBpm(v){
+      this.bpm = Math.max(40, Math.min(220, parseInt(v) || 90));
+      localStorage.setItem('nt-phrase-bpm', String(this.bpm));
+      this._refreshIdle();
+    },
+
+    _ensureDom(){
+      if (document.getElementById('phraseOverlay')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'phraseOverlay';
+      overlay.className = 'phrase-overlay';
+      overlay.innerHTML = `
+        <div class="phrase-topbar">
+          <div class="phrase-topbar-left">
+            <button class="phrase-icon-btn" id="phraseClose" title="Chiudi (P / ESC)">←</button>
+            <button class="phrase-home-btn" id="phraseHome" title="Torna alla home Nemo">
+              <img src="icon.svg" class="phrase-brand-logo" alt="">
+              <span class="phrase-brand-name">Nemo</span>
+            </button>
+          </div>
+          <div class="phrase-topbar-center">
+            <div class="phrase-title">phrase</div>
+          </div>
+          <div class="phrase-topbar-right">
+            <div class="phrase-bpm-wrap">
+              <label class="phrase-bpm-lbl">BPM</label>
+              <input type="number" id="phraseBpm" class="phrase-bpm-input" min="40" max="220" step="1">
+            </div>
+          </div>
+        </div>
+        <div class="phrase-stage" id="phraseStage"></div>
+      `;
+      document.body.appendChild(overlay);
+      document.getElementById('phraseClose').addEventListener('click', () => this.close());
+      const pHome = document.getElementById('phraseHome');
+      if (pHome) pHome.addEventListener('click', () => this.close());
+      const bpmInput = document.getElementById('phraseBpm');
+      bpmInput.value = this.bpm;
+      bpmInput.addEventListener('change', e => this.setBpm(e.target.value));
+    },
+
+    _setState(s){
+      this.state = s;
+      if (s === 'idle') this._refreshIdle();
+      if (s === 'countdown') this._startCountdown();
+      if (s === 'rec') this._startRecording();
+      if (s === 'result') this._showResult();
+    },
+
+    _refreshIdle(){
+      const stage = document.getElementById('phraseStage');
+      if (!stage) return;
+      const beatsPerSec = this.bpm / 60;
+      const totalBeats = Math.floor(beatsPerSec * this.durationSec);
+      stage.innerHTML = `
+        <div class="phrase-idle">
+          <div class="phrase-big-num">${this.durationSec}<span>s</span></div>
+          <div class="phrase-meta">${this.bpm} BPM · ${totalBeats} beat totali</div>
+          <p class="phrase-howto">Sentirai un click di metronomo per ${this.durationSec} secondi.
+          Suona note (chitarra, fingerpicking, ecc.) IN TEMPO con i click.
+          Alla fine ti dico quanto ti sei avvicinato.</p>
+          <button class="phrase-start-btn" id="phraseStartBtn">▶ Inizia</button>
+          <div class="phrase-hint" id="phraseHint">Microfono pronto?</div>
+        </div>
+      `;
+      document.getElementById('phraseStartBtn').addEventListener('click', () => this._setState('countdown'));
+    },
+
+    _startCountdown(){
+      const stage = document.getElementById('phraseStage');
+      stage.innerHTML = `
+        <div class="phrase-countdown">
+          <div class="phrase-cd-num" id="phraseCdNum">3</div>
+          <div class="phrase-cd-lbl">Preparati…</div>
+        </div>
+      `;
+      let n = 3;
+      const tick = () => {
+        const el = document.getElementById('phraseCdNum');
+        if (!el) return;
+        el.textContent = n;
+        if (n <= 0) { this._setState('rec'); return; }
+        n--;
+        setTimeout(tick, 800);
+      };
+      tick();
+    },
+
+    async _startRecording(){
+      const stage = document.getElementById('phraseStage');
+      stage.innerHTML = `
+        <div class="phrase-rec">
+          <div class="phrase-rec-dot"></div>
+          <div class="phrase-rec-time" id="phraseRecTime">${this.durationSec}.0s</div>
+          <div class="phrase-rec-beat" id="phraseRecBeat">● ● ● ●</div>
+          <canvas class="phrase-rec-canvas" id="phraseRecCanvas" width="800" height="100"></canvas>
+          <div class="phrase-rec-onsets" id="phraseOnsets">Onset rilevati: 0</div>
+          <button class="phrase-stop-btn" id="phraseStopBtn">⏹ Stop</button>
+        </div>
+      `;
+      document.getElementById('phraseStopBtn').addEventListener('click', () => this._finishRecording());
+
+      this.onsets = [];
+      const beatInterval = 60 / this.bpm;
+      const totalBeats = Math.floor((this.durationSec / beatInterval));
+      this.beats = [];
+      for (let i = 0; i < totalBeats; i++) this.beats.push(i * beatInterval);
+
+      try {
+        await this._startMic();
+      } catch(e) {
+        const hint = document.getElementById('phraseRecTime');
+        if (hint) hint.textContent = 'Mic error: ' + (e.message || e);
+        return;
+      }
+
+      this.recStartMs = performance.now();
+      this._startMetronome(beatInterval * 1000);
+      this._recLoop();
+
+      // Auto-stop dopo durationSec
+      setTimeout(() => { if (this.state === 'rec') this._finishRecording(); }, this.durationSec * 1000 + 200);
+    },
+
+    async _startMic(){
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
+      const did = (typeof selectedAudioDeviceId !== 'undefined' ? selectedAudioDeviceId : null);
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+                 ...(did ? { deviceId: { exact: did } } : {}) }
+      });
+      const src = this.audioCtx.createMediaStreamSource(this.stream);
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 1024;
+      src.connect(this.analyser);
+      this._buf = new Float32Array(this.analyser.fftSize);
+      this._lastRms = 0;
+      this._lastOnsetMs = 0;
+    },
+
+    _stopAudio(){
+      try { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); } catch(e){}
+      try { if (this.audioCtx) this.audioCtx.close(); } catch(e){}
+      this.audioCtx = null; this.analyser = null; this.stream = null;
+    },
+
+    _startMetronome(intervalMs){
+      // Crea AudioContext separato per i click (per non interferire con detection)
+      this._clickCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const playClick = () => {
+        if (!this._clickCtx) return;
+        const t = this._clickCtx.currentTime;
+        const osc = this._clickCtx.createOscillator();
+        const gain = this._clickCtx.createGain();
+        osc.frequency.value = 1000;
+        osc.connect(gain); gain.connect(this._clickCtx.destination);
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.exponentialRampToValueAtTime(0.4, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        osc.start(t); osc.stop(t + 0.05);
+      };
+      playClick();
+      this.metronomeTimer = setInterval(playClick, intervalMs);
+    },
+    _stopMetronome(){
+      if (this.metronomeTimer) { clearInterval(this.metronomeTimer); this.metronomeTimer = null; }
+      try { if (this._clickCtx) this._clickCtx.close(); } catch(e){}
+      this._clickCtx = null;
+    },
+
+    _recLoop(){
+      if (this.state !== 'rec' || !this.analyser) return;
+      this.analyser.getFloatTimeDomainData(this._buf);
+      // Compute RMS
+      let sum = 0;
+      for (let i = 0; i < this._buf.length; i++) sum += this._buf[i] * this._buf[i];
+      const rms = Math.sqrt(sum / this._buf.length);
+      const now = performance.now();
+      const t = (now - this.recStartMs) / 1000;
+      // Onset detection: spike threshold + decay precedente
+      const THRESH = 0.04;
+      const RATIO = 1.8;     // RMS deve essere almeno RATIO volte il precedente
+      const MIN_GAP_MS = 90;  // refrattario per evitare doppi onset
+      if (rms > THRESH && rms > this._lastRms * RATIO && (now - this._lastOnsetMs) > MIN_GAP_MS) {
+        this.onsets.push({ t });
+        this._lastOnsetMs = now;
+        const oEl = document.getElementById('phraseOnsets');
+        if (oEl) oEl.textContent = `Onset rilevati: ${this.onsets.length}`;
+      }
+      this._lastRms = rms;
+      // Update UI countdown
+      const remaining = Math.max(0, this.durationSec - t).toFixed(1);
+      const tEl = document.getElementById('phraseRecTime');
+      if (tEl) tEl.textContent = `${remaining}s`;
+      // Beat indicator pulse
+      const beatInterval = 60 / this.bpm;
+      const beatIdx = Math.floor(t / beatInterval);
+      const beatEl = document.getElementById('phraseRecBeat');
+      if (beatEl) beatEl.textContent = '● '.repeat((beatIdx % 4) + 1).trim();
+      // Draw waveform pixel
+      this._drawCanvas(t, rms);
+      this.rafId = requestAnimationFrame(() => this._recLoop());
+    },
+
+    _drawCanvas(t, rms){
+      const cv = document.getElementById('phraseRecCanvas');
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+      const x = (t / this.durationSec) * cv.width;
+      const h = Math.min(cv.height, rms * cv.height * 8);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(x, (cv.height - h) / 2, 1, h);
+    },
+
+    _finishRecording(){
+      if (this.state !== 'rec') return;
+      this._stopAudio();
+      this._stopMetronome();
+      if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
+      this._setState('result');
+    },
+
+    _showResult(){
+      // Per ogni onset, trova beat più vicino + scarto
+      const matches = this.onsets.map(o => {
+        let best = null, bestDelta = Infinity;
+        for (const b of this.beats) {
+          const d = Math.abs(o.t - b);
+          if (d < bestDelta) { bestDelta = d; best = b; }
+        }
+        return { t: o.t, beat: best, deltaMs: (o.t - best) * 1000 };
+      });
+      const avgErrMs = matches.length
+        ? matches.reduce((a, m) => a + Math.abs(m.deltaMs), 0) / matches.length
+        : 0;
+      // Accuracy: 100% se errore ≤ 20ms · 0% se errore ≥ 200ms · interpolazione lineare
+      const accPct = Math.max(0, Math.min(100, 100 - (Math.max(0, avgErrMs - 20) / 1.8)));
+
+      const tableRows = matches.map((m, i) => {
+        const sign = m.deltaMs >= 0 ? '+' : '';
+        const cls = Math.abs(m.deltaMs) <= 30 ? 'good' : Math.abs(m.deltaMs) <= 80 ? 'ok' : 'late';
+        return `<tr class="${cls}"><td>${i+1}</td><td>${m.t.toFixed(2)}s</td><td>${sign}${m.deltaMs.toFixed(0)}ms</td></tr>`;
+      }).join('');
+
+      const stage = document.getElementById('phraseStage');
+      stage.innerHTML = `
+        <div class="phrase-result">
+          <div class="phrase-result-acc">
+            <div class="phrase-acc-num">${accPct.toFixed(0)}<span>%</span></div>
+            <div class="phrase-acc-lbl">Timing accuracy</div>
+          </div>
+          <div class="phrase-result-meta">
+            ${matches.length} note rilevate · errore medio <strong>${avgErrMs.toFixed(0)}ms</strong>
+          </div>
+          ${matches.length ? `
+            <table class="phrase-result-table">
+              <thead><tr><th>#</th><th>Tempo</th><th>Scarto</th></tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          ` : '<p class="phrase-empty">Nessuna nota rilevata. Volume troppo basso o microfono non collegato?</p>'}
+          <div class="phrase-actions">
+            <button class="phrase-action-btn" id="phraseRetry">↻ Riprova</button>
+            <button class="phrase-action-btn phrase-action-done" id="phraseDone">Chiudi</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('phraseRetry').addEventListener('click', () => this._setState('idle'));
+      document.getElementById('phraseDone').addEventListener('click', () => this.close());
+    },
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'p' || e.key === 'P') {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      e.preventDefault();
+      if (Phrase.active) Phrase.close(); else Phrase.open();
+    }
+    if (e.key === 'Escape' && Phrase.active) Phrase.close();
+  });
+  window.Phrase = Phrase;
 
   // ════════════════════════════════════════════════════════════
   //  ONBOARDING · sheet al primo launch
