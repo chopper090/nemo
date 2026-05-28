@@ -2672,8 +2672,28 @@
     .focus-panel-label { font-size: 8px; padding: 1px 4px; }
   }
 </style>
+<style>
+  /* Bottone "Torna a Nemo" — fisso in alto a sinistra, sempre visibile */
+  .back-to-nemo {
+    position: fixed; top: 14px; left: 14px; z-index: 9999;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface, #1c1f26); color: var(--text, #ece9e0);
+    border: 1px solid var(--border-strong, #434a57); border-radius: 999px;
+    padding: 8px 16px; font: 600 13px/1 var(--font-ui, 'Inter'); text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    transition: transform .15s, background .15s;
+  }
+  .back-to-nemo:hover { transform: translateX(-2px); background: var(--surface-2, #232730); }
+  .back-to-nemo .arr { font-size: 14px; }
+  .back-to-nemo img { width: 18px; height: 18px; border-radius: 4px; }
+</style>
 </head>
 <body>
+<a href="index.html" class="back-to-nemo" title="Torna a Nemo">
+  <span class="arr">←</span>
+  <img src="icon.svg" alt="">
+  <span>Nemo</span>
+</a>
 
 <!-- ============ STICKY TOPBAR ============ -->
 <nav class="topbar" id="topbar" aria-label="Navigazione rapida">
