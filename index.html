@@ -353,6 +353,13 @@ body.tuner-active .btn-tuner .tuner-logo-mini, body.tuner-active .btn-tuner .tun
 .chip-streak { background: transparent; border-color: var(--border); }
 .chip-league { background: transparent; border:1px solid var(--border); font-weight:600; letter-spacing:.02em }
 @media (max-width: 720px){ .chip-league{display:none} }
+/* Chip versione SW: click per force-update */
+.chip-version {
+  background: transparent; border: 1px solid var(--border); color: var(--text-subtle);
+  font: 600 10px/1 var(--font-mono); padding: 4px 8px; border-radius: 999px; cursor: pointer;
+  letter-spacing: 0;
+}
+.chip-version:hover { color: var(--accent-tab); border-color: var(--accent-tab); }
 .chip-streak::before { content: '🔥'; font-size: 12px; }
 .chip-streak.active { color: var(--streak); border-color: var(--streak); }
 .chip-goal {
@@ -3142,6 +3149,7 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
           <span class="chip-goal-bar"><span class="chip-goal-fill" id="chipGoalFill"></span></span>
           <span id="chipGoalText">0/50</span>
         </span>
+        <button class="chip chip-version" id="chipVersion" title="Click per forzare aggiornamento dalla rete (ignora cache)">v43</button>
       </div>
     </div>
   </header>
@@ -10161,12 +10169,14 @@ document.addEventListener('wheel', (e) => {
 }, { passive: false });
 
 // ─── PWA: register service worker + auto-reload on update ───
+// FIX aggiornamenti: updateViaCache:'none' → il browser NON cachea mai il file sw.js,
+// va sempre alla rete per controllare se c'è una versione nuova.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      // Check for updates every time the page loads
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+      // Forza check update immediato + ogni 30 secondi (per quando l'app resta aperta a lungo)
       reg.update().catch(() => {});
-      // When a new SW takes control, reload to use new assets
+      setInterval(() => reg.update().catch(() => {}), 30000);
       let reloaded = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (reloaded) return;
@@ -10176,6 +10186,39 @@ if ('serviceWorker' in navigator) {
     }).catch(() => {});
   });
 }
+// Espone funzione di "force update" + version indicator
+window.nemoForceUpdate = async function() {
+  if (!('serviceWorker' in navigator)) return alert('SW non supportato');
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) await r.unregister();
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map(n => caches.delete(n)));
+    alert('Cache pulita. La pagina si ricarica con la versione fresca.');
+    location.reload(true);
+  } catch(e) { alert('Errore: ' + e.message); }
+};
+// Wire chip version → leggi nome cache attivo + force update click
+window.addEventListener('DOMContentLoaded', async () => {
+  const chip = document.getElementById('chipVersion');
+  if (!chip) return;
+  chip.addEventListener('click', () => {
+    if (confirm('Forzare aggiornamento? La cache viene pulita e la pagina si ricarica con la versione più recente da GitHub.')) {
+      window.nemoForceUpdate();
+    }
+  });
+  // Mostra versione dalla cache attiva
+  try {
+    if ('caches' in window) {
+      const names = await caches.keys();
+      const nemoName = names.find(n => n.startsWith('nemo-v'));
+      if (nemoName) {
+        const m = nemoName.match(/nemo-v(\d+)/);
+        if (m) chip.textContent = 'v' + m[1];
+      }
+    }
+  } catch(e){}
+});
 
 /* ════════════════════════════════════════════════════════════
    ◐ SOLO SKIN — modulo minimal focus mode
