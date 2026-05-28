@@ -1,8 +1,8 @@
 {
   "id": "/note-trainer/?source=pwa",
-  "name": "Note Trainer — Fretboard Studio",
-  "short_name": "NoteTrainer",
-  "description": "Studio del fretboard con riconoscimento note, intervalli, accordi, scale, arpeggi. Lezioni, brani, mastery polygon, Solo Mode e Resolve.",
+  "name": "Nemo — Fretboard & Ear Training",
+  "short_name": "Nemo",
+  "description": "Allenamento chitarra: riconoscimento note, intervalli, accordi, scale, arpeggi. Lezioni, brani, mastery polygon, Solo Mode e Resolve. Premium music memory app.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./",
@@ -10,28 +10,16 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait-primary",
-  "background_color": "#15171C",
-  "theme_color": "#3B5BDB",
+  "background_color": "#18191E",
+  "theme_color": "#5840D7",
   "categories": ["education", "music"],
   "prefer_related_applications": false,
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "icon-192-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
     },
     {
       "src": "icon-512-maskable.png",
@@ -40,10 +28,16 @@
       "purpose": "maskable"
     },
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
