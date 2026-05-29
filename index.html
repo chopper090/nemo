@@ -689,6 +689,30 @@ body.ear-active .btn-ear .ear-logo-mini, body.ear-active .btn-ear .ear-logo-mini
 body.tuner-active .btn-tuner { background: var(--c-tuner) !important; color: #fff !important; border-color: var(--c-tuner) !important; }
 body.tuner-active .btn-tuner .tuner-logo-mini, body.tuner-active .btn-tuner .tuner-logo-mini b { color: #fff; }
 
+/* ─── STRUTTURALI: uniformazione dimensioni dei tasti app-mode su Nemo home
+   Solo/Solve/Ear/Tune/Lab devono avere stessa altezza e stesso footprint
+   visivo in ogni view. Larghezza minima fissa, content centrato.  */
+.btn-solo,
+.btn-resolve,
+.btn-ear,
+.btn-tuner,
+.btn-lab {
+  height: 32px !important;
+  min-width: 56px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center; justify-content: center;
+  border-radius: 999px;
+  width: auto !important;
+  flex: 0 0 auto;
+}
+.solo-logo-mini,
+.resolve-logo-mini,
+.ear-logo-mini,
+.tuner-logo-mini { font-size: 15px; }
+.btn-lab .btn-l-full,
+.btn-lab .btn-l-icon { font: 600 11px/1 'JetBrains Mono', monospace; letter-spacing: .12em; }
+
 /* XP & Streak chips */
 .chip {
   display: inline-flex; align-items: center; gap: 5px;
@@ -1591,6 +1615,19 @@ body.view-fretboard-focus .fretboard-svg { height: auto; }
 .stats-action-btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
 .stats-action-btn.danger { color: var(--hot-text); border-color: var(--hot-border); }
 .stats-action-btn.danger:hover { background: var(--hot-bg); }
+/* SRS — card Ripasso: accento verde per richiamare l'attenzione senza essere invasiva */
+.srs-review-card { border-color: color-mix(in srgb, var(--c-ear, #10b981) 45%, var(--border)); background: color-mix(in srgb, var(--c-ear, #10b981) 6%, var(--surface)); }
+.srs-review-card #btnStartReview { background: var(--c-ear, #10b981); color: #062c1f; border-color: var(--c-ear, #10b981); font-weight: 600; }
+.srs-review-card #btnStartReview:hover { filter: brightness(1.08); }
+/* Banner ripasso/recupero (sotto le view-tabs, solo in Pratica) */
+.srs-banner { display:flex; align-items:center; gap:12px; justify-content:space-between; margin:0 0 8px; padding:9px 14px; border-radius:var(--r-md); background:color-mix(in srgb, var(--c-ear,#10b981) 8%, var(--surface-2)); border:1px solid color-mix(in srgb, var(--c-ear,#10b981) 30%, var(--border)); font:500 13px/1.3 var(--font-ui); color:var(--text); }
+.srs-banner.hidden { display:none; }
+.srs-banner-msg { display:flex; align-items:center; gap:8px; min-width:0; }
+.srs-banner-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.srs-banner-cta { background:var(--c-ear,#10b981); color:#062c1f; border:0; border-radius:999px; padding:6px 12px; font:600 12px/1 var(--font-ui); cursor:pointer; white-space:nowrap; }
+.srs-banner-cta:hover { filter:brightness(1.08); }
+.srs-banner-x { background:transparent; border:0; color:var(--text-subtle); font-size:18px; cursor:pointer; width:26px; height:26px; border-radius:50%; flex-shrink:0; }
+.srs-banner-x:hover { background:rgba(255,255,255,.08); color:var(--text); }
 
 @media (max-width: 540px) {
   .stats-view { padding: 8px; gap: 12px; }
@@ -2780,7 +2817,15 @@ body.tuner-active{overflow:hidden}
 .tuner-brand-name{font:700 13px/1 'Inter',sans-serif}
 .tuner-topbar-center{justify-self:center;display:flex;align-items:center;gap:18px;min-width:0}
 .tuner-topbar-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;flex-wrap:wrap;justify-content:flex-end}
-@media (max-width:720px){.tuner-topbar-right .tuner-freq-chip{display:none}}
+@media (max-width:720px){
+  .tuner-topbar-right .tuner-freq-chip,
+  .tuner-topbar-right .tuner-device-chip,
+  .tuner-topbar-right .tuner-tuning-name{display:none}
+  .ear-topbar-right .ear-info-chip{display:none}
+  .rs-topbar-right .rs-info-chip{display:none}
+  .ear-topbar,.tuner-topbar,.rs-topbar{padding:10px 8px;gap:6px}
+  .ear-topbar-center,.tuner-topbar-center,.rs-topbar-center{gap:8px}
+}
 .tuner-title{font:300 22px/1 'Cormorant Garamond',serif;letter-spacing:.04em}
 .tuner-tuning-name{
   font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#f59e0b;
@@ -2995,6 +3040,11 @@ body.tuner-active{overflow:hidden}
 .lt-bonus-secondary{font:500 12px/1.4 var(--font-ui);color:var(--text-subtle);margin:10px 0 18px}
 .lt-actions{display:flex;gap:10px;justify-content:center;margin-top:14px}
 .lt-actions .btn{flex:1;max-width:200px}
+.lt-remediation{margin:6px 0 4px;padding:12px 14px;border-radius:var(--r-md);background:color-mix(in srgb, var(--c-ear,#10b981) 8%, var(--surface-2));border:1px solid color-mix(in srgb, var(--c-ear,#10b981) 30%, var(--border))}
+.lt-remediation-title{font:700 13px/1.3 var(--font-ui);color:var(--text);margin-bottom:4px}
+.lt-remediation p{font:400 12px/1.5 var(--font-ui);color:var(--text-muted);margin:0 0 10px}
+.lt-remediation-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lt-remediation-actions .btn{flex:1;min-width:140px;max-width:200px}
 
 /* ════════════ MASTERY POLYGON (Stats view) ════════════ */
 .mastery-card{padding:18px}
@@ -3087,15 +3137,29 @@ body.solo-mode .btn-label:hover{color:var(--solo-fg);background:rgba(255,255,255
 .btn-label.btn-label-text .btn-l-icon{display:none}
 .btn-label.btn-label-text .btn-l-full{display:inline}
 
+/* Theme toggle — icone text-presentation (ereditano il colore CSS) */
+#btnTheme .btn-l-icon,
+#btnTheme .btn-l-full{
+  font-family:'Apple Symbols','Segoe UI Symbol','Symbola',serif;
+  font-variant-emoji:text;
+  font-size:16px; line-height:1;
+}
+[data-theme="light"] #btnTheme{ color:#f5f5dc; }
+[data-theme="dark"] #btnTheme{ color:#cfd6e4; }
+[data-theme="ultra-dark"] #btnTheme{ color:#7a7f8a; }
+
 /* Mobile (<720px) e quando la barra è stretta: icon-only per stare in 1 riga */
 @media (max-width: 720px){
   .btn-label{padding:0 8px !important;height:30px;font-size:11px}
   .btn-label .btn-l-icon{display:inline;font-size:14px}
   .btn-label .btn-l-full{display:none}
-  /* Riduci anche btn-solo (logo) e btn-focus-exit per fare spazio */
-  .btn-solo{padding:0 8px !important;height:30px}
-  .solo-logo-mini{font-size:13px}
-  .header-actions{gap:4px;flex-wrap:nowrap;justify-content:flex-end;overflow:hidden}
+  /* App-mode buttons: dimensione strutturale fissa anche su mobile (non si compattano) */
+  .btn-solo,.btn-resolve,.btn-ear,.btn-tuner,.btn-lab{
+    height:30px !important;min-width:48px !important;padding:0 10px !important;
+  }
+  .solo-logo-mini,.resolve-logo-mini,.ear-logo-mini,.tuner-logo-mini{font-size:13px}
+  .header-actions{gap:4px;flex-wrap:wrap;justify-content:center}
+  .header-app-modes{flex-wrap:nowrap}
   .header-left{gap:6px;flex-wrap:nowrap;min-width:0}
   .header-left h1{font-size:15px;white-space:nowrap}
   .header-left .chip{padding:3px 8px;font-size:11px}
@@ -3557,6 +3621,23 @@ body.solo-mode .solo-setup-cta{
 body.solo-mode .solo-setup-cta:hover{filter:brightness(1.1)}
 body.solo-mode .solo-setup-cta:active{transform:scale(.98)}
 
+/* Mobile: compatta Note Trainer Setup e Workout Options per stare in viewport
+   senza scroll, lasciando i tasti superiori a dimensione standard.  */
+@media (max-width:720px){
+  body.solo-mode .solo-setup-sheet{padding:6px 2px}
+  body.solo-mode .solo-setup-section-label{padding:0 4px 3px;font-size:9px;letter-spacing:.18em}
+  body.solo-mode .solo-setup-cards{gap:4px;margin-bottom:6px}
+  body.solo-mode .solo-setup-card{padding:6px 10px;border-radius:10px}
+  body.solo-mode .solo-setup-card .ssc-label{font-size:14px}
+  body.solo-mode .solo-setup-card .ssc-value{font-size:11px}
+  body.solo-mode .solo-setup-group{margin-bottom:6px;border-radius:10px}
+  body.solo-mode .solo-setup-row{padding:6px 10px}
+  body.solo-mode .solo-setup-row .ssr-lbl{font-size:12px}
+  body.solo-mode .solo-setup-row .ssr-val{font-size:11px}
+  body.solo-mode .solo-setup-row .ssr-select{padding:3px 6px;font-size:11px;padding-right:22px}
+  body.solo-mode .solo-setup-cta{padding:9px;font-size:13px;border-radius:10px;margin-top:3px}
+}
+
 /* Quando setup-sheet è visibile, neutralizza il display "exploration" sotto */
 body.solo-mode #soloSetupSheet ~ .display-tonic,
 body.solo-mode #soloSetupSheet ~ .display-degree,
@@ -3774,6 +3855,9 @@ body.solo-mode .display:has(#soloSetupSheet) ~ .grid-stats{opacity:.4}
     <button class="viewtab" data-view="songs">🎵 Brani</button>
     <button class="viewtab" data-view="stats">📊 Stats</button>
   </div>
+
+  <!-- BANNER RIPASSO/RECUPERO — mostrato solo in view practice quando ci sono ripassi dovuti o debolezze -->
+  <div id="srsBanner" class="srs-banner hidden" role="status"></div>
 
   <!-- TOP BAR — 3 sezioni: SX (Tonica + Accordatura) · CENTRO (drill tabs) · DX (Mic + extra) -->
   <div class="grid-topbar topbar" id="topbar">
@@ -4741,7 +4825,7 @@ const BADGES = [
 // ═══════════════════════════════════════════════════════════
 //  ACCOUNT & MIGRATIONS — versione schema + profili nominati
 // ═══════════════════════════════════════════════════════════
-const SCHEMA_VERSION = 2;  // ⬆ Incrementa quando cambi la struttura dei dati
+const SCHEMA_VERSION = 3;  // ⬆ Incrementa quando cambi la struttura dei dati
 
 // Profili: ogni profilo è un set completo di progress + solo-skin opts.
 // Schema chiavi localStorage:
@@ -4785,6 +4869,27 @@ const MIGRATIONS = {
   2(p) {
     if (!p.unlockedSongs) p.unlockedSongs = {};
     if (!p.lastBackup) p.lastBackup = null;
+  },
+  // v2 → v3: motore di apprendimento — loopState + backfill SRS sui record stat esistenti
+  3(p) {
+    if (p.loopState === undefined) p.loopState = null;
+    const cats = [p.stats && p.stats.theory, p.stats && p.stats.practice];
+    for (const cat of cats) {
+      if (!cat) continue;
+      for (const k of Object.keys(cat)) {
+        const s = cat[k];
+        if (s && s.seen && !s.srs) {
+          const acc = s.correct / s.seen;
+          s.srs = {
+            reps: acc >= 0.8 ? 2 : 0,
+            interval: acc >= 0.8 ? 3 : 1,
+            ease: 2.3,
+            due: s.lastSeen || Date.now(),
+            lapses: 0,
+          };
+        }
+      }
+    }
   },
 };
 
@@ -4838,6 +4943,7 @@ const progress = (function loadProgress() {
     badges: {},        // { badgeId: { unlockedAt } }
     weeklyXp: {},      // { 'YYYY-Www': xpEarnedThisWeek } — per le leghe
     unlockedSongs: {}, // { songId: { unlockedAt, viaXp? } } — brani sbloccati per "diritto" o acquisto XP
+    loopState: null,   // { lessonId, stage } — stato del loop guidato Lezione→Quiz→Pratica (Fase 3)
   };
   if (!stored) {
     def.schemaVersion = SCHEMA_VERSION;
@@ -4888,6 +4994,26 @@ function recordStat(category, key, isCorrect, elapsed) {
   if (isCorrect) s.correct++;
   s.lastSeen = Date.now();
   if (typeof elapsed === 'number') s.totalTime = (s.totalTime || 0) + elapsed;
+  // ── SRS (SM-2-lite): aggiorna scheduling di ripasso. Scrive SOLO su s.srs,
+  //    mai su seen/correct/totalTime (letti dalle formule SP). O(1), no scan. ──
+  {
+    const fast = typeof elapsed === 'number' && elapsed < 4;
+    const r = s.srs || { reps: 0, interval: 0, ease: 2.3, due: 0, lapses: 0 };
+    if (isCorrect) {
+      r.reps++;
+      if (r.reps === 1) r.interval = 1;
+      else if (r.reps === 2) r.interval = fast ? 4 : 3;
+      else r.interval = Math.min(180, Math.round(r.interval * r.ease));
+      if (fast) r.ease = Math.min(2.8, r.ease + 0.05);
+    } else {
+      if (r.reps >= 2) r.lapses++;   // lapse reale, non prima esposizione
+      r.reps = 0;
+      r.interval = 1;
+      r.ease = Math.max(1.3, r.ease - 0.20);
+    }
+    r.due = Date.now() + r.interval * 86400000;
+    s.srs = r;
+  }
   progress.stats[category][key] = s;
   // ── Mastery Polygon: riconcilia SP + controlla badge ──
   if (typeof reconcileSP === 'function') reconcileSP();
@@ -5052,6 +5178,184 @@ function updateWeeklyXp(amount) {
   const w = weekStr();
   progress.weeklyXp[w] = (progress.weeklyXp[w] || 0) + amount;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  SRS — Spaced Repetition (motore di apprendimento, Fase 1)
+//  Surface dei concetti "dovuti" (srs.due <= now) su theory + practice.
+//  L'update dello scheduling è in recordStat (O(1)). Qui SOLO query read-only.
+//  ⚠ getDue/dueCount sono O(#concetti): chiamarli al render di una view,
+//    MAI dentro recordStat (hot-path).
+// ═══════════════════════════════════════════════════════════
+const SRS = {
+  // Ritorna i concetti dovuti, ordinati per ritardo (più overdue prima) poi per lapses.
+  // Ogni voce: { cat, key, stat, overdue (ms), lapses }
+  getDue(limit = 50) {
+    ensureStats();
+    const now = Date.now();
+    const out = [];
+    for (const cat of ['theory', 'practice']) {
+      const bucket = progress.stats[cat] || {};
+      for (const key of Object.keys(bucket)) {
+        const stat = bucket[key];
+        const srs = stat && stat.srs;
+        if (!srs || !srs.due) continue;
+        if (srs.due <= now) {
+          out.push({ cat, key, stat, overdue: now - srs.due, lapses: srs.lapses || 0 });
+        }
+      }
+    }
+    out.sort((a, b) => (b.overdue - a.overdue) || (b.lapses - a.lapses));
+    return limit ? out.slice(0, limit) : out;
+  },
+  // Conteggio leggero (stesso scan, senza materializzare/ordinare l'array completo).
+  dueCount() {
+    ensureStats();
+    const now = Date.now();
+    let n = 0;
+    for (const cat of ['theory', 'practice']) {
+      const bucket = progress.stats[cat] || {};
+      for (const key of Object.keys(bucket)) {
+        const srs = bucket[key] && bucket[key].srs;
+        if (srs && srs.due && srs.due <= now) n++;
+      }
+    }
+    return n;
+  },
+  // Solo i concetti theory dovuti (per avviare un run Theory ristretto).
+  getDueTheoryKeys(limit = 50) {
+    return this.getDue(0).filter(d => d.cat === 'theory').slice(0, limit).map(d => d.key);
+  },
+};
+window.SRS = SRS;
+
+// ═══════════════════════════════════════════════════════════
+//  REMEDIATION — recupero guidato sugli errori (Fase 2)
+//  Rileva i concetti su cui l'utente fatica (lapse alti o accuracy bassa)
+//  e li mappa alla lezione / modalità Theory / pilastro giusti.
+//  Query read-only: chiamare al render, mai nell'hot-path di recordStat.
+// ═══════════════════════════════════════════════════════════
+const REMEDIATION = { minSeen: 4, lowAcc: 0.5, minLapses: 2 };
+const Remediation = {
+  // Concetti che meritano recupero, ordinati per gravità (lapses poi debolezza).
+  triggers(limit = 12) {
+    ensureStats();
+    const out = [];
+    for (const cat of ['theory', 'practice']) {
+      const bucket = progress.stats[cat] || {};
+      for (const key of Object.keys(bucket)) {
+        const s = bucket[key];
+        if (!s || !s.seen) continue;
+        const acc = s.correct / s.seen;
+        const lapses = (s.srs && s.srs.lapses) || 0;
+        const trig = lapses >= REMEDIATION.minLapses ||
+                     (s.seen >= REMEDIATION.minSeen && acc < REMEDIATION.lowAcc);
+        if (trig) out.push({ cat, key, seen: s.seen, acc, lapses, weakness: 1 - acc });
+      }
+    }
+    out.sort((a, b) => (b.lapses - a.lapses) || (b.weakness - a.weakness));
+    return limit ? out.slice(0, limit) : out;
+  },
+  // generator (prefisso del conceptKey) → primo FOCUS_MODE che lo contiene (esclusi mixed/warmup).
+  _modeForGenerator(gen) {
+    for (const [mkey, m] of Object.entries(FOCUS_MODES)) {
+      if (mkey === 'mixed' || mkey === 'warmup') continue;
+      if (m.generators && m.generators.includes(gen)) return mkey;
+    }
+    return null;
+  },
+  // pilastro di appartenenza di un conceptKey (via conceptPrefixes).
+  _pillarFor(key) {
+    for (const [pk, p] of Object.entries(PILLARS)) {
+      if (p.conceptPrefixes.some(pre => key.startsWith(pre))) return pk;
+    }
+    return null;
+  },
+  // fallback: modalità Theory di default per pilastro (per concetti di pratica puri).
+  _pillarDefaultMode: {
+    fretboard: 'degrees_basic', intervals: 'semitones', chords: 'chord_structure',
+    scales: 'degrees_basic', earRelative: 'ear_interval_rel', earAbsolute: 'ear_note_absolute',
+    harmony: 'reverse', extensions: 'extensions',
+  },
+  // prima lezione che insegna una data modalità Theory (reverse index su LESSONS).
+  _lessonForMode(mode) {
+    if (!mode || typeof LESSONS === 'undefined') return null;
+    const l = LESSONS.find(L => L.relatedTheoryMode === mode);
+    return l ? l.id : null;
+  },
+  // Suggerimento principale: cosa ripassare e come.
+  suggest() {
+    const trig = this.triggers(12);
+    if (!trig.length) return null;
+    const top = trig[0];
+    const gen = String(top.key).split(':')[0];
+    const pillar = this._pillarFor(top.key);
+    const theoryMode = this._modeForGenerator(gen) ||
+                       (pillar && this._pillarDefaultMode[pillar]) || 'warmup';
+    const restrictGenerators = [...new Set(
+      trig.filter(t => t.cat === 'theory').map(t => String(t.key).split(':')[0])
+    )];
+    return {
+      concepts: trig,
+      count: trig.length,
+      pillar,
+      theoryMode,
+      restrictGenerators,
+      lessonId: this._lessonForMode(theoryMode),
+    };
+  },
+  // Avvia il recupero come run Theory mirato (ristretto ai generatori deboli, o al mode).
+  start(suggestion) {
+    const sug = suggestion || this.suggest();
+    if (!sug) { setView('theory'); Theory.setMode('warmup'); return; }
+    setView('theory');
+    if (sug.restrictGenerators && sug.restrictGenerators.length) {
+      Theory.startReview(sug.restrictGenerators.map(g => g + ':'));
+    } else {
+      Theory.setMode(sug.theoryMode);
+    }
+  },
+};
+window.Remediation = Remediation;
+
+// Banner Ripasso/Recupero sotto le view-tabs (solo in Pratica). Non invasivo, chiudibile.
+let _srsBannerDismissed = false;
+function renderReviewBanner() {
+  const el = document.getElementById('srsBanner');
+  if (!el) return;
+  if (state.view !== 'practice' || _srsBannerDismissed) { el.classList.add('hidden'); return; }
+  const due = (typeof SRS !== 'undefined') ? SRS.dueCount() : 0;
+  const sug = (typeof Remediation !== 'undefined') ? Remediation.suggest() : null;
+  let msg, cta, mode;
+  if (due > 0) {
+    msg = `🔁 <strong>${due}</strong> ${due === 1 ? 'concetto da ripassare' : 'concetti da ripassare'} oggi`;
+    cta = 'Ripassa'; mode = 'review';
+  } else if (sug) {
+    msg = `💪 Hai <strong>${sug.count}</strong> ${sug.count === 1 ? 'punto debole' : 'punti deboli'} da consolidare`;
+    cta = 'Allena'; mode = 'remediate';
+  } else {
+    el.classList.add('hidden'); return;
+  }
+  el.innerHTML = `
+    <div class="srs-banner-msg">${msg}</div>
+    <div class="srs-banner-actions">
+      <button class="srs-banner-cta" id="srsBannerCta">${cta}</button>
+      <button class="srs-banner-x" id="srsBannerX" title="Nascondi">×</button>
+    </div>`;
+  el.classList.remove('hidden');
+  el.querySelector('#srsBannerCta').addEventListener('click', () => {
+    if (mode === 'review') {
+      const keys = SRS.getDueTheoryKeys();
+      setView('theory');
+      Theory.startReview(keys);
+    } else {
+      Remediation.start(sug);
+    }
+  });
+  el.querySelector('#srsBannerX').addEventListener('click', () => {
+    _srsBannerDismissed = true; el.classList.add('hidden');
+  });
+}
+window.renderReviewBanner = renderReviewBanner;
 
 // Controllo badge: se un check() ritorna true e il badge non è ancora sbloccato → sblocca + XP + toast.
 function checkBadges() {
@@ -6278,6 +6582,8 @@ function setView(v) {
       el.style.pointerEvents = isPractice ? '' : 'none';
     }
   });
+  // Banner ripasso/recupero (solo in Pratica)
+  if (typeof renderReviewBanner === 'function') renderReviewBanner();
 }
 document.querySelectorAll('.viewtab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
 
@@ -9221,6 +9527,15 @@ const LessonTest = {
           <div>Soglia: ${(lvl.pass*100).toFixed(0)}%</div>
         </div>
         ${firstPass ? `<div class="lt-bonus">+${lvl.xp} XP bonus 🎉</div>` : (passed ? `<div class="lt-bonus-secondary">Già passato in precedenza — nessun bonus XP</div>` : '')}
+        ${!passed ? `
+        <div class="lt-remediation">
+          <div class="lt-remediation-title">💡 Consolida prima di riprovare</div>
+          <p>Rivedi la lezione e allena i concetti a orecchio/quiz: il test diventa più facile.</p>
+          <div class="lt-remediation-actions">
+            <button class="btn" id="ltReviewLesson">📖 Rivedi la lezione</button>
+            ${this.lesson && this.lesson.relatedTheoryMode ? `<button class="btn btn-accent" id="ltTrainConcepts">🎯 Allena i concetti</button>` : ''}
+          </div>
+        </div>` : ''}
         <div class="lt-actions">
           <button class="btn" id="ltRetry">Riprova</button>
           <button class="btn btn-accent" id="ltDone">Chiudi</button>
@@ -9230,6 +9545,15 @@ const LessonTest = {
     overlay.querySelector('#ltClose').addEventListener('click', () => this.close());
     overlay.querySelector('#ltRetry').addEventListener('click', () => this.startTest(this.level));
     overlay.querySelector('#ltDone').addEventListener('click', () => { this.close(); if (Learn.renderLesson) Learn.renderLesson(this.lesson); });
+    const ltReviewLesson = overlay.querySelector('#ltReviewLesson');
+    if (ltReviewLesson) ltReviewLesson.addEventListener('click', () => { this.close(); if (Learn.renderLesson) Learn.renderLesson(this.lesson); });
+    const ltTrainConcepts = overlay.querySelector('#ltTrainConcepts');
+    if (ltTrainConcepts) ltTrainConcepts.addEventListener('click', () => {
+      const mode = this.lesson && this.lesson.relatedTheoryMode;
+      this.close();
+      setView('theory');
+      if (mode && typeof Theory !== 'undefined') Theory.setMode(mode);
+    });
   },
 };
 
@@ -9248,6 +9572,9 @@ const Theory = {
   // _restrictToConcepts: array opzionale di chord names / sem / degree label per filtrare ulteriormente.
   _difficulty: 3,
   _restrictToConcepts: null,
+  // Set transitorio di generatori per un run di Ripasso SRS (non persistito).
+  // Quando valorizzato, next() pesca SOLO da questi generatori (adaptive).
+  _reviewGenerators: null,
   // Toggle UI: se true, in modalità Theory libera filtra il pool ai concetti
   // appresi (unione delle lessons completate). Indipendente da LessonTest.
   onlyKnown: localStorage.getItem('nt-theory-only-known') === '1',
@@ -9321,8 +9648,19 @@ const Theory = {
 
   setMode(m) {
     this.focusMode = m;
+    this._reviewGenerators = null;  // scelta esplicita di un mode → esce dal Ripasso
     localStorage.setItem('nt-theory-mode', m);
     this.next();
+  },
+
+  // Avvia un run di Ripasso SRS limitato ai generatori che possiedono i concetti dovuti.
+  // conceptKeys: array di chiavi theory (es. 'intervalByEar:0:7') — il prefisso è il generatore.
+  startReview(conceptKeys) {
+    const allGens = FOCUS_MODES.mixed.generators;
+    const gens = [...new Set((conceptKeys || []).map(k => String(k).split(':')[0]))]
+      .filter(g => allGens.includes(g) && typeof this[g] === 'function');
+    this._reviewGenerators = gens.length ? gens : null;  // fallback: pool completo adattivo
+    this.start();
   },
 
   setOnlyKnown(v) {
@@ -9346,7 +9684,9 @@ const Theory = {
   },
   next() {
     this.selectedAnswer = null;
-    const mode = FOCUS_MODES[this.focusMode] || FOCUS_MODES.mixed;
+    const mode = this._reviewGenerators
+      ? { generators: this._reviewGenerators, adaptive: true }
+      : (FOCUS_MODES[this.focusMode] || FOCUS_MODES.mixed);
     // Adaptive picker: in modalità warmup (e a volte in misto) pesa i generatori
     // in base alla debolezza dell'utente — concetti con bassa accuracy salgono in probabilità
     let type;
@@ -10086,6 +10426,20 @@ const Stats = {
           <span class="weak-item-stats">${s.correct}/${s.seen} · ${(s.accuracy*100).toFixed(0)}%</span>
         </div>`).join('');
 
+    // ── Ripasso SRS: concetti theory dovuti oggi (Fase 1: solo theory) ──
+    const dueReviewKeys = (typeof SRS !== 'undefined') ? SRS.getDueTheoryKeys() : [];
+    const dueReviewCount = dueReviewKeys.length;
+    const reviewCardHtml = dueReviewCount > 0 ? `
+      <div class="stats-card srs-review-card">
+        <div class="stats-card-title">🔁 Ripasso — ${dueReviewCount} ${dueReviewCount === 1 ? 'concetto' : 'concetti'} da rivedere</div>
+        <p style="font:400 12px/1.5 var(--font-ui);color:var(--text-muted);margin:0 0 10px;text-align:center;">
+          La ripetizione spaziata riporta a galla ciò che stai per dimenticare. Un breve ripasso ora consolida la memoria a lungo termine.
+        </p>
+        <div style="text-align:center;">
+          <button class="stats-action-btn" id="btnStartReview">🔁 Inizia ripasso</button>
+        </div>
+      </div>` : '';
+
     dom.statsView.innerHTML = `
       <div style="text-align:center;">
         <h2 style="font:700 22px/1.2 var(--font-ui);margin-bottom:4px;">📊 Statistiche</h2>
@@ -10093,6 +10447,8 @@ const Stats = {
           I tuoi progressi, punti deboli e forti. L'app adatta i quiz in modalità <strong>🎲 Misto</strong> e <strong>🔥 Allenamento del giorno</strong>.
         </p>
       </div>
+
+      ${reviewCardHtml}
 
       <!-- ── MASTERY POLYGON ── -->
       <div class="stats-card mastery-card">
@@ -10179,6 +10535,12 @@ const Stats = {
     `;
     document.getElementById('btnStartWarmup').addEventListener('click', () => {
       Theory.setMode('warmup'); setView('theory');
+    });
+    const btnStartReview = document.getElementById('btnStartReview');
+    if (btnStartReview) btnStartReview.addEventListener('click', () => {
+      const keys = SRS.getDueTheoryKeys();
+      setView('theory');          // renderIdle()
+      Theory.startReview(keys);   // sostituisce con la prima domanda del ripasso
     });
     document.getElementById('btnExportProgress').addEventListener('click', exportProgress);
     document.getElementById('btnImportProgress').addEventListener('click', () => dom.importProgressFile.click());
@@ -10568,9 +10930,11 @@ dom.btnNotation.addEventListener('click', () => {
   } catch(e){ console.warn('notation re-render:', e); }
 });
 // Theme cycle: light → dark → ultra-dark → light
+// Icone con variation selector U+FE0E (text presentation) per ereditare il color CSS
+// e non essere renderizzate come emoji a colori (giallo ocra di sistema).
 const THEME_CYCLE = ['light', 'dark', 'ultra-dark'];
-const THEME_META = { light:'☀ Light', dark:'🌙 Dark', 'ultra-dark':'⚫ Ultra-dark' };
-const THEME_ICON = { light:'☀', dark:'🌙', 'ultra-dark':'⚫' };
+const THEME_META = { light:'☀ Light', dark:'☾ Dark', 'ultra-dark':'🌕 Deep Dark' };
+const THEME_ICON = { light:'☀︎', dark:'☾︎', 'ultra-dark':'🌕' };
 function applyThemeMeta(theme) {
   const meta = THEME_META[theme] || theme;
   const icon = THEME_ICON[theme] || '☀';
