@@ -1,8 +1,10 @@
 // Service Worker — Nemo PWA
 // Strategia: network-first per HTML (sempre fresh), cache-first per asset statici.
-const CACHE = 'nemo-v57-mobile-2-row-header-nemo-fix';
+const CACHE = 'nemo-v65-lick';
 const STATIC_ASSETS = [
   './manifest.json',
+  './styles.css',
+  './data.js',
   './icon.svg',
   './icon-192.png',
   './icon-512.png',

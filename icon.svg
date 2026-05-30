@@ -1,61 +1,13 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#00DCFF"/>
-      <stop offset="1" stop-color="#AA00DC"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7355FF"/>
+      <stop offset="1" stop-color="#4D2FCF"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#18191E"/>
-
-  <!-- Orecchio wireframe (3 archi concentrici) -->
-  <g fill="none" stroke="url(#grad)" stroke-linecap="round">
-    <!-- Outer rim -->
-    <path d="M 130 165
-             Q 130 100, 225 90
-             Q 360 90, 380 200
-             Q 380 320, 290 380
-             Q 200 410, 145 365
-             Q 100 320, 120 245
-             Q 130 195, 130 165 Z"
-          stroke-width="6" opacity="0.95"/>
-    <!-- Mid -->
-    <path d="M 165 195
-             Q 175 145, 245 140
-             Q 335 145, 345 220
-             Q 345 305, 275 345
-             Q 215 365, 175 335
-             Q 145 305, 155 250 Z"
-          stroke-width="4" opacity="0.85"/>
-    <!-- Inner (ear canal) -->
-    <path d="M 200 235
-             Q 215 195, 265 195
-             Q 305 200, 310 245
-             Q 305 295, 260 310
-             Q 220 305, 200 275 Z"
-          stroke-width="3" opacity="0.75"/>
-    <!-- Anti-elice detail -->
-    <path d="M 230 270 Q 250 250, 275 270 Q 275 290, 250 290 Q 230 285, 230 270 Z"
-          stroke-width="2" opacity="0.65"/>
-  </g>
-
-  <!-- Linee wireframe diagonali -->
-  <g stroke="url(#grad)" stroke-width="1.2" opacity="0.45">
-    <line x1="155" y1="155" x2="270" y2="240"/>
-    <line x1="200" y1="120" x2="290" y2="225"/>
-    <line x1="255" y1="105" x2="305" y2="225"/>
-    <line x1="315" y1="125" x2="305" y2="240"/>
-    <line x1="360" y1="180" x2="295" y2="260"/>
-    <line x1="370" y1="245" x2="285" y2="280"/>
-    <line x1="345" y1="310" x2="275" y2="295"/>
-  </g>
-
-  <!-- Nota musicale (croma) -->
-  <g fill="url(#grad)">
-    <!-- Stem -->
-    <rect x="340" y="170" width="6" height="135" rx="3"/>
-    <!-- Flag -->
-    <path d="M 346 170 Q 405 195, 410 245 Q 405 280, 380 295 Q 395 270, 390 245 Q 380 215, 346 205 Z"/>
-    <!-- Note head (ellisse inclinata) -->
-    <ellipse cx="330" cy="310" rx="22" ry="16" transform="rotate(-22 330 310)"/>
-  </g>
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#bg)"/>
+  <path d="M 152 384 L 152 128 L 206 128 L 206 282 L 306 128 L 360 128 L 360 384 L 306 384 L 306 230 L 206 384 Z" fill="#ECE9E0"/>
+  <path d="M 206 282 Q 230 250, 256 282 T 306 282 Q 306 282, 306 230" fill="none" stroke="#FFB800" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="206" cy="282" r="5" fill="#FFB800"/>
+  <circle cx="306" cy="230" r="5" fill="#FFB800"/>
 </svg>
