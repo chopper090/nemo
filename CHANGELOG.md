@@ -10,6 +10,23 @@ Branch `legacy-v1` = versione precedente archiviata (pre-cleanup massivo).
 
 ---
 
+## v2.02.00 — 2026-05-30
+Minor: espansione modulo Lick + fix layout mobile + ripristino `data.js`.
+
+### Lick (libreria)
+- Database lick ampliato **da 8 a 31**, in 9 categorie: Pentatonica, Scale & Modi (i 7 modi della maggiore), Legato, Blues, Bending, Sweep, Arpeggi, Alternate
+- **Trasposizione tonalità** dal vivo (◀ / ▶ + reset) con tablatura, manico e playback aggiornati insieme
+- Overlay **"scala sul manico"**: mostra l'intera scala attorno alle note del lick
+- **Sidebar elenco lick collassabile** (stato persistito)
+- Nuova tecnica **mezzo-bend (½)**; ogni lick ha descrizione didattica
+
+### Logo
+- Nuovo logo **Nemo "N"** (set A1) su tutte le icone (app, PWA, transparent, with-name)
+
+### Fix
+- **Layout mobile** del modulo Lick: risolte sovrapposizioni dei pulsanti e testo tagliato nella topbar (≤720px)
+- Aggiunto **`data.js`** (tabelle didattiche LESSONS/LEVELS) che mancava nel deploy → Apprendi/Percorso ora completi
+
 ## v2.00.00 — 2026-05-28
 Major: cleanup + UX + adaptive difficulty (cumulativo da 3 sessioni di lavoro).
 

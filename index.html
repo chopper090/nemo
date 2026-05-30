@@ -178,7 +178,7 @@ JS  <script>  (~3420-12860)
           <span class="chip-goal-bar"><span class="chip-goal-fill" id="chipGoalFill"></span></span>
           <span id="chipGoalText">0/50</span>
         </span>
-        <button class="chip chip-version" id="chipVersion" title="Click per forzare aggiornamento dalla rete">v65</button>
+        <button class="chip chip-version" id="chipVersion" title="Click per forzare aggiornamento dalla rete">v67</button>
       </div>
     </div>
     <!-- CENTRO · Funzioni app principali (sølo, sølve, ear, lab) -->
@@ -9540,16 +9540,39 @@ window.addEventListener('DOMContentLoaded', async () => {
   const LICK_CATEGORIES = [
     { id: 'all',        label: 'Tutti',        ico: '∿' },
     { id: 'pentatonic', label: 'Pentatonica',  ico: '⬡' },
+    { id: 'modes',      label: 'Scale & Modi', ico: '≋' },
     { id: 'legato',     label: 'Legato',       ico: '⌒' },
     { id: 'blues',      label: 'Blues',        ico: '♭' },
     { id: 'bending',    label: 'Bending',      ico: '↗' },
-    { id: 'modes',      label: 'Scale & Modi', ico: '≋' },
     { id: 'sweep',      label: 'Sweep',        ico: '⟋' },
+    { id: 'arpeggi',    label: 'Arpeggi',      ico: '◇' },
     { id: 'picking',    label: 'Alternate',    ico: '⇅' },
   ];
 
   // Legenda tecniche (codici usati in note.t)
-  const LICK_TECH = { h: 'h', p: 'p', sl: 'sl', b: 'b', br: 'b/r', '~': '~' };
+  const LICK_TECH = { h: 'h', p: 'p', sl: 'sl', b: 'b', bh: '½', br: 'b/r', '~': '~' };
+
+  // Pitch-class della scala/arpeggio (relativi alla tonica) — per overlay manico + auto-verifica
+  const SCALE_PCS = {
+    'Pentatonica minore':     [0, 3, 5, 7, 10],
+    'Pentatonica maggiore':   [0, 2, 4, 7, 9],
+    'Scala blues':            [0, 3, 5, 6, 7, 10],
+    'Scala maggiore':         [0, 2, 4, 5, 7, 9, 11],
+    'Modo ionico':            [0, 2, 4, 5, 7, 9, 11],
+    'Modo dorico':            [0, 2, 3, 5, 7, 9, 10],
+    'Modo frigio':            [0, 1, 3, 5, 7, 8, 10],
+    'Modo lidio':             [0, 2, 4, 6, 7, 9, 11],
+    'Modo misolidio':         [0, 2, 4, 5, 7, 9, 10],
+    'Modo eolio':             [0, 2, 3, 5, 7, 8, 10],
+    'Modo locrio':            [0, 1, 3, 5, 6, 8, 10],
+    'Minore armonica':        [0, 2, 3, 5, 7, 8, 11],
+    'Arpeggio maggiore':      [0, 4, 7],
+    'Arpeggio minore':        [0, 3, 7],
+    'Arpeggio maj7':          [0, 4, 7, 11],
+    'Arpeggio min7':          [0, 3, 7, 10],
+    'Arpeggio dom7':          [0, 4, 7, 10],
+    // 'Cromatica (esercizio)' → nessun vincolo (overlay/verifica disattivati)
+  };
 
   // Database lick. Ogni nota: {s:corda 0-5, f:tasto, d:durata in beat, t:tecnica}
   // 'h'=hammer-on '~'=vibrato 'p'=pull-off 'sl'=slide 'b'=bend(intero) 'br'=bend&release
@@ -9643,6 +9666,236 @@ window.addEventListener('DOMContentLoaded', async () => {
         {s:0,f:5,d:.25},{s:0,f:6,d:.25},{s:0,f:7,d:.25},{s:0,f:8,d:.5},
       ],
     },
+
+    // ─────────── PENTATONICA (altre posizioni / maggiore) ───────────
+    {
+      id: 'pent-am-box2', cat: 'pentatonic', title: 'Pentatonica La min — Box 2 (pos. VII)',
+      key: 9, scale: 'Pentatonica minore', diff: 2, bpm: 96, tags: ['box 2', 'pos. VII'],
+      desc: 'La <b>seconda posizione</b> della pentatonica minore di La, collegata alla Box 1. Imparare le 5 box e come si incastrano è il primo passo per uscire dalla “gabbia” del 5° tasto e suonare su tutto il manico.',
+      notes: [
+        {s:5,f:8,d:.5},{s:5,f:10,d:.5},{s:4,f:7,d:.5},{s:4,f:10,d:.5},
+        {s:3,f:7,d:.5},{s:3,f:10,d:.5},{s:2,f:7,d:.5},{s:2,f:9,d:.5},
+        {s:1,f:8,d:.5},{s:1,f:10,d:.5},{s:0,f:8,d:.5},{s:0,f:10,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'pent-cmaj', cat: 'pentatonic', title: 'Pentatonica Do maggiore — frase melodica',
+      key: 0, scale: 'Pentatonica maggiore', diff: 1, bpm: 100, tags: ['maggiore', 'melodia'],
+      desc: 'La <b>pentatonica maggiore</b> ha lo stesso “stampo” della minore ma centrata su una tonica maggiore: suono brillante, country/pop. Qui in Do: nota come risolve sereno sulla tonica, a differenza della tensione della minore.',
+      notes: [
+        {s:2,f:5,d:.5},{s:2,f:7,d:.5},{s:1,f:5,d:.5},{s:1,f:8,d:.5},
+        {s:0,f:5,d:.5},{s:0,f:8,d:.5},{s:0,f:5,d:.5},{s:1,f:8,d:.5},
+        {s:1,f:5,d:.5},{s:2,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'pent-cascade', cat: 'pentatonic', title: 'Pentatonica — cascata tra posizioni (slide)',
+      key: 9, scale: 'Pentatonica minore', diff: 2, bpm: 104, tags: ['shift', 'slide'],
+      desc: 'Collega due posizioni con uno <b>slide</b> sul cantino: il modo più musicale per spostarsi lungo il manico senza “saltare” a scatti. Esercizio chiave per la fluidità orizzontale.',
+      notes: [
+        {s:4,f:7,d:.5},{s:3,f:5,d:.5},{s:3,f:7,d:.5},{s:2,f:5,d:.5},
+        {s:2,f:7,d:.5},{s:1,f:5,d:.5},{s:1,f:8,d:.5},{s:0,f:5,d:.5},
+        {s:0,f:8,d:.5,t:'sl'},{s:0,f:12,d:1,t:'~'},
+      ],
+    },
+
+    // ─────────── SCALE & MODI (i 7 modi della maggiore) ───────────
+    {
+      id: 'mode-c-ionian', cat: 'modes', title: 'Ionico — scala maggiore (Do)',
+      key: 0, scale: 'Scala maggiore', diff: 1, bpm: 100, tags: ['ionico', 'fondamentale'],
+      desc: 'La <b>scala maggiore</b> (modo ionico), la madre di tutte le scale: Do Re Mi Fa Sol La Si. Tutti gli altri modi sono questa scala partendo da gradi diversi. Memorizzala come riferimento assoluto.',
+      notes: [
+        {s:4,f:3,d:.5},{s:4,f:5,d:.5},{s:3,f:2,d:.5},{s:3,f:3,d:.5},
+        {s:3,f:5,d:.5},{s:2,f:2,d:.5},{s:2,f:4,d:.5},{s:2,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-d-dorian-2', cat: 'modes', title: 'Dorico — colore min con 6ª maggiore (Re)',
+      key: 2, scale: 'Modo dorico', diff: 2, bpm: 100, tags: ['dorico', 'minore'],
+      desc: 'Il <b>dorico</b> è un minore con la 6ª <b>maggiore</b>: suono minore ma “aperto”, jazz/fusion e rock modale (Santana). La nota chiave è il SI naturale (6ª) — la trovi suonando un minore e alzando la 6ª.',
+      notes: [
+        {s:4,f:5,d:.5},{s:4,f:7,d:.5},{s:3,f:3,d:.5},{s:3,f:5,d:.5},
+        {s:3,f:7,d:.5},{s:2,f:4,d:.5},{s:2,f:5,d:.5},{s:2,f:7,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-e-phrygian', cat: 'modes', title: 'Frigio — colore “spagnolo” (Mi)',
+      key: 4, scale: 'Modo frigio', diff: 2, bpm: 96, tags: ['frigio', 'flamenco'],
+      desc: 'Il <b>frigio</b> è un minore con la 2ª <b>minore</b> (b2): suono cupo, spagnolo/flamenco e metal. Il FA subito dopo il MI è la nota che dà tutto il colore — ascolta quella tensione.',
+      notes: [
+        {s:5,f:0,d:.5},{s:5,f:1,d:.5},{s:5,f:3,d:.5},{s:4,f:0,d:.5},
+        {s:4,f:2,d:.5},{s:4,f:3,d:.5},{s:3,f:0,d:.5},{s:3,f:2,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-c-lydian', cat: 'modes', title: 'Lidio — colore sognante #4 (Do)',
+      key: 0, scale: 'Modo lidio', diff: 2, bpm: 100, tags: ['lidio', '#4'],
+      desc: 'Il <b>lidio</b> è un maggiore con la 4ª <b>aumentata</b> (#4): suono etereo, “da colonna sonora” (Vai, Satriani). Il FA# è la nota magica: prova a tenerla sospesa sopra un accordo di Do.',
+      notes: [
+        {s:4,f:3,d:.5},{s:4,f:5,d:.5},{s:3,f:2,d:.5},{s:3,f:4,d:.5},
+        {s:3,f:5,d:.5},{s:2,f:2,d:.5},{s:2,f:4,d:.5},{s:2,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-g-mixolydian', cat: 'modes', title: 'Misolidio — dominante, b7 (Sol)',
+      key: 7, scale: 'Modo misolidio', diff: 2, bpm: 100, tags: ['misolidio', 'dominante'],
+      desc: 'Il <b>misolidio</b> è un maggiore con la 7ª <b>minore</b> (b7): il suono degli accordi di <b>dominante</b> (7), blues-rock e funk. Il FA naturale su una tonalità di Sol è la firma — niente sensibile, tutto “groove”.',
+      notes: [
+        {s:5,f:3,d:.5},{s:5,f:5,d:.5},{s:4,f:2,d:.5},{s:4,f:3,d:.5},
+        {s:4,f:5,d:.5},{s:3,f:2,d:.5},{s:3,f:3,d:.5},{s:3,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-a-aeolian', cat: 'modes', title: 'Eolio — minore naturale (La)',
+      key: 9, scale: 'Modo eolio', diff: 1, bpm: 100, tags: ['eolio', 'minore naturale'],
+      desc: 'L’<b>eolio</b> è la <b>scala minore naturale</b>: il suono “triste” di default del minore (rock, pop, metal). Rispetto al dorico ha la 6ª minore (FA naturale invece di FA#) — confrontali per sentire la differenza.',
+      notes: [
+        {s:5,f:5,d:.5},{s:5,f:7,d:.5},{s:5,f:8,d:.5},{s:4,f:5,d:.5},
+        {s:4,f:7,d:.5},{s:4,f:8,d:.5},{s:3,f:5,d:.5},{s:3,f:7,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'mode-b-locrian', cat: 'modes', title: 'Locrio — il più instabile, b5 (Si)',
+      key: 11, scale: 'Modo locrio', diff: 3, bpm: 96, tags: ['locrio', 'semidiminuito'],
+      desc: 'Il <b>locrio</b> ha sia la b2 che la <b>b5</b>: è il modo più dissonante e instabile, usato sugli accordi <b>semidiminuiti</b> (m7b5). Raro come tonalità, fondamentale per capire l’armonia. Non “riposa” mai sulla tonica.',
+      notes: [
+        {s:4,f:2,d:.5},{s:4,f:3,d:.5},{s:4,f:5,d:.5},{s:3,f:2,d:.5},
+        {s:3,f:3,d:.5},{s:3,f:5,d:.5},{s:2,f:2,d:.5},{s:2,f:4,d:1,t:'~'},
+      ],
+    },
+
+    // ─────────── LEGATO ───────────
+    {
+      id: 'legato-3nps', cat: 'legato', title: 'Legato — 3 note per corda (La min)',
+      key: 9, scale: 'Modo eolio', diff: 3, bpm: 84, tags: ['3 note per corda', 'fluidità'],
+      desc: 'Pattern <b>3 note per corda</b> in legato: pennata solo a inizio corda, hammer-on per le altre due. È la base del fraseggio fluido alla Satriani/Petrucci. Cerca volume uniforme tra nota pennata e martellate.',
+      notes: [
+        {s:4,f:5,d:.3333,t:'h'},{s:4,f:7,d:.3333,t:'h'},{s:4,f:8,d:.3333},
+        {s:3,f:5,d:.3333,t:'h'},{s:3,f:7,d:.3333,t:'h'},{s:3,f:9,d:.3333},
+        {s:2,f:5,d:.3333,t:'h'},{s:2,f:7,d:.3333,t:'h'},{s:2,f:9,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'legato-pull-cascade', cat: 'legato', title: 'Legato — cascata di pull-off (La min)',
+      key: 9, scale: 'Pentatonica minore', diff: 2, bpm: 92, tags: ['pull-off', 'discesa'],
+      desc: 'Discesa in <b>pull-off</b> sulla pentatonica: ogni coppia di note parte da una sola pennata. Esercizio per rinforzare la mano sinistra (il pull-off deve “pizzicare” lateralmente, non solo sollevare).',
+      notes: [
+        {s:0,f:8,d:.3333,t:'p'},{s:0,f:5,d:.3333},{s:1,f:8,d:.3333,t:'p'},
+        {s:1,f:5,d:.3333},{s:2,f:7,d:.3333,t:'p'},{s:2,f:5,d:.3333},
+        {s:3,f:7,d:.3333,t:'p'},{s:3,f:5,d:1,t:'~'},
+      ],
+    },
+
+    // ─────────── BLUES ───────────
+    {
+      id: 'blues-am-box1', cat: 'blues', title: 'Blues — box 1 con blue note (La)',
+      key: 9, scale: 'Scala blues', diff: 2, bpm: 72, tags: ['blue note', 'box 1'],
+      desc: 'La <b>scala blues</b> è la pentatonica minore + la <b>blue note</b> (b5, il Mib in La). Qui scivoli dentro e fuori da quella nota di passaggio: è il cuore del suono blues. Suona “sporco”, con feeling.',
+      notes: [
+        {s:0,f:8,d:.5},{s:0,f:5,d:.5},{s:1,f:8,d:.5},{s:1,f:5,d:.5},
+        {s:2,f:8,d:.5,t:'sl'},{s:2,f:7,d:.5},{s:2,f:5,d:.5},{s:3,f:7,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'blues-am-box2', cat: 'blues', title: 'Blues — box alta con bending (La)',
+      key: 9, scale: 'Scala blues', diff: 2, bpm: 70, tags: ['box alta', 'bend'],
+      desc: 'Frase blues nella posizione alta (8°-10°) con bending intero verso la tonica e blue note finale. Tipico fraseggio “da assolo”: poche note, tanto vibrato e intenzione.',
+      notes: [
+        {s:1,f:8,d:.5},{s:0,f:8,d:.5},{s:1,f:8,d:1,t:'b'},{s:1,f:10,d:.5},
+        {s:2,f:9,d:.5},{s:2,f:8,d:1.5,t:'~'},
+      ],
+    },
+
+    // ─────────── BENDING ───────────
+    {
+      id: 'bend-blue-note', cat: 'bending', title: 'Bending — blue note di mezzo tono (La)',
+      key: 9, scale: 'Scala blues', diff: 2, bpm: 74, tags: ['½ bend', 'blue note'],
+      desc: 'Il <b>mezzo bending</b> (½) sulla blue note Mib la fa “salire” verso il MI: è la microtonalità del blues, quel quarto di tono che le tastiere non possono fare. Controlla l’intonazione: né troppo né poco.',
+      notes: [
+        {s:3,f:7,d:.5},{s:2,f:5,d:.5},{s:2,f:8,d:1,t:'bh'},{s:2,f:7,d:.5},
+        {s:1,f:5,d:.5},{s:0,f:5,d:1.5,t:'~'},
+      ],
+    },
+    {
+      id: 'bend-em-12', cat: 'bending', title: 'Bending — tono pieno in posizione alta (Mi min)',
+      key: 4, scale: 'Pentatonica minore', diff: 2, bpm: 78, tags: ['full bend', 'pos. XII'],
+      desc: 'Bending di un <b>tono intero</b> al 15° tasto: in alto le corde sono più tese, serve più forza ma l’intonazione è più “sentita”. Usa due-tre dita per spingere la corda e il pollice sul manico per leva.',
+      notes: [
+        {s:1,f:12,d:.5},{s:0,f:12,d:.5},{s:1,f:15,d:1,t:'b'},{s:1,f:12,d:.5},
+        {s:2,f:12,d:1.5,t:'~'},
+      ],
+    },
+
+    // ─────────── SWEEP ───────────
+    {
+      id: 'sweep-cmaj-3str', cat: 'sweep', title: 'Sweep — arpeggio Do maggiore (3 corde)',
+      key: 0, scale: 'Arpeggio maggiore', diff: 3, bpm: 100, tags: ['sweep', 'maggiore'],
+      desc: 'Arpeggio <b>maggiore</b> (Do-Mi-Sol) in sweep su tre corde. Confrontalo con la versione minore: cambia una sola nota (la 3ª) ma l’umore è completamente diverso. Plettrata fluida, dita che mutano subito.',
+      notes: [
+        {s:2,f:5,d:.5},{s:1,f:8,d:.5},{s:0,f:8,d:.5},{s:0,f:12,d:.5,t:'~'},
+        {s:0,f:8,d:.5},{s:1,f:8,d:.5},{s:2,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'sweep-am-5str', cat: 'sweep', title: 'Sweep — arpeggio La min (5 corde)',
+      key: 9, scale: 'Arpeggio minore', diff: 3, bpm: 96, tags: ['sweep', '5 corde'],
+      desc: 'Lo sweep esteso su <b>cinque corde</b> in posizione alta: una sola plettrata in discesa e una in risalita coprono due ottave dell’arpeggio di La minore. Il roll del dito (barré che “srotola”) è la difficoltà chiave.',
+      notes: [
+        {s:4,f:12,d:.3333},{s:3,f:14,d:.3333},{s:2,f:14,d:.3333},{s:1,f:13,d:.3333},
+        {s:0,f:12,d:.3333},{s:0,f:17,d:.5,t:'~'},{s:0,f:12,d:.3333},{s:1,f:13,d:.3333},
+        {s:2,f:14,d:.3333},{s:3,f:14,d:.3333},{s:4,f:12,d:1,t:'~'},
+      ],
+    },
+
+    // ─────────── ARPEGGI ───────────
+    {
+      id: 'arp-cmaj7', cat: 'arpeggi', title: 'Arpeggio Do maj7 (C-E-G-Si)',
+      key: 0, scale: 'Arpeggio maj7', diff: 2, bpm: 92, tags: ['maj7', 'jazz'],
+      desc: 'L’<b>arpeggio di maj7</b> aggiunge la 7ª maggiore alla triade: suono dolce, jazzy, “da film”. Suonare gli arpeggi degli accordi (non solo le scale) è il segreto per assoli che “centrano” l’armonia.',
+      notes: [
+        {s:4,f:3,d:.5},{s:3,f:2,d:.5},{s:3,f:5,d:.5},{s:2,f:4,d:.5},
+        {s:1,f:5,d:.5},{s:0,f:8,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'arp-am7', cat: 'arpeggi', title: 'Arpeggio La min7 (A-C-E-Sol)',
+      key: 9, scale: 'Arpeggio min7', diff: 2, bpm: 92, tags: ['min7', 'jazz'],
+      desc: 'L’<b>arpeggio di min7</b>: la triade minore + 7ª minore. È l’ossatura del suono su accordi minori (II grado dei II-V-I). Impara a vederlo “dentro” la pentatonica minore: condividono 4 note su 5.',
+      notes: [
+        {s:5,f:5,d:.5},{s:4,f:3,d:.5},{s:4,f:7,d:.5},{s:3,f:5,d:.5},
+        {s:2,f:5,d:.5},{s:1,f:5,d:.5},{s:0,f:5,d:1,t:'~'},
+      ],
+    },
+    {
+      id: 'arp-g7', cat: 'arpeggi', title: 'Arpeggio Sol7 (G-Si-D-Fa)',
+      key: 7, scale: 'Arpeggio dom7', diff: 2, bpm: 92, tags: ['dom7', 'V grado'],
+      desc: 'L’<b>arpeggio di dominante (7)</b> contiene il <b>tritono</b> (Si-Fa) che “vuole” risolvere: è il motore della tensione→riposo nell’armonia tonale (V→I). Sentire questo arpeggio aiuta a capire le risoluzioni.',
+      notes: [
+        {s:5,f:3,d:.5},{s:4,f:2,d:.5},{s:4,f:5,d:.5},{s:3,f:3,d:.5},
+        {s:3,f:5,d:.5},{s:2,f:4,d:.5},{s:1,f:3,d:1,t:'~'},
+      ],
+    },
+
+    // ─────────── ALTERNATE PICKING ───────────
+    {
+      id: 'picking-seq4', cat: 'picking', title: 'Alternate — sequenza in 4 (Sol maggiore)',
+      key: 7, scale: 'Scala maggiore', diff: 2, bpm: 88, tags: ['sequenza', 'scala'],
+      desc: 'La scala maggiore in <b>gruppi di 4</b> (1234-2345-3456…): l’esercizio classico per la pennata alternata veloce e per “sciogliere” le scale in modo musicale invece che su-e-giù dritto.',
+      notes: [
+        {s:5,f:3,d:.25},{s:5,f:5,d:.25},{s:5,f:7,d:.25},{s:4,f:3,d:.25},
+        {s:5,f:5,d:.25},{s:5,f:7,d:.25},{s:4,f:3,d:.25},{s:4,f:5,d:.25},
+        {s:5,f:7,d:.25},{s:4,f:3,d:.25},{s:4,f:5,d:.25},{s:4,f:7,d:.5,t:'~'},
+      ],
+    },
+    {
+      id: 'picking-pent-sixes', cat: 'picking', title: 'Alternate — pentatonica in sestine',
+      key: 9, scale: 'Pentatonica minore', diff: 3, bpm: 96, tags: ['sestine', 'velocità'],
+      desc: 'Discesa della pentatonica in <b>gruppi di 6</b> (stile Paul Gilbert): pennata alternata serrata. Ottimo per costruire velocità e precisione sul cambio corda. Parti lentissimo e cura ogni nota.',
+      notes: [
+        {s:0,f:8,d:.25},{s:0,f:5,d:.25},{s:1,f:8,d:.25},{s:1,f:5,d:.25},{s:2,f:7,d:.25},{s:2,f:5,d:.25},
+        {s:1,f:8,d:.25},{s:1,f:5,d:.25},{s:2,f:7,d:.25},{s:2,f:5,d:.25},{s:3,f:7,d:.25},{s:3,f:5,d:.5,t:'~'},
+      ],
+    },
   ];
 
   const LickLS = {
@@ -9657,6 +9910,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     currentId: LickLS.get('currentId', null),
     bpm: null,                            // override tempo (null = bpm del lick)
     loop: LickLS.get('loop', false),
+    transpose: 0,                         // offset semitoni applicato al lick corrente (non persistito)
+    sidebarCollapsed: LickLS.get('sidebarCollapsed', false),
+    showScale: LickLS.get('showScale', false),  // overlay scala completa sul manico
     playing: false,
     playIdx: -1,
     _timers: [],
@@ -9667,6 +9923,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       this._ensureDom();
       document.getElementById('lickOverlay').classList.add('show');
       this._render();
+      this._applySidebar();
     },
     close() {
       this.active = false;
@@ -9681,6 +9938,52 @@ window.addEventListener('DOMContentLoaded', async () => {
       LickLS.set('diff', this.diff);
       LickLS.set('currentId', this.currentId);
       LickLS.set('loop', this.loop);
+      LickLS.set('sidebarCollapsed', this.sidebarCollapsed);
+      LickLS.set('showScale', this.showScale);
+    },
+
+    // Helpers transposizione (offset semitoni applicato a tutti i tasti)
+    _xf(f) { return f + this.transpose; },
+    _curKey(lick) { return ((((lick || this._current()).key + this.transpose) % 12) + 12) % 12; },
+    _normalizeTranspose(lick) {
+      // Tiene i tasti in un range suonabile (0..19) spostando di ottave se serve
+      const frets = lick.notes.map(n => n.f + this.transpose);
+      let mn = Math.min(...frets), mx = Math.max(...frets);
+      let guard = 0;
+      while (mn < 0 && guard++ < 4) { this.transpose += 12; mn += 12; mx += 12; }
+      while (mx > 19 && guard++ < 8) { this.transpose -= 12; mn -= 12; mx -= 12; }
+    },
+    _changeKey(delta) {
+      const lick = this._current(); if (!lick) return;
+      this._stop();
+      this.transpose += delta;
+      this._normalizeTranspose(lick);
+      this._renderDetail();
+    },
+    _resetKey() {
+      this._stop();
+      this.transpose = 0;
+      this._renderDetail();
+    },
+    _toggleScale() {
+      this.showScale = !this.showScale;
+      this._persist();
+      this._renderDetail();
+    },
+    _toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+      this._persist();
+      this._applySidebar();
+    },
+    _applySidebar() {
+      const ov = document.getElementById('lickOverlay'); if (!ov) return;
+      const body = ov.querySelector('.lk-body');
+      if (body) body.classList.toggle('lk-collapsed', this.sidebarCollapsed);
+      const btn = document.getElementById('lkSidebarToggle');
+      if (btn) {
+        btn.classList.toggle('is-collapsed', this.sidebarCollapsed);
+        btn.title = this.sidebarCollapsed ? 'Mostra elenco lick' : 'Nascondi elenco lick';
+      }
     },
 
     _filtered() {
@@ -9700,7 +10003,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       overlay.className = 'lick-overlay';
       overlay.innerHTML = `
         <div class="lk-topbar">
-          <div class="lk-topbar-left"></div>
+          <div class="lk-topbar-left">
+            <button class="lk-icon-btn lk-sidebar-toggle" id="lkSidebarToggle" title="Nascondi elenco lick" aria-label="Mostra/nascondi elenco">☰</button>
+          </div>
           <div class="lk-topbar-center">
             <button class="lk-icon-btn" id="lkClose" title="Chiudi (K / ESC)">←</button>
             ${moduleSwitcherHtml('lick')}
@@ -9723,6 +10028,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       `;
       document.body.appendChild(overlay);
       document.getElementById('lkClose').addEventListener('click', () => this.close());
+      document.getElementById('lkSidebarToggle').addEventListener('click', () => this._toggleSidebar());
       if (typeof wireModuleSwitcher === 'function') wireModuleSwitcher(overlay, 'lick');
     },
 
@@ -9793,6 +10099,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       this._stop();
       this.currentId = id;
       this.bpm = null;
+      this.transpose = 0;
       this._persist();
       this._renderList();
       this._renderDetail();
@@ -9817,10 +10124,18 @@ window.addEventListener('DOMContentLoaded', async () => {
       host.innerHTML = `
         <div class="lk-detail-head">
           <h2 class="lk-dh-title">${lick.title}</h2>
+          <div class="lk-dh-controls">
+            <div class="lk-transpose">
+              <span class="lk-tr-lbl">Tonalità</span>
+              <button class="lk-tr-btn" id="lkKeyDown" title="Trasporta giù di un semitono">◀</button>
+              <button class="lk-tr-key ${this.transpose !== 0 ? 'is-moved' : ''}" id="lkKeyReset" title="${this.transpose !== 0 ? 'Reset alla tonalità originale' : 'Tonalità del lick'}">${this._keyName(this._curKey(lick))}${this.transpose !== 0 ? ' ↺' : ''}</button>
+              <button class="lk-tr-btn" id="lkKeyUp" title="Trasporta su di un semitono">▶</button>
+            </div>
+            <span class="lk-meta-chip lk-scale-chip">${lick.scale}</span>
+            ${SCALE_PCS[lick.scale] ? `<button class="lk-toggle lk-scale-toggle ${this.showScale ? 'is-active' : ''}" id="lkScaleToggle" title="Mostra tutte le note della scala sul manico">◇ Scala sul manico</button>` : ''}
+          </div>
           <div class="lk-dh-meta">
             <span class="lk-meta-chip"><b>${catLabel}</b></span>
-            <span class="lk-meta-chip">Tonalità <b>${this._keyName(lick.key)}</b></span>
-            <span class="lk-meta-chip">${lick.scale}</span>
             <span class="lk-meta-chip">Difficoltà <span class="lk-li-diff" style="vertical-align:middle">${dots}</span></span>
             ${(lick.tags || []).map(t => `<span class="lk-meta-chip">${t}</span>`).join('')}
           </div>
@@ -9849,7 +10164,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           ${lick.desc}
           <div class="lk-legend">
             <span><b>h</b> hammer-on</span><span><b>p</b> pull-off</span>
-            <span><b>b</b> bend</span><span><b>b/r</b> bend &amp; release</span>
+            <span><b>b</b> bend</span><span><b>½</b> mezzo bend</span><span><b>b/r</b> bend &amp; release</span>
             <span><b>sl</b> slide</span><span><b>~</b> vibrato</span>
           </div>
         </div>
@@ -9865,6 +10180,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         this.loop = !this.loop; this._persist();
         e.currentTarget.classList.toggle('is-active', this.loop);
       });
+      // Transposizione tonalità + overlay scala completa
+      document.getElementById('lkKeyDown').addEventListener('click', () => this._changeKey(-1));
+      document.getElementById('lkKeyUp').addEventListener('click', () => this._changeKey(1));
+      document.getElementById('lkKeyReset').addEventListener('click', () => this._resetKey());
+      const scaleToggle = document.getElementById('lkScaleToggle');
+      if (scaleToggle) scaleToggle.addEventListener('click', () => this._toggleScale());
     },
 
     // ── Tablatura SVG ──────────────────────────────────────
@@ -9886,7 +10207,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const cx = x(i), cy = sY(nt.s);
         svg += `<g class="lk-tab-cell" data-idx="${i}">`;
         svg += `<rect class="lk-tab-pill" x="${cx - 11}" y="${cy - 9}" width="22" height="18" rx="6"/>`;
-        svg += `<text class="lk-tab-fret" x="${cx}" y="${cy}">${nt.f}</text>`;
+        svg += `<text class="lk-tab-fret" x="${cx}" y="${cy}">${this._xf(nt.f)}</text>`;
         svg += `</g>`;
         // Tecnica
         if (nt.t && LICK_TECH[nt.t]) {
@@ -9905,11 +10226,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // ── Manico SVG (finestra attorno ai tasti del lick) ────
     _fbSvg(lick) {
-      const frets = lick.notes.map(nt => nt.f).filter(f => f > 0);
-      const minF = Math.min(...frets), maxF = Math.max(...frets);
+      const tr = this.transpose;
+      const xfrets = lick.notes.map(nt => nt.f + tr).filter(f => f > 0);
+      const minF = Math.min(...xfrets), maxF = Math.max(...xfrets);
       let winStart = Math.max(0, minF - 1);
-      let winEnd = Math.min(15, maxF + 1);
-      while (winEnd - winStart < 5) { if (winEnd < 15) winEnd++; else if (winStart > 0) winStart--; else break; }
+      let winEnd = Math.min(22, maxF + 1);
+      while (winEnd - winStart < 5) { if (winEnd < 22) winEnd++; else if (winStart > 0) winStart--; else break; }
       const nF = winEnd - winStart;
       const padL = 22, padR = 12, padT = 10, padB = 18, rowH = 16, fW = 30, nutW = 4;
       const leftEdge = padL + nutW;
@@ -9918,6 +10240,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const sY = s => padT + s * rowH;
       const fretLineX = k => leftEdge + k * fW;
       const noteX = f => f === 0 ? padL + nutW / 2 : leftEdge + (f - winStart - 0.5) * fW;
+      const degColor = deg => (typeof colorForDegree === 'function') ? colorForDegree(DEGREE_LABELS[deg]) : '#a855f7';
       let svg = `<svg class="lk-fb-svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
       // Frets verticali
       for (let k = 0; k <= nF; k++) {
@@ -9929,7 +10252,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         svg += `<line class="lk-fb-string" x1="${padL}" y1="${sY(s)}" x2="${w - padR}" y2="${sY(s)}" stroke-width="${1 + s * 0.18}"/>`;
       }
       // Inlay
-      const inlays = [3, 5, 7, 9, 12, 15];
+      const inlays = [3, 5, 7, 9, 12, 15, 17, 19, 21];
       const midY = (sY(0) + sY(5)) / 2;
       for (const f of inlays) {
         if (f <= winStart || f > winEnd) continue;
@@ -9939,21 +10262,37 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
       // Numeri tasto
       for (let f = winStart + 1; f <= winEnd; f++) svg += `<text class="lk-fb-fretnum" x="${noteX(f)}" y="${sY(5) + 13}">${f}</text>`;
-      // Note (dedupe per posizione, colore per grado)
+
+      const curKey = this._curKey(lick);
+      const lickPos = new Set(lick.notes.map(nt => nt.s + '-' + (nt.f + tr)));
+
+      // Overlay scala completa (cerchietti vuoti) — solo se attivo e scala nota
+      const pcs = this.showScale ? SCALE_PCS[lick.scale] : null;
+      if (pcs) {
+        for (let s = 0; s < 6; s++) {
+          for (let f = winStart === 0 ? 0 : winStart + 1; f <= winEnd; f++) {
+            if (lickPos.has(s + '-' + f)) continue; // le posizioni del lick le disegno piene dopo
+            const deg = (((LICK_OPEN_MIDI[s] + f) - curKey) % 12 + 12) % 12;
+            if (!pcs.includes(deg)) continue;
+            const cx = noteX(f), cy = sY(s);
+            svg += `<g class="lk-fb-note lk-fb-scale"><circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="${degColor(deg)}"/><text x="${cx}" y="${cy}">${deg === 0 ? 'R' : DEGREE_LABELS[deg]}</text></g>`;
+          }
+        }
+      }
+
+      // Note del lick (piene, dedupe per posizione trasposta). Grado = invariante per transposizione.
       const seen = {};
       lick.notes.forEach(nt => {
-        const posKey = nt.s + '-' + nt.f;
+        const xf = nt.f + tr;
+        const posKey = nt.s + '-' + xf;
         if (seen[posKey]) return;
         seen[posKey] = true;
-        const midi = LICK_OPEN_MIDI[nt.s] + nt.f;
-        const deg = (((midi - lick.key) % 12) + 12) % 12;
-        const label = DEGREE_LABELS[deg];
-        const color = (typeof colorForDegree === 'function') ? colorForDegree(label) : '#a855f7';
-        const cx = noteX(nt.f), cy = sY(nt.s);
+        const deg = ((((LICK_OPEN_MIDI[nt.s] + nt.f) - lick.key) % 12) + 12) % 12;
+        const cx = noteX(xf), cy = sY(nt.s);
         const rootCls = deg === 0 ? 'is-root' : '';
         svg += `<g class="lk-fb-note ${rootCls}" data-pos="${posKey}">
-          <circle cx="${cx}" cy="${cy}" r="7.5" fill="${color}"/>
-          <text x="${cx}" y="${cy}">${deg === 0 ? 'R' : label}</text>
+          <circle cx="${cx}" cy="${cy}" r="7.5" fill="${degColor(deg)}"/>
+          <text x="${cx}" y="${cy}">${deg === 0 ? 'R' : DEGREE_LABELS[deg]}</text>
         </g>`;
       });
       svg += `</svg>`;
@@ -9990,11 +10329,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     },
     _sound(nt, durSec) {
       if (typeof playSynthNote !== 'function') return;
-      const midi = LICK_OPEN_MIDI[nt.s] + nt.f;
+      const midi = LICK_OPEN_MIDI[nt.s] + nt.f + this.transpose;
       const vol = 0.20;
       if (nt.t === 'b') { // bend intero: parte sotto, sale di un tono
         playSynthNote(midi, 0, durSec * 0.45, 'sawtooth', vol);
         playSynthNote(midi + 2, durSec * 0.4, durSec * 0.6, 'sawtooth', vol);
+      } else if (nt.t === 'bh') { // bend di mezzo tono
+        playSynthNote(midi, 0, durSec * 0.45, 'sawtooth', vol);
+        playSynthNote(midi + 1, durSec * 0.4, durSec * 0.6, 'sawtooth', vol);
       } else if (nt.t === 'br') { // bend & release
         playSynthNote(midi, 0, durSec * 0.35, 'sawtooth', vol);
         playSynthNote(midi + 2, durSec * 0.33, durSec * 0.34, 'sawtooth', vol);
@@ -10011,7 +10353,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       ov.querySelectorAll('.lk-fb-note.is-playing').forEach(e => e.classList.remove('is-playing'));
       const cell = ov.querySelector(`.lk-tab-cell[data-idx="${i}"]`);
       if (cell) cell.classList.add('is-playing');
-      const pos = ov.querySelector(`.lk-fb-note[data-pos="${nt.s}-${nt.f}"]`);
+      const pos = ov.querySelector(`.lk-fb-note[data-pos="${nt.s}-${this._xf(nt.f)}"]`);
       if (pos) pos.classList.add('is-playing');
     },
     _clearTimers() {
