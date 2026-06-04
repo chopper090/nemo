@@ -1,0 +1,25 @@
+# Configurazione deploy Netlify — esclude cartelle wrapper app
+
+[build]
+  publish = "."
+
+# Escludi le cartelle wrapper app dal deploy Netlify (Netlify legge solo i file root)
+# Le cartelle desktop-app/ e mobile-app/ esistono solo per build APK/EXE locali.
+
+[[redirects]]
+  from = "/desktop-app/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/mobile-app/*"
+  to = "/index.html"
+  status = 200
+
+# Sicurezza
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

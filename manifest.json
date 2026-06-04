@@ -1,0 +1,66 @@
+{
+  "id": "/note-trainer/?source=pwa",
+  "name": "Nemo — Fretboard & Ear Training",
+  "short_name": "Nemo",
+  "description": "Allenamento chitarra: riconoscimento note, intervalli, accordi, scale, arpeggi. Lezioni, brani, mastery polygon, Solo Mode e Resolve. Premium music memory app.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#18191E",
+  "theme_color": "#5840D7",
+  "categories": ["education", "music"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pratica",
+      "short_name": "Pratica",
+      "description": "Drill con riconoscimento audio",
+      "url": "./?view=practice",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Solo Mode",
+      "short_name": "Solo",
+      "description": "Focus mode minimale per ear training",
+      "url": "./?solo=1",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Stats",
+      "short_name": "Stats",
+      "description": "Mastery polygon e progressi",
+      "url": "./?view=stats",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

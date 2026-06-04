@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Nemo — Logo v2 (A · C · E esplorate)</title>
+<style>
+  :root{
+    --bg:#0e0f13; --card:#181a20; --border:#2a2d35;
+    --text:#ECE9E0; --muted:#9aa0ac; --subtle:#6b707a;
+    --brand:#5840D7; --cyan:#00D4FF; --magenta:#E94CC8; --gold:#FFB800;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:500 14px/1.5 -apple-system,"Inter",system-ui,sans-serif}
+  header.top{padding:28px 36px 18px;border-bottom:1px solid var(--border);background:#0a0b0f}
+  header.top h1{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:-0.4px}
+  header.top p{margin:0;color:var(--muted);max-width:820px;font-size:13.5px}
+  header.top .themes{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  header.top .theme{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;padding:4px 10px;border-radius:6px}
+  .t-wave{background:rgba(0,212,255,0.13);color:#5bdfff}
+  .t-note{background:rgba(255,184,0,0.13);color:#ffcb52}
+  .t-learn{background:rgba(233,76,200,0.13);color:#f49ada}
+
+  .section{padding:28px 36px 8px}
+  .section h2{margin:0 0 4px;font-size:20px;font-weight:800;letter-spacing:-0.3px}
+  .section h2 .sub{font-size:13px;font-weight:500;color:var(--muted);margin-left:8px}
+  .section p.intro{margin:0 0 18px;color:var(--muted);max-width:780px;font-size:13.5px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+        gap:18px;padding:0 36px 24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .card .h{padding:12px 16px;border-bottom:1px solid var(--border);background:#15171c;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card .h h3{margin:0;font-size:14px;font-weight:700}
+  .card .h .tags{display:flex;gap:5px;flex-wrap:wrap}
+  .card .h .tg{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 7px;border-radius:5px}
+  .card .desc{padding:10px 16px;color:var(--muted);font-size:12.5px;line-height:1.5;border-bottom:1px solid var(--border);min-height:60px}
+  .swatches{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+  .sw{display:flex;align-items:center;justify-content:center;padding:22px 10px;min-height:128px}
+  .sw.light{background:#F6F4EE}
+  .sw.dark{background:#15171C}
+  .sw.brand{background:linear-gradient(135deg,#5840D7,#7d3fe0 50%,#E94CC8)}
+  .sw svg{width:88px;height:88px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
+  .sw.light svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.10))}
+  .sizes{display:flex;align-items:flex-end;justify-content:space-around;
+         padding:16px 10px;background:#0c0d11;gap:14px;border-bottom:1px solid var(--border)}
+  .sizes div{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .sizes .lab{font-size:10px;color:var(--subtle)}
+  .sizes svg.s1{width:56px;height:56px}
+  .sizes svg.s2{width:36px;height:36px}
+  .sizes svg.s3{width:22px;height:22px}
+  .wordmark{display:grid;grid-template-columns:1fr 1fr}
+  .wm{display:flex;align-items:center;justify-content:center;padding:14px;gap:10px;min-height:76px}
+  .wm.light{background:#F6F4EE;color:#1A1D24}
+  .wm.dark{background:#15171C}
+  .wm svg{height:32px;width:auto}
+  .wm .nm{font:800 22px/1 "Inter",sans-serif;letter-spacing:-0.5px}
+  .wm.light .nm{color:#1A1D24}
+  .wm.dark .nm{color:#ECE9E0}
+
+  .footnote{padding:20px 36px 32px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);background:#0a0b0f}
+  .footnote b{color:var(--text)}
+  .divider{height:1px;background:var(--border);margin:16px 36px 0}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Nemo — Esplorazione direzioni A · C · E</h1>
+  <p>4 varianti per ciascuna direzione che ti è piaciuta, ognuna integra esplicitamente i tre
+  temi che mi hai dato. Le tag sopra ogni card indicano quale tema è dominante.</p>
+  <div class="themes">
+    <span class="theme t-wave">● Onde</span>
+    <span class="theme t-note">● Note</span>
+    <span class="theme t-learn">● Learning</span>
+  </div>
+</header>
+
+<!-- Definizioni globali -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#00D4FF"/>
+      <stop offset="0.5" stop-color="#5840D7"/>
+      <stop offset="1"   stop-color="#E94CC8"/>
+    </linearGradient>
+    <linearGradient id="g-solid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7355FF"/>
+      <stop offset="1" stop-color="#4D2FCF"/>
+    </linearGradient>
+    <linearGradient id="g-warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB800"/>
+      <stop offset="1" stop-color="#FF7A3D"/>
+    </linearGradient>
+    <linearGradient id="g-cool" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00D4FF"/>
+      <stop offset="1" stop-color="#5840D7"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<section class="section">
+  <h2>Direzione A — "N" monogramma <span class="sub">forma geometrica + elemento musicale</span></h2>
+  <p class="intro">La N rimane la struttura portante. Esploro 4 modi diversi di farla "cantare":
+  con corde, con onde, con note, e come progressione di apprendimento.</p>
+</section>
+<div class="grid" id="grid-A"></div>
+
+<div class="divider"></div>
+
+<section class="section">
+  <h2>Direzione C — Waveform / N audio <span class="sub">il suono che diventa lettera</span></h2>
+  <p class="intro">N costruita partendo dal segnale sonoro. Esploro 4 stili: barre EQ rifinite,
+  onda sinusoidale continua, pentagramma con note, e spettro con marker di learning.</p>
+</section>
+<div class="grid" id="grid-C"></div>
+
+<div class="divider"></div>
+
+<section class="section">
+  <h2>Direzione E — Paletta chitarra <span class="sub">l'identità strumentale</span></h2>
+  <p class="intro">Top della chitarra. Esploro proporzioni corrette (3+3 o 6-inline) e 4 modi di
+  iniettare onde/note/learning senza sovraccaricare la silhouette.</p>
+</section>
+<div class="grid" id="grid-E"></div>
+
+<div class="footnote">
+  <p><b>Quando scegli</b> — guarda anche i favicon 22px in basso a ogni card: il logo deve
+  reggere quella dimensione, altrimenti diventa una macchia sul tab del browser e sulla home
+  dello smartphone. <b>I tag colorati</b> in alto indicano quale tema (onde/note/learning) è
+  dominante in quella variante.</p>
+  <p>Dimmi quale combinazione preferisci (es. "A2 + C3" o "solo E1 rifinito") e te la porto
+  alla resa finale con tutti gli asset (SVG vettoriale, PNG 192/512, maskable PWA).</p>
+</div>
+
+<script>
+const VB = '0 0 512 512';
+
+/* ═══════════════════════════════════════════════════════════════
+   DIREZIONE A · Monogramma "N"
+   ═══════════════════════════════════════════════════════════════ */
+
+/* A1 · Original refined — N + corda vibrante (più pulita) */
+function A1(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#g-solid)"/>
+  <!-- N geometrica ottimizzata -->
+  <path d="M 152 384 L 152 128 L 206 128 L 206 282
+           L 306 128 L 360 128 L 360 384 L 306 384 L 306 230
+           L 206 384 Z"
+        fill="#ECE9E0"/>
+  <!-- Corda vibrante (più definita) -->
+  <path d="M 206 282 Q 230 250, 256 282 T 306 282 Q 306 282, 306 230"
+        fill="none" stroke="#FFB800" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="206" cy="282" r="5" fill="#FFB800"/>
+  <circle cx="306" cy="230" r="5" fill="#FFB800"/>
+`;}
+
+/* A2 · N costruita da 6 corde di chitarra che vibrano (waveform) */
+function A2(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+  <!-- Aste verticali della N come "corde" di chitarra -->
+  <g stroke="url(#g-brand)" stroke-linecap="round">
+    <!-- 3 corde a sinistra con ampiezza che cresce -->
+    <path d="M 152 130 Q 158 200, 152 270 Q 146 340, 152 384" stroke-width="6" fill="none"/>
+    <path d="M 172 130 Q 180 220, 172 290 Q 164 360, 172 384" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 192 130 Q 200 200, 192 270 Q 184 340, 192 384" stroke-width="4" fill="none" opacity="0.5"/>
+    <!-- 3 corde a destra -->
+    <path d="M 320 130 Q 312 200, 320 270 Q 328 340, 320 384" stroke-width="4" fill="none" opacity="0.5"/>
+    <path d="M 340 130 Q 348 220, 340 290 Q 332 360, 340 384" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 360 130 Q 366 200, 360 270 Q 354 340, 360 384" stroke-width="6" fill="none"/>
+  </g>
+  <!-- Diagonale della N come waveform pulsante in oro -->
+  <path d="M 168 200 L 200 220 L 224 180 L 248 250 L 272 200 L 296 270 L 320 220 L 344 280"
+        fill="none" stroke="#FFB800" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+`;}
+
+/* A3 · N con nota croma in accento + sound wave sottile */
+function A3(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#F6F4EE"/>
+  <!-- N geometrica viola -->
+  <path d="M 152 384 L 152 168 L 206 168 L 206 282
+           L 306 168 L 360 168 L 360 384 L 306 384 L 306 230
+           L 206 384 Z"
+        fill="url(#g-solid)"/>
+  <!-- Nota croma in alto a destra (sopra la N) -->
+  <g>
+    <rect x="346" y="80" width="7" height="100" rx="3.5" fill="url(#g-brand)"/>
+    <path d="M 353 80 C 388 90, 396 118, 380 145 C 388 128, 384 110, 353 105 Z"
+          fill="url(#g-brand)"/>
+    <ellipse cx="338" cy="178" rx="18" ry="13" fill="url(#g-brand)"
+             transform="rotate(-22 338 178)"/>
+  </g>
+  <!-- Wave sottile sotto la N (suono che emerge) -->
+  <path d="M 130 420 Q 180 405, 230 420 T 330 420 T 382 420"
+        fill="none" stroke="url(#g-brand)" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+`;}
+
+/* A4 · N con dot pattern ascendente (learning/progressione livelli) */
+function A4(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#g-solid)"/>
+  <!-- N geometrica outline -->
+  <path d="M 152 384 L 152 128 L 206 128 L 206 282
+           L 306 128 L 360 128 L 360 384 L 306 384 L 306 230
+           L 206 384 Z"
+        fill="none" stroke="#ECE9E0" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Dot pattern ascendente sulla diagonale (fingering / level-up) -->
+  <g fill="#FFB800">
+    <circle cx="222" cy="350" r="6" opacity="0.4"/>
+    <circle cx="240" cy="320" r="8" opacity="0.55"/>
+    <circle cx="258" cy="290" r="10" opacity="0.7"/>
+    <circle cx="278" cy="258" r="11" opacity="0.85"/>
+    <circle cx="298" cy="226" r="12"/>
+    <!-- Centro illuminato (livello "raggiunto") -->
+    <circle cx="298" cy="226" r="18" fill="none" stroke="#FFB800" stroke-width="3" opacity="0.6"/>
+  </g>
+`;}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIREZIONE C · Waveform / N audio
+   ═══════════════════════════════════════════════════════════════ */
+
+/* C1 · Refined — barre EQ che formano N con proporzioni migliori */
+function C1(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+  <g fill="url(#g-brand)">
+    <!-- Asta sinistra (corde verticali alte) -->
+    <rect x="138" y="160" width="16" height="192" rx="8"/>
+    <rect x="162" y="140" width="16" height="232" rx="8"/>
+    <!-- Diagonale: scala discendente -->
+    <rect x="190" y="160" width="16" height="192" rx="8"/>
+    <rect x="214" y="180" width="16" height="152" rx="8"/>
+    <rect x="238" y="200" width="16" height="112" rx="8"/>
+    <rect x="262" y="220" width="16" height="72"  rx="8"/>
+    <rect x="286" y="200" width="16" height="112" rx="8"/>
+    <rect x="310" y="180" width="16" height="152" rx="8"/>
+    <rect x="334" y="160" width="16" height="192" rx="8"/>
+    <!-- Asta destra -->
+    <rect x="358" y="140" width="16" height="232" rx="8"/>
+  </g>
+`;}
+
+/* C2 · N tracciata da un'onda sinusoidale continua (eleganza) */
+function C2(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+  <!-- Asta sinistra come onda sinusoidale verticale -->
+  <path d="M 156 384
+           C 130 350, 182 320, 156 286
+           C 130 252, 182 222, 156 188
+           C 130 154, 156 128, 156 128"
+        fill="none" stroke="url(#g-brand)" stroke-width="14" stroke-linecap="round"/>
+  <!-- Diagonale come onda che scende -->
+  <path d="M 156 168
+           C 180 200, 220 220, 256 256
+           C 292 292, 332 312, 356 344"
+        fill="none" stroke="url(#g-brand)" stroke-width="14" stroke-linecap="round"/>
+  <!-- Asta destra simmetrica -->
+  <path d="M 356 384
+           C 382 350, 330 320, 356 286
+           C 382 252, 330 222, 356 188
+           C 382 154, 356 128, 356 128"
+        fill="none" stroke="url(#g-brand)" stroke-width="14" stroke-linecap="round"/>
+`;}
+
+/* C3 · N + pentagramma con note (notazione esplicita) */
+function C3(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#F6F4EE"/>
+  <!-- Pentagramma orizzontale (5 linee) -->
+  <g stroke="#1A1D24" stroke-width="2" opacity="0.18">
+    <line x1="100" y1="200" x2="412" y2="200"/>
+    <line x1="100" y1="230" x2="412" y2="230"/>
+    <line x1="100" y1="260" x2="412" y2="260"/>
+    <line x1="100" y1="290" x2="412" y2="290"/>
+    <line x1="100" y1="320" x2="412" y2="320"/>
+  </g>
+  <!-- N geometrica viola -->
+  <path d="M 152 384 L 152 128 L 206 128 L 206 282
+           L 306 128 L 360 128 L 360 384 L 306 384 L 306 230
+           L 206 384 Z"
+        fill="url(#g-brand)" opacity="0.95"/>
+  <!-- 4 teste di nota lungo una scala ascendente (learning!) -->
+  <g fill="#FFB800">
+    <ellipse cx="135" cy="320" rx="13" ry="9" transform="rotate(-18 135 320)"/>
+    <ellipse cx="195" cy="290" rx="13" ry="9" transform="rotate(-18 195 290)"/>
+    <ellipse cx="305" cy="230" rx="13" ry="9" transform="rotate(-18 305 230)"/>
+    <ellipse cx="380" cy="200" rx="13" ry="9" transform="rotate(-18 380 200)"/>
+  </g>
+`;}
+
+/* C4 · Spectrum bars + playhead (learning in azione) */
+function C4(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+  <!-- N con barre EQ animate (suggerite tramite altezze graduate) -->
+  <g>
+    <!-- Asta sinistra (corde alte) -->
+    <rect x="138" y="170" width="14" height="172" rx="7" fill="url(#g-cool)"/>
+    <rect x="160" y="150" width="14" height="212" rx="7" fill="url(#g-cool)"/>
+    <!-- Diagonale -->
+    <rect x="186" y="170" width="14" height="172" rx="7" fill="url(#g-cool)" opacity="0.85"/>
+    <rect x="208" y="190" width="14" height="132" rx="7" fill="url(#g-cool)" opacity="0.75"/>
+    <rect x="230" y="210" width="14" height="92"  rx="7" fill="url(#g-cool)" opacity="0.7"/>
+    <!-- Marker centrale (current position / focus) -->
+    <rect x="252" y="220" width="14" height="72"  rx="7" fill="#FFB800"/>
+    <rect x="274" y="210" width="14" height="92"  rx="7" fill="url(#g-cool)" opacity="0.7"/>
+    <rect x="296" y="190" width="14" height="132" rx="7" fill="url(#g-cool)" opacity="0.75"/>
+    <rect x="318" y="170" width="14" height="172" rx="7" fill="url(#g-cool)" opacity="0.85"/>
+    <!-- Asta destra -->
+    <rect x="344" y="150" width="14" height="212" rx="7" fill="url(#g-cool)"/>
+    <rect x="366" y="170" width="14" height="172" rx="7" fill="url(#g-cool)"/>
+  </g>
+  <!-- Linea di base orizzontale (livello / scala) -->
+  <line x1="120" y1="380" x2="392" y2="380" stroke="url(#g-brand)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <!-- Piccola nota sopra il marker centrale (output del learning) -->
+  <g fill="#FFB800">
+    <rect x="262" y="108" width="5" height="38" rx="2.5"/>
+    <ellipse cx="256" cy="146" rx="10" ry="7" transform="rotate(-20 256 146)"/>
+  </g>
+`;}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIREZIONE E · Paletta chitarra
+   ═══════════════════════════════════════════════════════════════ */
+
+/* E1 · Refined — 3+3 pegs (classico Gibson) + N integrata */
+function E1(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+  <!-- Paletta classica 3+3 (forma "open book") -->
+  <path d="M 210 120
+           Q 200 100, 220 100
+           L 292 100
+           Q 312 100, 302 120
+           L 302 310
+           Q 302 326, 286 330
+           L 286 400
+           Q 286 412, 274 412
+           L 238 412
+           Q 226 412, 226 400
+           L 226 330
+           Q 210 326, 210 310 Z"
+        fill="none" stroke="url(#g-brand)" stroke-width="9" stroke-linejoin="round"/>
+  <!-- 3+3 tuning pegs -->
+  <g fill="url(#g-brand)">
+    <circle cx="232" cy="145" r="11"/>
+    <circle cx="232" cy="200" r="11"/>
+    <circle cx="232" cy="255" r="11"/>
+    <circle cx="280" cy="145" r="11"/>
+    <circle cx="280" cy="200" r="11"/>
+    <circle cx="280" cy="255" r="11"/>
+  </g>
+  <!-- N nel disco di base -->
+  <text x="256" y="385" text-anchor="middle"
+        font-family="Inter,sans-serif" font-weight="900" font-size="38"
+        fill="url(#g-brand)" letter-spacing="-1">N</text>
+`;}
+
+/* E2 · Paletta con 6 corde che diventano onda sonora */
+function E2(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#g-solid)"/>
+  <!-- Paletta minimale in alto -->
+  <path d="M 196 100
+           L 316 100
+           Q 326 100, 326 112
+           L 326 200
+           Q 326 212, 316 212
+           L 196 212
+           Q 186 212, 186 200
+           L 186 112
+           Q 186 100, 196 100 Z"
+        fill="none" stroke="#ECE9E0" stroke-width="8" stroke-linejoin="round"/>
+  <!-- 6 tuning pegs (3+3) -->
+  <g fill="#ECE9E0">
+    <circle cx="210" cy="135" r="8"/>
+    <circle cx="210" cy="178" r="8"/>
+    <circle cx="302" cy="135" r="8"/>
+    <circle cx="302" cy="178" r="8"/>
+    <circle cx="256" cy="135" r="8" opacity="0.55"/>
+    <circle cx="256" cy="178" r="8" opacity="0.55"/>
+  </g>
+  <!-- 6 corde che scendono e si trasformano in waveform -->
+  <g stroke="#FFB800" stroke-linecap="round" fill="none">
+    <line x1="216" y1="212" x2="216" y2="260" stroke-width="2"/>
+    <line x1="232" y1="212" x2="232" y2="260" stroke-width="2.5"/>
+    <line x1="248" y1="212" x2="248" y2="260" stroke-width="3"/>
+    <line x1="264" y1="212" x2="264" y2="260" stroke-width="3"/>
+    <line x1="280" y1="212" x2="280" y2="260" stroke-width="2.5"/>
+    <line x1="296" y1="212" x2="296" y2="260" stroke-width="2"/>
+    <!-- Sotto: onda sonora che cresce -->
+    <path d="M 130 320 Q 165 290, 200 320 T 270 320 T 340 320 T 410 320" stroke-width="6"/>
+    <path d="M 110 360 Q 160 335, 210 360 T 310 360 T 410 360" stroke-width="4" opacity="0.7"/>
+    <path d="M 130 395 Q 180 380, 230 395 T 330 395 T 390 395" stroke-width="3" opacity="0.5"/>
+  </g>
+`;}
+
+/* E3 · Paletta + nota croma emergente (note theme) */
+function E3(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#F6F4EE"/>
+  <!-- Paletta -->
+  <path d="M 130 130
+           Q 120 110, 140 110
+           L 240 110
+           Q 260 110, 250 130
+           L 250 290
+           Q 250 304, 236 308
+           L 236 380
+           Q 236 392, 224 392
+           L 178 392
+           Q 166 392, 166 380
+           L 166 308
+           Q 150 304, 150 290 Z"
+        fill="url(#g-solid)"/>
+  <!-- 3+3 pegs (bianchi sulla paletta scura) -->
+  <g fill="#ECE9E0">
+    <circle cx="158" cy="155" r="9"/>
+    <circle cx="158" cy="200" r="9"/>
+    <circle cx="158" cy="245" r="9"/>
+    <circle cx="222" cy="155" r="9"/>
+    <circle cx="222" cy="200" r="9"/>
+    <circle cx="222" cy="245" r="9"/>
+  </g>
+  <!-- Nota croma grande a destra che "esce" dalla chitarra -->
+  <g fill="url(#g-brand)">
+    <rect x="368" y="140" width="9" height="180" rx="4.5"/>
+    <path d="M 377 140 C 425 158, 434 200, 408 240
+             C 420 220, 416 198, 377 188 Z"/>
+    <ellipse cx="354" cy="320" rx="28" ry="20" transform="rotate(-22 354 320)"/>
+  </g>
+  <!-- Linee/onde tra paletta e nota (collegamento sonoro) -->
+  <g stroke="url(#g-brand)" stroke-width="2.5" stroke-linecap="round" opacity="0.55" fill="none">
+    <path d="M 260 230 Q 290 240, 320 250"/>
+    <path d="M 260 260 Q 290 270, 320 280"/>
+    <path d="M 260 290 Q 290 300, 320 310"/>
+  </g>
+`;}
+
+/* E4 · Paletta + scala di livelli/learning sulla tastiera */
+function E4(){return `
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+  <!-- Paletta in alto -->
+  <path d="M 200 90
+           L 312 90
+           Q 322 90, 322 102
+           L 322 200
+           Q 322 214, 308 218
+           L 308 244
+           Q 308 256, 296 256
+           L 216 256
+           Q 204 256, 204 244
+           L 204 218
+           Q 190 214, 190 200
+           L 190 102
+           Q 190 90, 200 90 Z"
+        fill="none" stroke="url(#g-brand)" stroke-width="7" stroke-linejoin="round"/>
+  <!-- 6 pegs in linea (6-inline tipo Fender) -->
+  <g fill="url(#g-brand)">
+    <circle cx="216" cy="125" r="7"/>
+    <circle cx="244" cy="125" r="7"/>
+    <circle cx="272" cy="125" r="7"/>
+    <circle cx="300" cy="125" r="7"/>
+    <circle cx="216" cy="175" r="7"/>
+    <circle cx="300" cy="175" r="7"/>
+  </g>
+  <!-- Tastiera che scende: 6 corde -->
+  <g stroke="url(#g-brand)" stroke-linecap="round" opacity="0.6">
+    <line x1="218" y1="256" x2="218" y2="420" stroke-width="1.5"/>
+    <line x1="234" y1="256" x2="234" y2="420" stroke-width="2"/>
+    <line x1="250" y1="256" x2="250" y2="420" stroke-width="2.5"/>
+    <line x1="266" y1="256" x2="266" y2="420" stroke-width="3"/>
+    <line x1="282" y1="256" x2="282" y2="420" stroke-width="3.5"/>
+    <line x1="298" y1="256" x2="298" y2="420" stroke-width="4"/>
+  </g>
+  <!-- Frets orizzontali -->
+  <g stroke="url(#g-brand)" stroke-width="2" opacity="0.3" stroke-linecap="round">
+    <line x1="210" y1="300" x2="306" y2="300"/>
+    <line x1="210" y1="340" x2="306" y2="340"/>
+    <line x1="210" y1="380" x2="306" y2="380"/>
+  </g>
+  <!-- Dot di learning ascendenti (positions/fret markers) -->
+  <g fill="#FFB800">
+    <circle cx="234" cy="395" r="6" opacity="0.5"/>
+    <circle cx="250" cy="360" r="8" opacity="0.7"/>
+    <circle cx="266" cy="320" r="10"/>
+    <!-- Glow attorno all'ultimo -->
+    <circle cx="266" cy="320" r="16" fill="none" stroke="#FFB800" stroke-width="2.5" opacity="0.45"/>
+  </g>
+`;}
+
+/* ═══════════════════════════════════════════════════════════════
+   METADATI + RENDER
+   ═══════════════════════════════════════════════════════════════ */
+
+const SETS = {
+  A: [
+    { id:'A1', name:'A1 · Refined — N + corda vibrante',
+      tags:[['t-wave','onde'],['t-note','note']],
+      desc:'Versione rifinita del concept originale: N pulita con la diagonale sostituita da una corda che vibra in oro, con due "pin" che ancorano gli estremi.',
+      body:A1 },
+    { id:'A2', name:'A2 · N costruita da 6 corde + waveform',
+      tags:[['t-wave','onde']],
+      desc:'Le aste verticali della N diventano 6 corde di chitarra che vibrano (ampiezza graduata). La diagonale è un waveform audio reale in oro.',
+      body:A2 },
+    { id:'A3', name:'A3 · N + nota croma in accento',
+      tags:[['t-note','note'],['t-wave','onde']],
+      desc:'N solida con una croma sospesa in alto a destra come "headnote". Sotto, un\'onda sonora sottile suggerisce il suono che la N emette.',
+      body:A3 },
+    { id:'A4', name:'A4 · N outline + dot ascendenti (learning)',
+      tags:[['t-learn','learning']],
+      desc:'N in outline con una scala di pallini che ascendono lungo la diagonale: metafora visiva diretta del "salire di livello" — chord positions che si illuminano.',
+      body:A4 },
+  ],
+  C: [
+    { id:'C1', name:'C1 · Refined — barre EQ a forma di N',
+      tags:[['t-wave','onde']],
+      desc:'Versione rifinita: barre EQ con proporzioni migliori, asta sx/dx più alte (tipico waveform), diagonale che ricalca una scala sinusoidale.',
+      body:C1 },
+    { id:'C2', name:'C2 · N tracciata da onda sinusoidale',
+      tags:[['t-wave','onde']],
+      desc:'N disegnata da 3 onde sinusoidali continue (sx, diagonale, dx). Eleganza geometrica pura — l\'onda È la lettera, senza barre.',
+      body:C2 },
+    { id:'C3', name:'C3 · N + pentagramma + scala ascendente',
+      tags:[['t-note','note'],['t-learn','learning']],
+      desc:'N viola su pentagramma musicale; 4 teste di nota dorate disposte in scala ascendente — notazione esplicita + progressione di apprendimento.',
+      body:C3 },
+    { id:'C4', name:'C4 · Spectrum + playhead + nota emergente',
+      tags:[['t-wave','onde'],['t-learn','learning'],['t-note','note']],
+      desc:'Spectrum analyzer a forma di N con una barra centrale evidenziata (il "current focus" dell\'utente). Una croma in alto rappresenta l\'output del learning. Tutti e 3 i temi.',
+      body:C4 },
+  ],
+  E: [
+    { id:'E1', name:'E1 · Refined — paletta 3+3 classica',
+      tags:[['t-note','note']],
+      desc:'Configurazione 3+3 (Gibson-style), proporzioni corrette, 6 pegs reali, N incisa nella base. Premium e adulto.',
+      body:E1 },
+    { id:'E2', name:'E2 · Paletta + corde + onde sonore',
+      tags:[['t-wave','onde']],
+      desc:'Paletta in alto, 6 corde scendono e si trasformano in 3 onde sonore concentriche in oro. Lo strumento "che canta".',
+      body:E2 },
+    { id:'E3', name:'E3 · Paletta + nota croma laterale',
+      tags:[['t-note','note'],['t-wave','onde']],
+      desc:'Paletta solida a sinistra, croma grande a destra collegata da onde sottili: lo strumento e il suono che produce, lato a lato.',
+      body:E3 },
+    { id:'E4', name:'E4 · Paletta + tastiera + dot di learning',
+      tags:[['t-learn','learning'],['t-note','note']],
+      desc:'Paletta 6-inline (Fender-style) e tastiera che scende con pallini ascendenti dorati: il percorso di apprendimento visualizzato sulla chitarra stessa.',
+      body:E4 },
+  ],
+};
+
+function svgFull(body){ return `<svg viewBox="${VB}" xmlns="http://www.w3.org/2000/svg">${body()}</svg>`; }
+function svgSized(body,cls){ return `<svg class="${cls}" viewBox="${VB}" xmlns="http://www.w3.org/2000/svg">${body()}</svg>`; }
+
+function renderSet(setKey){
+  const grid = document.getElementById('grid-' + setKey);
+  for(const o of SETS[setKey]){
+    const full = svgFull(o.body);
+    const tagsHtml = o.tags.map(([cls,lbl])=>`<span class="tg ${cls}">${lbl}</span>`).join('');
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="card">
+        <div class="h"><h3>${o.name}</h3><div class="tags">${tagsHtml}</div></div>
+        <div class="desc">${o.desc}</div>
+        <div class="swatches">
+          <div class="sw light">${full}</div>
+          <div class="sw dark">${full}</div>
+          <div class="sw brand">${full}</div>
+        </div>
+        <div class="sizes">
+          <div>${svgSized(o.body,'s1')}<span class="lab">56px</span></div>
+          <div>${svgSized(o.body,'s2')}<span class="lab">36px</span></div>
+          <div>${svgSized(o.body,'s3')}<span class="lab">22px</span></div>
+        </div>
+        <div class="wordmark">
+          <div class="wm light">${svgSized(o.body,'s2')}<span class="nm">Nemo</span></div>
+          <div class="wm dark">${svgSized(o.body,'s2')}<span class="nm">Nemo</span></div>
+        </div>
+      </div>
+    `);
+  }
+}
+renderSet('A'); renderSet('C'); renderSet('E');
+</script>
+</body>
+</html>

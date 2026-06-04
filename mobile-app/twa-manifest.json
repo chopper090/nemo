@@ -1,0 +1,41 @@
+{
+  "packageId": "com.chopper090.notetrainer",
+  "host": "chopper090.github.io",
+  "name": "Note Trainer",
+  "launcherName": "Note Trainer",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#15171C",
+  "navigationColor": "#15171C",
+  "navigationColorDark": "#15171C",
+  "navigationDividerColor": "#1F1F22",
+  "navigationDividerColorDark": "#1F1F22",
+  "backgroundColor": "#15171C",
+  "enableNotifications": false,
+  "startUrl": "/note-trainer/",
+  "iconUrl": "https://chopper090.github.io/note-trainer/icon.svg",
+  "maskableIconUrl": "https://chopper090.github.io/note-trainer/icon.svg",
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "splashScreenFadeOutDuration": 300,
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": { "enabled": false },
+    "playBilling": { "enabled": false }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "minSdkVersion": 21,
+  "shareTarget": null,
+  "fullScopeUrl": "https://chopper090.github.io/note-trainer/",
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1.0.0"
+}

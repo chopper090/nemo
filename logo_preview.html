@@ -1,0 +1,100 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Nemo — opzioni logo</title>
+<style>
+  body{margin:0;background:#16181d;color:#e8e8ea;font:500 14px/1.4 -apple-system,Inter,sans-serif}
+  h1{font-weight:700;font-size:18px;padding:16px 20px 0}
+  .grid{display:flex;flex-wrap:wrap;gap:18px;padding:18px}
+  .card{border:1px solid #2a2d33;border-radius:14px;overflow:hidden;width:300px;background:#1c1f25}
+  .card h2{font-size:13px;margin:0;padding:10px 12px;border-bottom:1px solid #2a2d33;color:#aeb4c0;font-weight:600}
+  .swatches{display:flex}
+  .sw{flex:1;display:flex;align-items:center;justify-content:center;padding:18px}
+  .sw.light{background:#f3f1ea}.sw.dark{background:#0c0d10}.sw.mid{background:#3a3d44}
+  .sw svg{width:120px;height:120px;display:block}
+  .note{padding:8px 12px;color:#7e828c;font-size:12px}
+</style></head><body>
+<h1>Nemo — opzioni logo (sfondo trasparente · vettoriale)</h1>
+<div class="grid" id="grid"></div>
+
+<!-- ════ DEFINIZIONI RIUSABILI (gradient + glow) ════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="neon" x1="0" y1="0" x2="0.25" y2="1">
+    <stop offset="0" stop-color="#3ad4ff"/>
+    <stop offset="0.4" stop-color="#6f6cf6"/>
+    <stop offset="0.72" stop-color="#a64bf4"/>
+    <stop offset="1" stop-color="#ec5cc0"/>
+  </linearGradient>
+  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="4.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs></svg>
+
+<script>
+// ─── Simbolo orecchio+nota: path condivisi ───
+// Orecchio (elica esterna), concha interna, antielice; nota = gambo+bandierina+testa.
+// Orecchio anatomico stilizzato: elica esterna + antielice + concha + tragus + lobo.
+const EAR_OUTER  = "M286 150 C228 108 150 120 138 196 C126 262 144 326 196 352 C224 366 258 356 270 326";   // elica + lobo
+const ANTIHELIX  = "M262 176 C214 180 188 224 198 274 C204 306 230 322 258 314";                            // antielice (cresta interna)
+const CONCHA     = "M256 214 C220 214 202 248 214 282";                                                      // concha (conca, apre verso la nota)
+const TRAGUS     = "M272 240 C286 242 288 260 274 266";                                                      // tragus (piccola aletta)
+const NOTE_STEM  = "M348 352 L348 150";
+const NOTE_FLAG  = "M348 150 C400 160 412 204 380 246";
+
+function sym(opts={}){
+  const poly = opts.poly ? polyMesh() : '';
+  const head = `<ellipse cx="322" cy="356" rx="31" ry="22" transform="rotate(-24 322 356)" fill="url(#neon)"/>`;
+  const sw = opts.sw||11;
+  return `
+   <g filter="url(#glow)" fill="none" stroke="url(#neon)" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">
+     <path d="${EAR_OUTER}"/>
+     <path d="${ANTIHELIX}" stroke-width="${sw-2}" opacity=".9"/>
+     <path d="${CONCHA}" stroke-width="${sw-2}" opacity=".85"/>
+     <path d="${TRAGUS}" stroke-width="${sw-3}" opacity=".8"/>
+     ${poly}
+     <path d="${NOTE_STEM}"/>
+     <path d="${NOTE_FLAG}"/>
+   </g>
+   ${head}`;
+}
+// Maglia low-poly leggera sopra l'orecchio
+function polyMesh(){
+  const pts = [[138,196],[210,116],[286,150],[150,268],[214,214],[214,282],[196,352],[262,176],[258,314]];
+  const tris = [[0,1,3],[1,2,7],[1,7,4],[1,4,3],[3,4,5],[3,5,6],[5,8,6],[4,7,8],[4,8,5]];
+  let s='<g stroke-width="2" opacity=".5">';
+  for(const t of tris){ const a=pts[t[0]],b=pts[t[1]],c=pts[t[2]];
+    s+=`<polygon points="${a} ${b} ${c}" fill="none"/>`; }
+  return s+'</g>';
+}
+function nemoText(){
+  return `<text x="256" y="470" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="78" letter-spacing="6" fill="none" stroke="url(#neon)" stroke-width="5" filter="url(#glow)">NEMO</text>`;
+}
+
+const OPTIONS = [
+  { id:'A', name:'A · Linea pulita', vb:'0 0 512 512', body: sym() },
+  { id:'B', name:'B · Low-poly (wireframe)', vb:'0 0 512 512', body: sym({poly:true}) },
+  { id:'D', name:'D · Su tile scuro (come ref)', vb:'0 0 512 512', body:
+      `<rect x="36" y="36" width="440" height="440" rx="96" fill="#26282d" stroke="#3a3d44" stroke-width="3"/>` + sym({poly:true}) },
+];
+
+const grid = document.getElementById('grid');
+for(const o of OPTIONS){
+  const svg = `<svg viewBox="${o.vb}" xmlns="http://www.w3.org/2000/svg">${defs()}${o.body}</svg>`;
+  grid.insertAdjacentHTML('beforeend', `
+   <div class="card"><h2>${o.name}</h2>
+     <div class="swatches">
+       <div class="sw light">${svg}</div>
+       <div class="sw dark">${svg}</div>
+       <div class="sw mid">${svg}</div>
+     </div>
+     <div class="note">chiaro · scuro · medio (controllo su sfondi diversi)</div>
+   </div>`);
+}
+function defs(){return `<defs>
+  <linearGradient id="neon" x1="0" y1="0" x2="0.25" y2="1">
+    <stop offset="0" stop-color="#3ad4ff"/><stop offset="0.4" stop-color="#6f6cf6"/>
+    <stop offset="0.72" stop-color="#a64bf4"/><stop offset="1" stop-color="#ec5cc0"/></linearGradient>
+  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="4.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ </defs>`;}
+</script>
+</body></html>

@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Nemo — Nuove proposte logo</title>
+<style>
+  :root{
+    --bg:#0e0f13; --card:#181a20; --card-2:#1f222a; --border:#2a2d35;
+    --text:#ECE9E0; --muted:#9aa0ac; --subtle:#6b707a;
+    --brand:#5840D7; --cyan:#00D4FF; --magenta:#E94CC8; --gold:#FFB800;
+    --green:#10B981; --pink:#FF4D6D;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:500 14px/1.5 -apple-system,"Inter",system-ui,sans-serif}
+  header{padding:32px 40px 16px;border-bottom:1px solid var(--border);background:#0a0b0f}
+  header h1{margin:0 0 8px;font-size:24px;font-weight:800;letter-spacing:-0.5px}
+  header p{margin:0;color:var(--muted);max-width:780px;font-size:14px}
+  header .legend{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;font-size:12px;color:var(--subtle)}
+  header .legend span{display:inline-flex;align-items:center;gap:6px}
+  header .legend i{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid var(--border)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
+        gap:20px;padding:28px 40px 60px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+  .card header.h{padding:14px 18px;border-bottom:1px solid var(--border);background:#15171c;display:flex;justify-content:space-between;align-items:center}
+  .card h2{margin:0;font-size:15px;font-weight:700}
+  .card .tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--brand);background:rgba(88,64,215,0.13);padding:3px 8px;border-radius:6px}
+  .card .desc{padding:12px 18px;color:var(--muted);font-size:13px;line-height:1.5;border-bottom:1px solid var(--border);min-height:54px}
+  .swatches{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+  .sw{display:flex;align-items:center;justify-content:center;padding:24px 12px;min-height:140px}
+  .sw.light{background:#F6F4EE}
+  .sw.dark{background:#15171C}
+  .sw.brand{background:linear-gradient(135deg,#5840D7,#7d3fe0 50%,#E94CC8)}
+  .sw svg{width:96px;height:96px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
+  .sw.light svg{filter:drop-shadow(0 4px 12px rgba(0,0,0,.10))}
+  .sizes{display:flex;align-items:flex-end;justify-content:space-around;
+         padding:18px 12px;background:#0c0d11;gap:16px}
+  .sizes div{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .sizes svg{display:block}
+  .sizes .lab{font-size:10px;color:var(--subtle)}
+  .sizes svg.s1{width:64px;height:64px}
+  .sizes svg.s2{width:40px;height:40px}
+  .sizes svg.s3{width:24px;height:24px}
+  .wordmark{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}
+  .wm{display:flex;align-items:center;justify-content:center;padding:18px;gap:10px;min-height:84px}
+  .wm.light{background:#F6F4EE;color:#1A1D24}
+  .wm.dark{background:#15171C}
+  .wm svg{height:36px;width:auto}
+  .wm .nm{font:800 24px/1 "Inter",sans-serif;letter-spacing:-0.5px}
+  .wm.light .nm{color:#1A1D24}
+  .wm.dark .nm{color:#ECE9E0}
+  .footnote{padding:24px 40px 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);background:#0a0b0f}
+  .footnote b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Nemo — 9 nuove proposte logo</h1>
+  <p>Ogni proposta è vettoriale, testata su 3 sfondi (chiaro · scuro · brand), in 3 dimensioni
+  (favicon 24, header 40, app icon 64) e abbinata al wordmark. Concetti legati al DNA dell'app:
+  chitarra, fretboard, ear training, allenamento, mastery.</p>
+  <div class="legend">
+    <span><i style="background:#F6F4EE"></i> tema chiaro</span>
+    <span><i style="background:#15171C"></i> tema scuro</span>
+    <span><i style="background:linear-gradient(135deg,#5840D7,#E94CC8)"></i> brand gradient</span>
+    <span>· dimensioni: 24px · 40px · 64px</span>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<!-- ═══════════ Definizioni globali (gradient + filtri) ═══════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Gradient brand: cyan → viola → magenta -->
+    <linearGradient id="g-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#00D4FF"/>
+      <stop offset="0.5" stop-color="#5840D7"/>
+      <stop offset="1"   stop-color="#E94CC8"/>
+    </linearGradient>
+    <!-- Gradient warm: gold → magenta -->
+    <linearGradient id="g-warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB800"/>
+      <stop offset="1" stop-color="#E94CC8"/>
+    </linearGradient>
+    <!-- Solid: viola brand -->
+    <linearGradient id="g-solid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7355FF"/>
+      <stop offset="1" stop-color="#4D2FCF"/>
+    </linearGradient>
+    <filter id="glow-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<div class="footnote">
+  <p><b>Come scegliere</b> — guarda ogni logo sulle tre dimensioni piccole in basso a ogni card:
+  un logo riuscito deve restare riconoscibile anche a 24px (favicon). Verifica anche
+  il <b>wordmark</b> nella riga finale: l'icona dovrebbe accompagnare bene il nome "Nemo" senza
+  competerci visivamente.</p>
+  <p>Dimmi quale ti convince di più (anche solo l'iniziale, es. "C" o "F+H") e te la rifinisco a
+  livello pixel-perfect per generare gli <code>icon-192.png</code>, <code>icon-512.png</code> e
+  l'<code>icon.svg</code> definitivi, oltre alle versioni maskable per PWA.</p>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   9 PROPOSTE LOGO — ciascuna è una funzione che ritorna il <g> SVG completo.
+   Tutte usano viewBox 0 0 512 512 e sono progettate per essere leggibili
+   anche a 24px (favicon).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const VB = '0 0 512 512';
+
+/* ──────────── A · Monogramma "N" con corda risonante ────────────
+   Una N geometrica bold, dove la diagonale è una corda di chitarra che
+   vibra (onda). Pulito, app-store ready, leggibile a tutte le dimensioni. */
+function logoA(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#g-solid)"/>
+    <!-- N geometrica -->
+    <path d="M 150 380 L 150 132 L 200 132 L 200 280
+             L 312 132 L 362 132 L 362 380 L 312 380 L 312 232
+             L 200 380 Z"
+          fill="#ECE9E0"/>
+    <!-- Corda vibrante che sostituisce la diagonale -->
+    <path d="M 200 280 Q 220 260, 240 280 T 280 280 T 312 232"
+          fill="none" stroke="#FFB800" stroke-width="7" stroke-linecap="round"
+          opacity="0.95"/>
+  </g>`;}
+
+/* ──────────── B · Fret + Pallino (posizione sulla tastiera) ────────────
+   Sezione minimale di tastiera con un dot — il linguaggio universale della
+   chitarra. Bold, professionale, immediato per ogni chitarrista. */
+function logoB(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+    <!-- Tastiera: 6 corde -->
+    <g stroke="#ECE9E0" stroke-linecap="round" opacity="0.55">
+      <line x1="120" y1="160" x2="392" y2="160" stroke-width="2"/>
+      <line x1="120" y1="200" x2="392" y2="200" stroke-width="2.5"/>
+      <line x1="120" y1="240" x2="392" y2="240" stroke-width="3"/>
+      <line x1="120" y1="280" x2="392" y2="280" stroke-width="3.5"/>
+      <line x1="120" y1="320" x2="392" y2="320" stroke-width="4"/>
+      <line x1="120" y1="360" x2="392" y2="360" stroke-width="5"/>
+    </g>
+    <!-- Frets (verticali) -->
+    <g stroke="#ECE9E0" opacity="0.35" stroke-width="3" stroke-linecap="round">
+      <line x1="170" y1="150" x2="170" y2="370"/>
+      <line x1="240" y1="150" x2="240" y2="370"/>
+      <line x1="310" y1="150" x2="310" y2="370"/>
+      <line x1="380" y1="150" x2="380" y2="370"/>
+    </g>
+    <!-- Capotasto (più spesso) -->
+    <rect x="120" y="148" width="8" height="224" rx="4" fill="#ECE9E0"/>
+    <!-- DOT — posizione su corda + fret -->
+    <circle cx="275" cy="260" r="34" fill="url(#g-brand)"/>
+    <circle cx="275" cy="260" r="34" fill="none"
+            stroke="url(#g-brand)" stroke-width="3" opacity="0.5"
+            transform="scale(1.35) translate(-72,-68)"/>
+  </g>`;}
+
+/* ──────────── C · Waveform a forma di "N" ────────────
+   Una N disegnata come forma d'onda audio. Combina lettera + suono in un
+   unico segno. Modernissimo, perfetto per un'app musicale tech. */
+function logoC(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+    <!-- Forma d'onda verticale che disegna una "N" -->
+    <g fill="url(#g-brand)">
+      <!-- Asta sinistra (waveform di barre) -->
+      <rect x="138" y="200" width="14" height="112" rx="7"/>
+      <rect x="160" y="170" width="14" height="172" rx="7"/>
+      <rect x="182" y="150" width="14" height="212" rx="7"/>
+      <!-- Diagonale (barre crescenti, simulano scala) -->
+      <rect x="210" y="180" width="14" height="152" rx="7"/>
+      <rect x="232" y="200" width="14" height="120" rx="7"/>
+      <rect x="254" y="220" width="14" height="80"  rx="7"/>
+      <rect x="276" y="240" width="14" height="50"  rx="7"/>
+      <rect x="298" y="220" width="14" height="80"  rx="7"/>
+      <rect x="320" y="200" width="14" height="120" rx="7"/>
+      <rect x="342" y="180" width="14" height="152" rx="7"/>
+      <!-- Asta destra -->
+      <rect x="370" y="150" width="14" height="212" rx="7"/>
+      <rect x="392" y="170" width="14" height="172" rx="7" opacity="0"/>
+    </g>
+  </g>`;}
+
+/* ──────────── D · Plettro + Nota ────────────
+   Un plettro di chitarra che contiene una nota musicale stilizzata.
+   Combina identità chitarra + musica in un simbolo unico, caldo,
+   immediatamente "musicale". */
+function logoD(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#F6F4EE"/>
+    <!-- Plettro -->
+    <path d="M 256 110
+             C 340 110, 386 170, 386 240
+             C 386 305, 326 380, 256 410
+             C 186 380, 126 305, 126 240
+             C 126 170, 172 110, 256 110 Z"
+          fill="url(#g-brand)"/>
+    <!-- Nota croma all'interno (bianca) -->
+    <g fill="#FFFFFF">
+      <rect x="277" y="170" width="9" height="135" rx="4.5"/>
+      <path d="M 286 170 C 330 184, 338 220, 318 250
+               C 326 232, 322 212, 286 200 Z"/>
+      <ellipse cx="265" cy="305" rx="26" ry="18" transform="rotate(-22 265 305)"/>
+    </g>
+  </g>`;}
+
+/* ──────────── E · Headstock minimal ────────────
+   Top di una paletta di chitarra (3 meccaniche), forma molto distintiva
+   e premium. Comunica "chitarra" in modo elegante e adulto. */
+function logoE(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+    <!-- Paletta stilizzata -->
+    <path d="M 200 110
+             L 312 110
+             Q 322 110, 322 124
+             L 322 280
+             Q 322 295, 308 298
+             L 304 305
+             L 304 380
+             Q 304 392, 292 392
+             L 220 392
+             Q 208 392, 208 380
+             L 208 305
+             L 204 298
+             Q 190 295, 190 280
+             L 190 124
+             Q 190 110, 200 110 Z"
+          fill="none" stroke="url(#g-brand)" stroke-width="8"
+          stroke-linejoin="round"/>
+    <!-- 3 tuning pegs -->
+    <circle cx="218" cy="160" r="14" fill="url(#g-brand)"/>
+    <circle cx="294" cy="160" r="14" fill="url(#g-brand)"/>
+    <circle cx="218" cy="225" r="14" fill="url(#g-brand)"/>
+    <circle cx="294" cy="225" r="14" fill="url(#g-brand)"/>
+    <!-- N inciso sulla base -->
+    <text x="256" y="358" text-anchor="middle"
+          font-family="Inter,sans-serif" font-weight="900" font-size="44"
+          fill="url(#g-brand)" letter-spacing="-1">N</text>
+  </g>`;}
+
+/* ──────────── F · Diapason + nota ────────────
+   Un diapason (tuning fork) stilizzato — simbolo storico dell'intonazione
+   perfetta. Una piccola nota emerge dalle punte, evocando il suono che
+   l'app insegna a riconoscere. */
+function logoF(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="url(#g-solid)"/>
+    <!-- Diapason -->
+    <g stroke="#ECE9E0" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="14">
+      <!-- Manico -->
+      <line x1="256" y1="408" x2="256" y2="300"/>
+      <!-- Forcella (curva morbida + due bracci) -->
+      <path d="M 196 300 Q 196 260, 230 260 Q 256 260, 256 300
+               M 316 300 Q 316 260, 282 260 Q 256 260, 256 300"/>
+      <line x1="196" y1="300" x2="196" y2="150"/>
+      <line x1="316" y1="300" x2="316" y2="150"/>
+      <!-- Cap dei bracci -->
+      <line x1="196" y1="150" x2="196" y2="142"/>
+      <line x1="316" y1="150" x2="316" y2="142"/>
+    </g>
+    <!-- Onde sonore che escono in alto -->
+    <g fill="none" stroke="#FFB800" stroke-linecap="round" stroke-width="6" opacity="0.9">
+      <path d="M 175 130 Q 256 100, 337 130"/>
+      <path d="M 195 105 Q 256 80, 317 105" opacity="0.7"/>
+      <path d="M 215 82 Q 256 65, 297 82" opacity="0.5"/>
+    </g>
+  </g>`;}
+
+/* ──────────── G · Cochlea pulita (rivisitazione ear) ────────────
+   Una spirale a chiocciola (orecchio interno) pulita e geometrica, con
+   una nota che ne emerge. Mantiene il concetto del logo attuale ma con
+   esecuzione drasticamente più chiara. */
+function logoG(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#15171C"/>
+    <!-- Spirale cochlea — costruita con archi concentrici aperti -->
+    <g fill="none" stroke="url(#g-brand)" stroke-linecap="round">
+      <path d="M 320 256
+               A 110 110 0 1 1 210 256
+               A 80 80 0 1 0 290 256
+               A 50 50 0 1 1 240 256
+               A 25 25 0 1 0 265 256"
+            stroke-width="18"/>
+    </g>
+    <!-- Piccola nota croma a destra (che esce dall'orecchio) -->
+    <g fill="url(#g-brand)">
+      <rect x="358" y="190" width="9" height="100" rx="4.5"/>
+      <path d="M 367 190 C 405 200, 412 232, 392 258
+               C 400 240, 395 220, 367 213 Z"/>
+      <ellipse cx="346" cy="288" rx="20" ry="14" transform="rotate(-22 346 288)"/>
+    </g>
+  </g>`;}
+
+/* ──────────── H · Bersaglio + Nota (focus / mastery) ────────────
+   Un bersaglio concentrico con una nota nel centro. Metafora diretta di
+   "training", "precisione", "padronanza" — il cuore della promessa
+   dell'app. Forma circolare molto riconoscibile. */
+function logoH(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#F6F4EE"/>
+    <!-- Anelli del bersaglio -->
+    <circle cx="256" cy="256" r="170" fill="none" stroke="url(#g-brand)" stroke-width="10" opacity="0.35"/>
+    <circle cx="256" cy="256" r="130" fill="none" stroke="url(#g-brand)" stroke-width="10" opacity="0.55"/>
+    <circle cx="256" cy="256" r="92"  fill="none" stroke="url(#g-brand)" stroke-width="10" opacity="0.75"/>
+    <circle cx="256" cy="256" r="56"  fill="url(#g-brand)"/>
+    <!-- Nota croma sul centro (bianca) -->
+    <g fill="#FFFFFF">
+      <rect x="270" y="218" width="7" height="58" rx="3.5"/>
+      <path d="M 277 218 C 302 226, 308 246, 295 263
+               C 301 250, 298 238, 277 233 Z"/>
+      <ellipse cx="263" cy="278" rx="15" ry="11" transform="rotate(-22 263 278)"/>
+    </g>
+  </g>`;}
+
+/* ──────────── I · Wordmark puro NEMO ────────────
+   Solo tipografia: NEMO con una piccola differenziazione musicale
+   (la "O" diventa una nota / un disco). Classico, intramontabile,
+   funziona ovunque. Perfetto anche come affiancato all'icona. */
+function logoI(){return `
+  <g>
+    <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+    <!-- NEMO -->
+    <text x="100" y="305" font-family="Inter,sans-serif" font-weight="900"
+          font-size="140" letter-spacing="-4" fill="url(#g-brand)">NEM</text>
+    <!-- "O" come testa di nota inclinata -->
+    <ellipse cx="395" cy="270" rx="40" ry="32" fill="url(#g-brand)" transform="rotate(-18 395 270)"/>
+    <ellipse cx="395" cy="270" rx="22" ry="15" fill="#0e0f13" transform="rotate(-18 395 270)"/>
+    <!-- Gambo della nota -->
+    <rect x="430" y="140" width="9" height="135" rx="4.5" fill="url(#g-brand)" transform="rotate(8 434 200)"/>
+  </g>`;}
+
+
+/* ═══════════ DESCRIZIONI ═══════════ */
+const OPTIONS = [
+  { id:'A', tag:'monogramma', name:'A · "N" con corda vibrante',
+    desc:'N geometrica bold; la diagonale è una corda di chitarra che vibra in oro. Massima riconoscibilità a tutte le dimensioni. App-store ready.',
+    body: logoA },
+  { id:'B', tag:'chitarra', name:'B · Tastiera + dot di posizione',
+    desc:'Sezione minimale di fretboard con un pallino brillante: il linguaggio universale della chitarra. Premium, professionale, immediato.',
+    body: logoB },
+  { id:'C', tag:'audio', name:'C · Waveform a forma di N',
+    desc:'La lettera N disegnata come una forma d\'onda audio. Combina nome del brand + dimensione sonora in un unico segno geometrico moderno.',
+    body: logoC },
+  { id:'D', tag:'chitarra', name:'D · Plettro + nota musicale',
+    desc:'Plettro di chitarra che contiene una croma. Forma calda, immediatamente "musicale", funziona perfettamente sia in versione piena che outline.',
+    body: logoD },
+  { id:'E', tag:'chitarra', name:'E · Paletta (headstock)',
+    desc:'Top di una paletta stilizzata con meccaniche. Look premium, adulto, da strumento serio. Una N discreta marca la base.',
+    body: logoE },
+  { id:'F', tag:'musica', name:'F · Diapason + onde sonore',
+    desc:'Tuning fork con onde sonore che emergono in oro. Simbolo storico dell\'intonazione perfetta — collega direttamente all\'ear training.',
+    body: logoF },
+  { id:'G', tag:'ear', name:'G · Cochlea pulita (evoluzione dell\'attuale)',
+    desc:'Spirale dell\'orecchio interno geometrica e leggibile + nota che ne emerge. Mantiene il concetto del logo attuale ma drasticamente più chiaro.',
+    body: logoG },
+  { id:'H', tag:'training', name:'H · Bersaglio + nota centrale',
+    desc:'Bersaglio concentrico con nota nel centro: metafora diretta di precisione, training, mastery — il cuore della promessa dell\'app.',
+    body: logoH },
+  { id:'I', tag:'wordmark', name:'I · Wordmark "NEMO" tipografico',
+    desc:'Solo tipografia: NEMO dove la O diventa testa di nota. Classico, intramontabile. Da usare da solo o accanto a un\'altra icona.',
+    body: logoI },
+];
+
+/* ═══════════ RENDER ═══════════ */
+function svgFull(body){ return `<svg viewBox="${VB}" xmlns="http://www.w3.org/2000/svg">${body()}</svg>`; }
+function svgSized(body,cls){ return `<svg class="${cls}" viewBox="${VB}" xmlns="http://www.w3.org/2000/svg">${body()}</svg>`; }
+
+const grid = document.getElementById('grid');
+for(const o of OPTIONS){
+  const full = svgFull(o.body);
+  grid.insertAdjacentHTML('beforeend', `
+    <div class="card">
+      <header class="h"><h2>${o.name}</h2><span class="tag">${o.tag}</span></header>
+      <div class="desc">${o.desc}</div>
+      <div class="swatches">
+        <div class="sw light">${full}</div>
+        <div class="sw dark">${full}</div>
+        <div class="sw brand">${full}</div>
+      </div>
+      <div class="sizes">
+        <div>${svgSized(o.body,'s1')}<span class="lab">64px</span></div>
+        <div>${svgSized(o.body,'s2')}<span class="lab">40px</span></div>
+        <div>${svgSized(o.body,'s3')}<span class="lab">24px</span></div>
+      </div>
+      <div class="wordmark">
+        <div class="wm light">${svgSized(o.body,'s2')}<span class="nm">Nemo</span></div>
+        <div class="wm dark">${svgSized(o.body,'s2')}<span class="nm">Nemo</span></div>
+      </div>
+    </div>
+  `);
+}
+</script>
+</body>
+</html>

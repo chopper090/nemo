@@ -1,0 +1,32 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g-cool" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00D4FF"/>
+      <stop offset="1" stop-color="#5840D7"/>
+    </linearGradient>
+    <linearGradient id="g-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00D4FF"/>
+      <stop offset="0.5" stop-color="#5840D7"/>
+      <stop offset="1" stop-color="#E94CC8"/>
+    </linearGradient>
+  </defs>
+  <rect x="60" y="60" width="392" height="392" rx="88" fill="#0e0f13"/>
+  <g>
+    <rect x="138" y="170" width="14" height="172" rx="7" fill="url(#g-cool)"/>
+    <rect x="160" y="150" width="14" height="212" rx="7" fill="url(#g-cool)"/>
+    <rect x="186" y="170" width="14" height="172" rx="7" fill="url(#g-cool)" opacity="0.85"/>
+    <rect x="208" y="190" width="14" height="132" rx="7" fill="url(#g-cool)" opacity="0.75"/>
+    <rect x="230" y="210" width="14" height="92"  rx="7" fill="url(#g-cool)" opacity="0.7"/>
+    <rect x="252" y="220" width="14" height="72"  rx="7" fill="#FFB800"/>
+    <rect x="274" y="210" width="14" height="92"  rx="7" fill="url(#g-cool)" opacity="0.7"/>
+    <rect x="296" y="190" width="14" height="132" rx="7" fill="url(#g-cool)" opacity="0.75"/>
+    <rect x="318" y="170" width="14" height="172" rx="7" fill="url(#g-cool)" opacity="0.85"/>
+    <rect x="344" y="150" width="14" height="212" rx="7" fill="url(#g-cool)"/>
+    <rect x="366" y="170" width="14" height="172" rx="7" fill="url(#g-cool)"/>
+  </g>
+  <line x1="120" y1="380" x2="392" y2="380" stroke="url(#g-brand)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <g fill="#FFB800">
+    <rect x="262" y="108" width="5" height="38" rx="2.5"/>
+    <ellipse cx="256" cy="146" rx="10" ry="7" transform="rotate(-20 256 146)"/>
+  </g>
+</svg>
