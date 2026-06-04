@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.03.01 — 2026-06-04
+
+- Fix mobile: barra dei tasti dell'header su 3 righe a tutta larghezza (brand · modalità · vista); tutti i pulsanti (Sølo/Sølve/Ear/Lick/Play/Tune/Lab + controlli vista) ora visibili e cliccabili, senza sovrapposizioni né tagli.
+
 ## v2.03.00 — 2026-06-04
 
 - Modulo **PLAY** completo: accordo in evidenza + diagramma, testo con accordi, metronomo che avanza la progressione.
