@@ -193,7 +193,7 @@ JS  <script>  (~3420-12860)
       <button class="btn btn-icon btn-resolve" id="btnResolve" title="Resolve — ear training cieco (R)"><span class="logo-mini resolve-logo-mini">s<b>ø</b>lve</span></button>
       <button class="btn btn-icon btn-ear" id="btnEar" title="EAR — interval ear training (E)"><span class="logo-mini ear-logo-mini"><b>e</b>ar</span></button>
       <button class="btn btn-icon btn-lick" id="btnLick" title="Lick — libreria di lick ed esercizi (K)"><span class="logo-mini lick-logo-mini">L<b>i</b>ck</span></button>
-      <button class="btn btn-icon btn-play" id="btnPlay" title="Play — studia canzoni: accordi + metronomo (P)"><span class="logo-mini play-logo-mini">P<b>l</b>ay</span></button>
+      <button class="btn btn-icon btn-play" id="btnPlay" title="Play — studia canzoni: accordi + metronomo (C)"><span class="logo-mini play-logo-mini">P<b>l</b>ay</span></button>
       <button class="btn btn-icon btn-tuner" id="btnTuner" title="Tune — accordatore (U)"><span class="logo-mini tuner-logo-mini">t<b>u</b>ne</span></button>
       <a class="btn btn-icon btn-label btn-lab" id="btnFretboardLab" href="fretboard-lab.html" target="_blank" rel="noopener" title="Apri Fretboard Lab (nuova scheda)" style="text-decoration:none;color:inherit;"><span class="btn-l-full">Lab ↗</span><span class="btn-l-icon">🧪</span></a>
     </div>
@@ -6002,6 +6002,7 @@ dom.importProgressFile.addEventListener('change', (e) => {
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('keydown', (e) => {
   if (e.target.matches('input,textarea')) return;
+  if (window.Play && Play.active) return;   // overlay Play attivo: la tastiera va solo a Play (Spazio=play/pausa)
   if (e.key === 'Escape') {
     if (!dom.lessonIntroOverlay.classList.contains('hidden')) { dom.lessonIntroOverlay.classList.add('hidden'); e.preventDefault(); return; }
     if (!dom.lessonSummaryOverlay.classList.contains('hidden')) { dom.lessonSummaryOverlay.classList.add('hidden'); setView('path'); e.preventDefault(); return; }
@@ -10395,6 +10396,1468 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Escape' && Lick.active) Lick.close();
   });
   window.Lick = Lick;
+
+  // ════════════════════════════════════════════════════════════
+  //  PLAY — studio canzoni: accordo grande "in mostra" + testo con
+  //  accordi sopra + metronomo che fa AVANZARE la progressione armonica.
+  //  Modello a battiti: ogni accordo dura N beat; bars = beat/beatsPerBar.
+  //  Import "accordi sopra testo" (IT/EN) → parsing struttura armonica.
+  // ════════════════════════════════════════════════════════════
+  const PLAY_PC = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+  const PLAY_OPEN_MIDI = [40, 45, 50, 55, 59, 64];   // E A D G B e (low→high)
+  const PLAY_FLAT_NAMES = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+  // Schemi di pennata (8 crome per battuta 4/4): D=giù, U=su, '-'=pausa
+  const PLAY_STRUMS = {
+    down:    ['D', '-', 'D', '-', 'D', '-', 'D', '-'],   // un giù per movimento
+    folk:    ['D', '-', 'D', 'U', '-', 'U', 'D', 'U'],   // D - D U - U D U (pop/folk)
+    rock:    ['D', 'D', 'D', 'D', 'D', 'D', 'D', 'D'],   // ottavi in giù (drive)
+    ballad:  ['D', '-', '-', '-', 'D', '-', '-', '-'],   // lenta: 1 e 3
+    offbeat: ['-', 'U', '-', 'U', '-', 'U', '-', 'U'],   // levare/reggae
+  };
+  const PLAY_STRUM_LABELS = { down: 'Giù', folk: 'Folk', rock: 'Rock', ballad: 'Ballata', offbeat: 'Levare' };
+  const PLAY_QUALITIES = {
+    'maj':[0,4,7], 'min':[0,3,7], 'dim':[0,3,6], 'aug':[0,4,8],
+    'sus2':[0,2,7], 'sus4':[0,5,7], 'sus':[0,5,7], '5':[0,7],
+    '7':[0,4,7,10], 'maj7':[0,4,7,11], 'm7':[0,3,7,10], 'm7b5':[0,3,6,10],
+    'dim7':[0,3,6,9], '6':[0,4,7,9], 'm6':[0,3,7,9],
+    '9':[0,4,7,10,14], 'm9':[0,3,7,10,14], 'maj9':[0,4,7,11,14], 'add9':[0,4,7,14],
+  };
+  const PLAY_QUAL_SUFFIX = {
+    'maj':'', 'min':'m', 'dim':'dim', 'aug':'aug', 'sus2':'sus2', 'sus4':'sus4', 'sus':'sus4', '5':'5',
+    '7':'7', 'maj7':'maj7', 'm7':'m7', 'm7b5':'m7b5', 'dim7':'dim7', '6':'6', 'm6':'m6',
+    '9':'9', 'm9':'m9', 'maj9':'maj9', 'add9':'add9',
+  };
+  // Voicing chord-box per i diagrammi (low E→high e; -1=muta, 0=corda vuota, n=tasto)
+  const CHORD_SHAPES = {
+    'C':[-1,3,2,0,1,0], 'Cmaj7':[-1,3,2,0,0,0], 'C7':[-1,3,2,3,1,0], 'Cm':[-1,3,5,5,4,3],
+    'D':[-1,-1,0,2,3,2], 'Dm':[-1,-1,0,2,3,1], 'D7':[-1,-1,0,2,1,2], 'Dmaj7':[-1,-1,0,2,2,2],
+    'E':[0,2,2,1,0,0], 'Em':[0,2,2,0,0,0], 'E7':[0,2,0,1,0,0], 'Em7':[0,2,0,0,0,0],
+    'F':[1,3,3,2,1,1], 'Fmaj7':[-1,-1,3,2,1,0], 'Fm':[1,3,3,1,1,1], 'F7':[1,3,1,2,1,1],
+    'G':[3,2,0,0,0,3], 'G7':[3,2,0,0,0,1], 'Gm':[3,5,5,3,3,3], 'Gmaj7':[3,2,0,0,0,2],
+    'A':[-1,0,2,2,2,0], 'Am':[-1,0,2,2,1,0], 'A7':[-1,0,2,0,2,0], 'Am7':[-1,0,2,0,1,0], 'Amaj7':[-1,0,2,1,2,0],
+    'B':[-1,2,4,4,4,2], 'Bm':[-1,2,4,4,3,2], 'B7':[-1,2,1,2,0,2], 'Bm7':[-1,2,0,2,0,2],
+    'Bb':[-1,1,3,3,3,1], 'Bbm':[-1,1,3,3,2,1], 'Bb7':[-1,1,3,1,3,1],
+    'Eb':[-1,6,8,8,8,6], 'Ebm':[-1,6,8,8,7,6], 'Ebmaj7':[-1,6,8,7,8,6], 'Eb7':[-1,6,8,6,8,6],
+    'Ab':[4,6,6,5,4,4], 'Abm':[4,6,6,4,4,4], 'Db':[-1,4,6,6,6,4], 'Gb':[2,4,4,3,2,2], 'Gbm':[2,4,4,2,2,2],
+  };
+
+  // Notazione italiana → internazionale (solo su fondamentale/basso, a inizio token o dopo "/")
+  function plNormalizeSym(raw) {
+    let s = (raw || '').trim();
+    if (!s) return '';
+    const map = { SOL:'G', DO:'C', RE:'D', MI:'E', FA:'F', LA:'A', SI:'B' };
+    s = s.replace(/(^|\/)\s*(SOL|DO|RE|MI|FA|LA|SI)/gi, (m, pre, note) => pre + map[note.toUpperCase()]);
+    return s;
+  }
+  function plQualityKey(rest) {
+    let q = (rest || '').trim();
+    if (q === '') return 'maj';
+    if (/^(maj7|Maj7|M7|7\+|Δ|maj)/.test(q) && /^(maj7|Maj7|M7|7\+|Δ)/.test(q)) return 'maj7';
+    if (/^(maj9|Maj9|M9)/.test(q)) return 'maj9';
+    if (/^(m7b5|min7b5|ø|-7b5)/.test(q)) return 'm7b5';
+    if (/^(dim7|°7|o7)/.test(q)) return 'dim7';
+    if (/^(dim|°|o$)/.test(q)) return 'dim';
+    if (/^(aug|\+)/.test(q)) return 'aug';
+    if (/^sus2/.test(q)) return 'sus2';
+    if (/^(sus4|sus)/.test(q)) return 'sus4';
+    if (/^add9/.test(q)) return 'add9';
+    if (/^(m9|min9|-9)/.test(q)) return 'm9';
+    if (/^(m6|min6|-6)/.test(q)) return 'm6';
+    if (/^(m7|min7|-7)/.test(q)) return 'm7';
+    if (/^(maj7|M7)/.test(q)) return 'maj7';
+    if (/^(m|min|-)/.test(q)) return 'min';
+    if (/^9/.test(q)) return '9';
+    if (/^7/.test(q)) return '7';
+    if (/^6/.test(q)) return '6';
+    if (/^5/.test(q)) return '5';
+    return 'maj';
+  }
+  function plParseChord(rawSym) {
+    const sym = plNormalizeSym(rawSym);
+    const m = sym.match(/^([A-G])([b#]?)(.*)$/);
+    if (!m) return null;
+    let pc = PLAY_PC[m[1]];
+    if (m[2] === 'b') pc = (pc + 11) % 12; else if (m[2] === '#') pc = (pc + 1) % 12;
+    let rest = m[3] || '', bassPc = null;
+    const slash = rest.indexOf('/');
+    if (slash >= 0) {
+      const bm = rest.slice(slash + 1).match(/^([A-G])([b#]?)/);
+      rest = rest.slice(0, slash);
+      if (bm) { bassPc = PLAY_PC[bm[1]]; if (bm[2] === 'b') bassPc = (bassPc + 11) % 12; else if (bm[2] === '#') bassPc = (bassPc + 1) % 12; }
+    }
+    const quality = plQualityKey(rest);
+    return { pc, quality, bassPc, intervals: PLAY_QUALITIES[quality] || PLAY_QUALITIES.maj };
+  }
+  function plChordSym(pc, quality, bassPc) {
+    let s = PLAY_FLAT_NAMES[((pc % 12) + 12) % 12] + (PLAY_QUAL_SUFFIX[quality] != null ? PLAY_QUAL_SUFFIX[quality] : '');
+    if (bassPc !== null && bassPc !== undefined) s += '/' + PLAY_FLAT_NAMES[((bassPc % 12) + 12) % 12];
+    return s;
+  }
+  // ── Spelling enarmonico: diesis o bemolli secondo la tonalità (EN/IT) ──
+  const PLAY_SPELL = {
+    sharp: { en: ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], it: ['Do','Do#','Re','Re#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si'] },
+    flat:  { en: ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'], it: ['Do','Reb','Re','Mib','Mi','Fa','Solb','Sol','Lab','La','Sib','Si'] },
+  };
+  function plSpellName(pc, pref, notation) {
+    const t = PLAY_SPELL[pref === 'sharp' ? 'sharp' : 'flat'];
+    return (notation === 'it' ? t.it : t.en)[((pc % 12) + 12) % 12];
+  }
+  // Tonalità con bemolli/diesis (circolo delle quinte). Ambigue → bemolli (più comuni negli spartiti).
+  function plPrefForKey(pc, isMinor) {
+    pc = ((pc % 12) + 12) % 12;
+    if (isMinor) { const flatMin = new Set([2,7,0,5,10,3,8]); return flatMin.has(pc) ? 'flat' : 'sharp'; }   // Dm Gm Cm Fm Bbm Ebm Abm
+    const flatMaj = new Set([5,10,3,8,1,6]);                                                                 // F Bb Eb Ab Db Gb
+    return flatMaj.has(pc) ? 'flat' : (new Set([7,2,9,4,11]).has(pc) ? 'sharp' : 'flat');                    // sharp: G D A E B
+  }
+  function plKeyPref(keyStr, transpose) {
+    const p = plParseChord(keyStr || '');
+    if (!p) return 'flat';
+    const isMinor = /^(min|m7|m9|m6|m7b5|dim|dim7)/.test(p.quality);
+    return plPrefForKey(p.pc + (transpose || 0), isMinor);
+  }
+  // Testo accordo (per chart/lato) e HTML stilizzato (per stage/zoom), da pitch-class.
+  function plChordText(pc, quality, bassPc, pref, notation) {
+    let s = plSpellName(pc, pref, notation) + (PLAY_QUAL_SUFFIX[quality] != null ? PLAY_QUAL_SUFFIX[quality] : '');
+    if (bassPc !== null && bassPc !== undefined) s += '/' + plSpellName(bassPc, pref, notation);
+    return s;
+  }
+  function plChordDisplayHtml(pc, quality, bassPc, pref, notation) {
+    const root = plSpellName(pc, pref, notation);
+    const suf = PLAY_QUAL_SUFFIX[quality] != null ? PLAY_QUAL_SUFFIX[quality] : '';
+    let inlineM = '', sup = suf;
+    if (suf.charAt(0) === 'm' && suf.slice(0, 3) !== 'maj') { inlineM = 'm'; sup = suf.slice(1); }
+    let html = root + inlineM;
+    if (sup) html += `<span class="pl-chord-sup">${sup}</span>`;
+    if (bassPc !== null && bassPc !== undefined) html += `<span class="pl-chord-bass">/${plSpellName(bassPc, pref, notation)}</span>`;
+    return html;
+  }
+  function plShapeFor(parsed) {
+    const sh = CHORD_SHAPES[plChordSym(parsed.pc, parsed.quality, null)];
+    return sh || null;
+  }
+  // ── Supporto accordature: TUNINGS[i].notes = pitch-class per corda, high→low ──
+  const PLAY_REF_MIDI = [35, 40, 45, 50, 55, 59, 64]; // B1 E2 A2 D3 G3 B3 e4 (low→high, per 6/7 corde)
+  function plTuningPCs(idx) { const t = TUNINGS[idx] || TUNINGS[0]; return t.notes; }            // high→low
+  function plTuningMidiLowHigh(idx) {
+    const pcsHL = plTuningPCs(idx), n = pcsHL.length;
+    const ref = PLAY_REF_MIDI.slice(PLAY_REF_MIDI.length - n);
+    return pcsHL.slice().reverse().map((pc, i) => { let d = (((pc - (ref[i] % 12)) % 12) + 12) % 12; if (d > 6) d -= 12; return ref[i] + d; });
+  }
+  function plChordPCs(parsed) {
+    const set = new Set(parsed.intervals.map(iv => (parsed.pc + iv) % 12));
+    if (parsed.bassPc !== null && parsed.bassPc !== undefined) set.add(parsed.bassPc);
+    return set;
+  }
+  // Trova un voicing suonabile dell'accordo in QUALSIASI accordatura (greedy, finestra 4 tasti).
+  function plVoicing(parsed, tuningIdx, region) {
+    const openLH = plTuningPCs(tuningIdx).slice().reverse();   // low→high
+    const pcs = plChordPCs(parsed);
+    const wantBass = (parsed.bassPc !== null && parsed.bassPc !== undefined) ? parsed.bassPc : parsed.pc;
+    const start = region != null ? region : 0, end = region != null ? Math.min(14, region + 2) : 11;
+    let best = null;
+    for (let base = start; base <= end; base++) {
+      const frets = openLH.map(open => {
+        for (let f = (base === 0 ? 0 : base); f <= base + 3; f++) if (pcs.has((open + f) % 12)) return f;
+        if (base <= 2 && pcs.has(open % 12)) return 0;
+        return -1;
+      });
+      const used = frets.filter(f => f >= 0);
+      if (used.length < 3) continue;
+      const distinct = new Set(frets.map((f, i) => f < 0 ? null : (openLH[i] + f) % 12).filter(x => x != null));
+      const li = frets.findIndex(f => f >= 0);
+      const lowestPc = (openLH[li] + frets[li]) % 12;
+      const fr = used.filter(f => f > 0);
+      const span = fr.length ? Math.max(...fr) - Math.min(...fr) : 0;
+      const score = distinct.size * 10 + (distinct.has(parsed.pc) ? 6 : 0) + (lowestPc === wantBass ? 5 : 0) + used.length - base * 0.3 - span;
+      if (!best || score > best.score) best = { score, frets };
+    }
+    return best ? best.frets : null;
+  }
+  function plResolveVoicing(parsed, tuningIdx) {
+    if (!tuningIdx) { const s = plShapeFor(parsed); if (s) return s; }
+    return plVoicing(parsed, tuningIdx || 0);
+  }
+  function plChordMidi(parsed, tuningIdx) {
+    const frets = plResolveVoicing(parsed, tuningIdx || 0);
+    if (frets) {
+      const open = plTuningMidiLowHigh(tuningIdx || 0), out = [];
+      frets.forEach((f, s) => { if (f >= 0) out.push(open[s] + f); });
+      if (out.length) return out;
+    }
+    const root = 48 + parsed.pc;
+    const notes = parsed.intervals.map(iv => root + iv);
+    if (parsed.bassPc !== null && parsed.bassPc !== undefined) notes.unshift(36 + parsed.bassPc);
+    return notes;
+  }
+  // Diagramma chord-box da un array di tasti (low→high; -1=muta, 0=vuota).
+  function plChordDiagram(frets, size) {
+    if (!frets || !frets.length) return '';
+    const nS = frets.length, sc = size || 1;
+    const fretted = frets.filter(f => f > 0);
+    let base = 1, nF = 4;
+    if (fretted.length) { const mn = Math.min(...fretted), mx = Math.max(...fretted); if (mx > 4) base = mn; nF = Math.max(4, mx - base + 1); }
+    const cellW = 13 * sc, cellH = 15 * sc, padX = 11 * sc, padT = 16 * sc, padB = 7 * sc;
+    const w = padX * 2 + cellW * (nS - 1), h = padT + cellH * nF + padB;
+    const sx = s => padX + s * cellW, fy = f => padT + f * cellH;
+    let svg = `<svg class="pl-dia-svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
+    for (let s = 0; s < nS; s++) svg += `<line class="pl-dia-grid" x1="${sx(s)}" y1="${fy(0)}" x2="${sx(s)}" y2="${fy(nF)}"/>`;
+    for (let f = 0; f <= nF; f++) {
+      if (f === 0 && base === 1) svg += `<line class="pl-dia-nut" x1="${sx(0)}" y1="${fy(0)}" x2="${sx(nS - 1)}" y2="${fy(0)}"/>`;
+      else svg += `<line class="pl-dia-grid" x1="${sx(0)}" y1="${fy(f)}" x2="${sx(nS - 1)}" y2="${fy(f)}"/>`;
+    }
+    if (base > 1) svg += `<text class="pl-dia-base" x="${sx(0) - 4 * sc}" y="${fy(0) + cellH / 2}">${base}fr</text>`;
+    frets.forEach((f, s) => {
+      const x = sx(s), y = padT - 6 * sc;
+      if (f === 0) svg += `<circle class="pl-dia-open" cx="${x}" cy="${y}" r="${3 * sc}"/>`;
+      else if (f < 0) { const r = 2.7 * sc; svg += `<line class="pl-dia-mute" x1="${x - r}" y1="${y - r}" x2="${x + r}" y2="${y + r}"/><line class="pl-dia-mute" x1="${x - r}" y1="${y + r}" x2="${x + r}" y2="${y - r}"/>`; }
+    });
+    frets.forEach((f, s) => {
+      if (f > 0) { const rel = f - base + 1; if (rel < 1 || rel > nF) return; svg += `<circle class="pl-dia-dot" cx="${sx(s)}" cy="${fy(rel) - cellH / 2}" r="${5 * sc}"/>`; }
+    });
+    return svg + `</svg>`;
+  }
+
+  // ── Parser "accordi sopra testo" → sezioni (per import manuale o AI) ──
+  function plLooksChord(tok) {
+    let t = (tok || '').replace(/[|()]/g, '').trim();
+    if (!t) return true;                       // separatori di battuta "|"
+    // I veri accordi iniziano MAIUSCOLI (A–G, o nota IT: DO RE MI FA SOL LA SI):
+    // così parole minuscole del testo ("la", "do", "mi", "fa") non vengono scambiate per accordi.
+    if (!/^[A-G]/.test(t) && !/^(DO|RE|MI|FA|SOL|LA|SI)/.test(t)) return false;
+    const en = plNormalizeSym(t);
+    return /^[A-G][b#]?(m|min|maj|M|dim|aug|sus|add|°|ø|Δ|\+|7\+|-|\d|\/)*[A-G0-9b#+°ømajinsudtl\/-]*$/.test(en) && /^[A-G]/.test(en) && en.length <= 10;
+  }
+  function plIsChordLine(line) {
+    const toks = line.trim().split(/\s+/);
+    if (!toks.length || !line.trim()) return false;
+    let real = 0;
+    for (const t of toks) { if (!plLooksChord(t)) return false; if (t.replace(/[|()]/g, '').trim()) real++; }
+    return real > 0;
+  }
+  function plIsSectionLine(line) {
+    const t = line.trim();
+    if (/^\[.+\]$/.test(t)) return true;
+    return t.length < 42 && /^(intro|strofa|verse|chorus|ritornello|rit\b|bridge|ponte|inciso|assolo|solo|outro|coda|finale|interludio|interlude|pre[\s-]?chorus|refrain|tema|stacco)\b/i.test(t);
+  }
+  function plExtractChords(line) {
+    const out = [], re = /\S+/g; let m;
+    while ((m = re.exec(line)) !== null) {
+      const tok = m[0].replace(/[|()]/g, '');
+      if (!tok) continue;
+      out.push({ sym: plNormalizeSym(tok), pos: m.index });
+    }
+    return out;
+  }
+  function plParseChart(text) {
+    const lines = (text || '').replace(/\r/g, '').split('\n');
+    const sections = []; let cur = null;
+    const ensure = () => { if (!cur) { cur = { name: '', lines: [] }; sections.push(cur); } return cur; };
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+      if (plIsSectionLine(line)) { cur = { name: line.trim().replace(/[:\[\]]/g, '').trim(), lines: [] }; sections.push(cur); continue; }
+      if (plIsChordLine(line)) {
+        const chords = plExtractChords(line).map(c => [c.sym, c.pos, 4]);
+        const next = lines[i + 1];
+        if (next && next.trim() && !plIsChordLine(next) && !plIsSectionLine(next)) {
+          ensure().lines.push({ lyric: next.replace(/\s+$/, ''), chords }); i++;
+        } else ensure().lines.push({ chords });
+      } else ensure().lines.push({ lyric: line.replace(/\s+$/, ''), chords: [] });
+    }
+    return sections.filter(s => s.lines.length);
+  }
+
+  // ── Seed: "Still Loving You" — Scorpions (chart accordiespartiti, IT→EN) ──
+  const PLAY_SEED = [{
+    id: 'still-loving-you', seed: true, title: 'Still Loving You', artist: 'Scorpions',
+    key: 'Gm', bpm: 63, capo: 0, beatsPerBar: 4,
+    sections: [
+      { name: 'Intro', lines: [
+        { chords: [['Gm/D',0,4],['Gm/F',8,4],['Ebmaj7',16,4],['D7',24,4]] },
+        { chords: [['Gm/D',0,4],['Gm/F',8,4],['Ebmaj7',16,4],['D7',24,4]] },
+      ]},
+      { name: 'Strofa 1', lines: [
+        { lyric: 'Time, it needs time to win back your love again', chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+        { lyric: 'Love, only love can bring back your love someday', chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+      ]},
+      { name: 'Stacco', lines: [
+        { chords: [['Gm',0,2],['Gm/F',5,2],['Ebmaj7',13,4],['D7',21,4]] },
+        { chords: [['Gm',0,2],['Gm/F',5,2],['Ebmaj7',13,4],['D7',21,4]] },
+      ]},
+      { name: 'Strofa 2', lines: [
+        { lyric: "Fight, babe, I'll fight to win back your love again", chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+        { lyric: 'Love, only love can bring down the wall someday', chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+      ]},
+      { name: 'Ritornello', lines: [
+        { lyric: ' If we go again all the way from the start', chords: [['Gm',0,4],['Eb',7,2],['Bb',16,4],['F',37,4]] },
+        { lyric: ' I would try to change the things that killed our love', chords: [['Gm',0,4],['Eb',9,2],['Bb',27,4],['F',52,4]] },
+        { lyric: ' Your pride has built a wall,', chords: [['Gm',0,4],['Cm',16,4]] },
+        { lyric: "so strong that I can't get through", chords: [['D',3,4],['Gm',27,2],['Gm/F',36,2]] },
+        { lyric: 'Is there really no chance to start once again?', chords: [['Eb',9,4],['F',29,4]] },
+        { lyric: "I'm loving you", chords: [['Gm',11,2],['Gm/F',16,2],['Ebmaj7',24,4],['D7',33,4]] },
+      ]},
+      { name: 'Stacco', lines: [
+        { chords: [['Gm',0,2],['Gm/F',5,2],['Ebmaj7',13,4],['D7',21,4]] },
+      ]},
+      { name: 'Strofa 3', lines: [
+        { lyric: 'Try, baby, try to trust in my love again', chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+        { lyric: "Love, our love just shouldn't be thrown away", chords: [['Gm',0,8]] },
+        { lyric: 'I will be there, I will be there', chords: [['A7',10,4],['D',27,4]] },
+      ]},
+      { name: 'Finale', lines: [
+        { lyric: ' If we go again all the way from the start', chords: [['Gm',0,4],['Eb',7,2],['Bb',16,4],['F',37,4]] },
+        { lyric: ' I would try to change the things that killed our love', chords: [['Gm',0,4],['Eb',9,2],['Bb',27,4],['F',52,4]] },
+        { lyric: ' Your pride has built a wall,', chords: [['Gm',0,4],['Cm',16,4]] },
+        { lyric: "so strong that I can't get through", chords: [['D',3,4],['Gm',27,2],['Gm/F',36,2]] },
+        { lyric: 'Is there really no chance to start once again?', chords: [['Eb',9,4],['F',29,4]] },
+        { lyric: " If we'd go again, all the way from the start", chords: [['Gm',0,4],['Eb',9,2],['Bb',19,4],['F',40,4]] },
+        { lyric: ' I would try to change the things that killed our love', chords: [['Gm',0,4],['Eb',9,2],['Bb',27,4],['F',52,4]] },
+        { lyric: " Yes, I've hurt your pride,", chords: [['Gm',0,4],['Cm',11,4]] },
+        { lyric: "and I know what you've been through", chords: [['D',6,4],['Gm',28,2],['Gm/F',35,2]] },
+        { lyric: "You should give me a chance, this can't be the end", chords: [['Eb',11,4],['F',34,4]] },
+        { lyric: "I'm still loving you", chords: [['Gm',17,4],['Eb',23,4],['Bb',28,4],['F',33,4]] },
+        { lyric: "I'm still loving you", chords: [['Gm',17,4],['Eb',23,4],['Bb',28,4],['F',33,4]] },
+        { lyric: "I'm still loving you", chords: [['Gm',17,4],['Eb',23,4],['Bb',28,4]] },
+        { lyric: 'I need your love', chords: [['F',12,4]] },
+        { lyric: "I'm still loving you...", chords: [['Gm',17,4],['Eb',23,4],['Bb',28,4],['F',33,4]] },
+      ]},
+    ],
+  }];
+
+  // Builder per chart di SOLI accordi (play-along): sec = [[nomeSezione, [accordi...]], ...]
+  function plChordChart(m) {
+    const sections = (m.sec || []).map(row => {
+      const name = row[0], chs = row[1] || [];
+      let pos = 0;
+      const chords = chs.map(sym => { const e = [sym, pos, 4]; pos += sym.length + 3; return e; });
+      return { name, lines: [{ chords }] };
+    });
+    return { id: m.id, seed: true, title: m.title, artist: m.artist || '', key: m.key || '', bpm: m.bpm || 100, capo: m.capo || 0, beatsPerBar: m.beatsPerBar || 4, sections };
+  }
+
+  // Libreria karaoke — blocco 1. Pubblico dominio = testo+accordi completi; il resto = soli accordi.
+  const PLAY_KARAOKE = [
+    // ── Pubblico dominio (testo + accordi) ──
+    { id: 'bella-ciao', seed: true, title: 'Bella ciao', artist: 'Tradizionale', key: 'Am', bpm: 110, capo: 0, beatsPerBar: 4,
+      sections: [
+        { name: 'Strofa 1', lines: [
+          { lyric: 'Una mattina mi son svegliato', chords: [['Am', 0, 8]] },
+          { lyric: 'o bella ciao, bella ciao, bella ciao ciao ciao', chords: [['E7', 0, 8], ['Am', 40, 4]] },
+          { lyric: 'Una mattina mi son svegliato', chords: [['Am', 0, 8]] },
+          { lyric: "e ho trovato l'invasor", chords: [['Dm', 0, 2], ['Am', 6, 2], ['E7', 13, 2], ['Am', 20, 2]] },
+        ]},
+        { name: 'Strofa 2', lines: [
+          { lyric: 'O partigiano, portami via', chords: [['Am', 0, 8]] },
+          { lyric: 'o bella ciao, bella ciao, bella ciao ciao ciao', chords: [['E7', 0, 8], ['Am', 40, 4]] },
+          { lyric: 'O partigiano, portami via', chords: [['Am', 0, 8]] },
+          { lyric: 'ché mi sento di morir', chords: [['Dm', 0, 2], ['Am', 6, 2], ['E7', 13, 2], ['Am', 19, 2]] },
+        ]},
+        { name: 'Strofa 3', lines: [
+          { lyric: 'E se io muoio da partigiano', chords: [['Am', 0, 8]] },
+          { lyric: 'o bella ciao, bella ciao, bella ciao ciao ciao', chords: [['E7', 0, 8], ['Am', 40, 4]] },
+          { lyric: 'E se io muoio da partigiano', chords: [['Am', 0, 8]] },
+          { lyric: 'tu mi devi seppellir', chords: [['Dm', 0, 2], ['Am', 6, 2], ['E7', 13, 2], ['Am', 19, 2]] },
+        ]},
+      ] },
+    // ── Classici internazionali (soli accordi) ──
+    plChordChart({ id: 'kar-knockin', title: "Knockin' on Heaven's Door", artist: 'Bob Dylan', key: 'G', bpm: 72, sec: [
+      ['Giro', ['G', 'D', 'Am7']], ['', ['G', 'D', 'C']],
+    ]}),
+    plChordChart({ id: 'kar-zombie', title: 'Zombie', artist: 'The Cranberries', key: 'Em', bpm: 84, sec: [
+      ['Strofa', ['Em', 'C', 'G', 'D']], ['Ritornello', ['Em', 'C', 'G', 'D']],
+    ]}),
+    plChordChart({ id: 'kar-creep', title: 'Creep', artist: 'Radiohead', key: 'G', bpm: 92, sec: [
+      ['Tutto il brano', ['G', 'B', 'C', 'Cm']],
+    ]}),
+    plChordChart({ id: 'kar-wowy', title: 'With or Without You', artist: 'U2', key: 'D', bpm: 110, sec: [
+      ['Tutto il brano', ['D', 'A', 'Bm', 'G']],
+    ]}),
+    plChordChart({ id: 'kar-wywh', title: 'Wish You Were Here', artist: 'Pink Floyd', key: 'G', bpm: 60, sec: [
+      ['Intro', ['Em7', 'G', 'Em7', 'G']], ['Strofa', ['C', 'D', 'Am', 'G']], ['', ['D', 'C', 'Am', 'G']], ['', ['Em', 'A7', 'G']],
+    ]}),
+    plChordChart({ id: 'kar-letitbe', title: 'Let It Be', artist: 'The Beatles', key: 'C', bpm: 72, sec: [
+      ['Strofa', ['C', 'G', 'Am', 'F']], ['', ['C', 'G', 'F', 'C']], ['Ritornello', ['Am', 'G', 'F', 'C']], ['', ['C', 'G', 'F', 'C']],
+    ]}),
+    plChordChart({ id: 'kar-sweethome', title: 'Sweet Home Alabama', artist: 'Lynyrd Skynyrd', key: 'D', bpm: 98, sec: [
+      ['Tutto il brano', ['D', 'C', 'G']],
+    ]}),
+    // ── Chicche (soli accordi) ──
+    plChordChart({ id: 'kar-nem', title: 'Nothing Else Matters', artist: 'Metallica', key: 'Em', bpm: 70, sec: [
+      ['Intro', ['Em', 'D', 'C']], ['Strofa', ['Em', 'D', 'C']], ['', ['Em', 'G', 'D']], ['Ritornello', ['C', 'D', 'Em']],
+    ]}),
+    plChordChart({ id: 'kar-tears', title: 'Tears in Heaven', artist: 'Eric Clapton', key: 'A', bpm: 80, sec: [
+      ['Strofa', ['A', 'E/G#', 'F#m', 'F#m/E', 'D', 'A/C#', 'Bm7', 'E']],
+      ['Ritornello', ['D', 'A/C#', 'Bm7', 'A', 'G', 'D/F#', 'E']],
+    ]}),
+    // ── Moderne (soli accordi) ──
+    plChordChart({ id: 'kar-perfect', title: 'Perfect', artist: 'Ed Sheeran', key: 'G', bpm: 95, capo: 1, sec: [
+      ['Strofa', ['G', 'Em7', 'C', 'D']], ['Ritornello', ['G', 'D', 'Em7', 'C']], ['', ['G', 'D', 'C']],
+    ]}),
+    plChordChart({ id: 'kar-someone', title: 'Someone Like You', artist: 'Adele', key: 'A', bpm: 67, sec: [
+      ['Strofa', ['A', 'E/G#', 'F#m', 'D']], ['Ritornello', ['A', 'E', 'F#m', 'D']],
+    ]}),
+    plChordChart({ id: 'kar-riptide', title: 'Riptide', artist: 'Vance Joy', key: 'Am', bpm: 102, capo: 1, sec: [
+      ['Strofa', ['Am', 'G', 'C']], ['Ritornello', ['Am', 'G', 'C', 'F']],
+    ]}),
+    plChordChart({ id: 'kar-countingstars', title: 'Counting Stars', artist: 'OneRepublic', key: 'Am', bpm: 122, sec: [
+      ['Tutto il brano', ['Am', 'C', 'G', 'F']],
+    ]}),
+    // ── Chicche (soli accordi) ──
+    plChordChart({ id: 'kar-hallelujah', title: 'Hallelujah', artist: 'Leonard Cohen', key: 'C', bpm: 60, sec: [
+      ['Strofa', ['C', 'Am', 'C', 'Am']], ['', ['F', 'G', 'C', 'G']], ['', ['C', 'F', 'G', 'Am', 'F']], ['', ['G', 'E7', 'Am']],
+      ['Ritornello', ['F', 'Am', 'F', 'G']], ['', ['C', 'G', 'C']],
+    ]}),
+    plChordChart({ id: 'kar-nightwemet', title: 'The Night We Met', artist: 'Lord Huron', key: 'A', bpm: 87, sec: [
+      ['Strofa', ['A', 'C#m', 'D']], ['Ritornello', ['A', 'C#m', 'D', 'E']],
+    ]}),
+    // ── Classici italiani (soli accordi, verificati da accordiespartiti) ──
+    plChordChart({ id: 'kar-canzonesole', title: 'La canzone del sole', artist: 'Lucio Battisti', key: 'A', bpm: 128, sec: [
+      ['Tutto il brano', ['A', 'E', 'D', 'E']],
+    ]}),
+    plChordChart({ id: 'kar-albachiara', title: 'Albachiara', artist: 'Vasco Rossi', key: 'C', bpm: 80, sec: [
+      ['Intro', ['Fmaj7', 'C', 'G7']], ['Strofa', ['C', 'G', 'Am', 'C', 'F', 'C', 'D', 'G7']],
+    ]}),
+    plChordChart({ id: 'kar-generale', title: 'Generale', artist: 'Francesco De Gregori', key: 'A', bpm: 116, sec: [
+      ['Strofa', ['A', 'D', 'A', 'F#m', 'Bm', 'A', 'E', 'A']], ['Ritornello', ['D', 'A', 'D', 'E', 'A']],
+    ]}),
+    plChordChart({ id: 'kar-azzurro', title: 'Azzurro', artist: 'Adriano Celentano', key: 'Bbm', bpm: 120, sec: [
+      ['Strofa', ['Bbm', 'F7', 'Bbm', 'F7']], ['Inciso', ['Ebm', 'Bb7', 'Ebm', 'Bb7']],
+      ['Pre-ritornello', ['Bb', 'F', 'Dm7', 'G7', 'C9', 'F7', 'Bb']], ['Ritornello', ['Bb', 'C7', 'F7', 'Cm7', 'F7', 'Bb']],
+    ]}),
+    plChordChart({ id: 'kar-napule', title: 'Napule è', artist: 'Pino Daniele', key: 'D', bpm: 80, sec: [
+      ['Intro', ['Dmaj7', 'Gmaj7', 'Dmaj7', 'Gmaj7']],
+      ['Strofa', ['Dmaj7', 'Gmaj7', 'A', 'A/G', 'F#m7', 'F#7', 'Bm7', 'G', 'A7sus4', 'D']], ['', ['Gmaj7', 'Dmaj7', 'Gmaj7']],
+    ]}),
+  ];
+
+  const PlayLS = {
+    get(k, def) { try { const v = localStorage.getItem('play.' + k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } },
+    set(k, v) { try { localStorage.setItem('play.' + k, JSON.stringify(v)); } catch (e) {} },
+  };
+  // Override per-brano: bpm, beatsPerBar, beats[] (durate sincronizzate), tuning (indice TUNINGS).
+  // Vivono separate dai dati del brano così anche il seed (in codice) è personalizzabile e persistente.
+  const PlayOver = {
+    all() { return PlayLS.get('over', {}); },
+    get(id) { return this.all()[id] || {}; },
+    set(id, patch) { const a = this.all(); a[id] = Object.assign({}, a[id], patch); PlayLS.set('over', a); },
+  };
+
+  const Play = {
+    active: false,
+    view: 'player',
+    currentId: PlayLS.get('currentId', 'still-loving-you'),
+    transpose: 0,
+    bpm: null,
+    metronome: PlayLS.get('metronome', true),
+    chordSound: PlayLS.get('chordSound', true),
+    countin: PlayLS.get('countin', true),
+    loop: PlayLS.get('loop', false),
+    playing: false,
+    _beat: 0, _curIdx: 0, _timer: null, _countBeats: 0, _countTotal: 0, _curLineKey: null,
+    timeline: [], _starts: [], totalBeats: 0, lineInfo: [],
+    _user: PlayLS.get('songs', []),
+    notation: PlayLS.get('notation', (typeof state !== 'undefined' && state.notation === 'it') ? 'it' : 'en'),
+    strum: PlayLS.get('strum', 'folk'),
+    _eighth: 0, _countEighths: 0,
+    // Sync/edit/zoom
+    syncMode: false, editMode: false, _selIdx: -1, _taps: [], _syncBeats: [], _tapTimes: [],
+    _zoomTuning: null, _zoomNotes: false,
+    _focus: false,
+    // Audio (sync sull'onda reale)
+    _audio: null, _audioUrl: null, _audioReady: false, _audioName: '', _audioSyncMode: false, _syncTimes: [], _raf: 0,
+
+    open() {
+      this.active = true;
+      document.body.classList.add('play-active');
+      this._ensureDom();
+      document.getElementById('playOverlay').classList.add('show');
+      this.view = 'player';
+      this._render();
+    },
+    close() {
+      this.active = false;
+      this._pause();
+      this.syncMode = false; this.editMode = false; this._audioSyncMode = false;
+      this._zoomClose();
+      document.body.classList.remove('play-active');
+      const el = document.getElementById('playOverlay');
+      if (el) el.classList.remove('show');
+    },
+    _persist() {
+      PlayLS.set('currentId', this.currentId);
+      PlayLS.set('metronome', this.metronome);
+      PlayLS.set('chordSound', this.chordSound);
+      PlayLS.set('countin', this.countin);
+      PlayLS.set('loop', this.loop);
+    },
+    _saveSongs() { PlayLS.set('songs', this._user); },
+
+    // Progressioni già presenti nell'app (const SONGS) portate in PLAY come play-along (solo accordi)
+    _builtins() {
+      if (this.__builtins) return this.__builtins;
+      if (typeof SONGS === 'undefined') return (this.__builtins = []);
+      const QM = { maj: 'maj', min: 'min', maj7: 'maj7', min7: 'm7', dom7: '7', m7b5: 'm7b5', dim: 'dim', dim7: 'dim7', aug: 'aug', min6: 'm6', '6': '6', min9: 'm9', maj9: 'maj9', '9': '9', dom7sus4: 'sus4', sus4: 'sus4', sus2: 'sus2' };
+      const BPM = { Blues: 100, Ballad: 72, Swing: 140, 'Modal Jazz': 120, Jazz: 120, 'Jazz Standard': 110, 'Latin Jazz': 142, Bebop: 160, Rock: 120, 'Pop Rock': 118, Pop: 112, 'Pop/Soul': 100 };
+      this.__builtins = SONGS.map(s => {
+        const key = (s.key || '').split(/[\s(]/)[0].replace('♭', 'b').replace('♯', '#');
+        let pos = 0;
+        const chords = (s.chords || []).map(c => {
+          const sym = plChordSym(c.root, QM[c.q] || 'maj', null);
+          const e = [sym, pos, 4]; pos += sym.length + 3; return e;
+        });
+        return { id: 'builtin-' + s.id, seed: true, title: s.name, artist: 'Progressione · ' + (s.style || ''), key, bpm: BPM[s.style] || 104, capo: 0, beatsPerBar: 4,
+          sections: [{ name: (s.style || 'Progressione') + ' · loop', lines: [{ chords }] }] };
+      });
+      return this.__builtins;
+    },
+    _songs() { return PLAY_SEED.concat(PLAY_KARAOKE, this._builtins(), this._user); },
+    _current() { return this._songs().find(s => s.id === this.currentId) || null; },
+    _over() { return PlayOver.get(this.currentId); },
+    _tuningIdx() { const o = this._over(); if (o.tuning != null) return o.tuning; const s = this._current(); return (s && s.tuning) || 0; },
+    _bpb() { const s = this._current(); return this._over().beatsPerBar || (s && s.beatsPerBar) || 4; },
+    _notation() { return this.notation === 'it' ? 'it' : 'en'; },
+    _spellPref() { const s = this._current(); return plKeyPref(s && s.key, this.transpose); },
+    _esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); },
+
+    _ensureDom() {
+      if (document.getElementById('playOverlay')) return;
+      const ov = document.createElement('div');
+      ov.id = 'playOverlay'; ov.className = 'play-overlay';
+      ov.innerHTML = `
+        <div class="pl-topbar">
+          <div class="pl-topbar-left"></div>
+          <div class="pl-topbar-center">
+            <button class="pl-icon-btn" id="plClose" title="Chiudi (C / ESC)">←</button>
+            ${moduleSwitcherHtml('play')}
+          </div>
+          <div class="pl-topbar-right"><span class="pl-count-chip" id="plCount">—</span></div>
+        </div>
+        <div class="pl-body">
+          <aside class="pl-sidebar">
+            <div class="pl-sidebar-head">
+              <span class="pl-sb-lbl">Canzoni</span>
+              <button class="pl-import-btn" id="plImport">+ Importa</button>
+            </div>
+            <div class="pl-list" id="plList"></div>
+          </aside>
+          <main class="pl-detail" id="plDetail"></main>
+        </div>`;
+      document.body.appendChild(ov);
+      document.getElementById('plClose').addEventListener('click', () => this.close());
+      document.getElementById('plImport').addEventListener('click', () => { this.view = 'import'; this._renderDetail(); });
+      if (typeof wireModuleSwitcher === 'function') wireModuleSwitcher(ov, 'play');
+    },
+
+    _render() {
+      this._renderList();
+      if (!this._current()) { const s = this._songs(); this.currentId = s.length ? s[0].id : null; }
+      this._renderDetail();
+      const c = document.getElementById('plCount'); if (c) c.textContent = `${this._songs().length} brani`;
+    },
+
+    _renderList() {
+      const host = document.getElementById('plList'); if (!host) return;
+      const songs = this._songs();
+      if (!songs.length) { host.innerHTML = `<div class="pl-list-empty">Nessuna canzone. Usa <b>+ Importa</b>.</div>`; return; }
+      host.innerHTML = songs.map(s => {
+        const active = s.id === this.currentId ? 'is-active' : '';
+        const tag = [s.key || '', s.bpm ? s.bpm + ' BPM' : ''].filter(Boolean).join(' · ');
+        const del = s.seed ? '' : `<button class="pl-li-del" data-del="${s.id}" title="Elimina">✕</button>`;
+        return `<button class="pl-list-item ${active}" data-song="${s.id}">
+          <span class="pl-li-title">${this._esc(s.title)}</span>
+          <span class="pl-li-meta"><span class="pl-li-tag">${this._esc(s.artist || '—')}</span>${tag ? `<span class="pl-li-tag">${tag}</span>` : ''}</span>
+          ${del}
+        </button>`;
+      }).join('');
+      host.querySelectorAll('[data-song]').forEach(b => b.addEventListener('click', (e) => {
+        if (e.target.closest('[data-del]')) return;
+        this._select(b.dataset.song);
+      }));
+      host.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); this._delete(b.dataset.del); }));
+    },
+
+    _delete(id) {
+      this._user = this._user.filter(s => s.id !== id);
+      this._saveSongs();
+      if (this.currentId === id) { this._pause(); this.currentId = this._songs()[0] ? this._songs()[0].id : null; this._beat = 0; }
+      this._renderList(); this._renderDetail();
+      const c = document.getElementById('plCount'); if (c) c.textContent = `${this._songs().length} brani`;
+    },
+
+    _select(id) {
+      this._pause();
+      this._removeAudio(true);
+      this.currentId = id; this.transpose = 0; this.bpm = null; this._beat = 0; this._curIdx = 0; this._curLineKey = null;
+      this.syncMode = false; this.editMode = false; this._selIdx = -1; this._zoomTuning = null;
+      this.view = 'player';
+      this._persist();
+      this._renderList();
+      this._renderDetail();
+    },
+
+    // ── Timeline a battiti ──
+    _xpose(symRaw) {
+      const p = plParseChord(symRaw);
+      if (!p) return { sym: symRaw, pc: 0, quality: 'maj', intervals: [0,4,7], bassPc: null };
+      const t = this.transpose || 0;
+      const pc = (((p.pc + t) % 12) + 12) % 12;
+      const bassPc = p.bassPc === null ? null : (((p.bassPc + t) % 12) + 12) % 12;
+      return { sym: plChordText(pc, p.quality, bassPc, this._spellPref(), this._notation()), pc, quality: p.quality, intervals: p.intervals, bassPc };
+    },
+    _buildTimeline() {
+      const song = this._current();
+      const ovBeats = this._over().beats;   // durate sincronizzate/modificate, per indice timeline
+      const tl = [], starts = [], lines = []; let beat = 0;
+      (song.sections || []).forEach((sec, si) => {
+        (sec.lines || []).forEach((ln, li) => {
+          const chords = ln.chords || [];
+          const lineStart = beat, firstTi = tl.length;
+          chords.forEach((c, ci) => {
+            const symRaw = c[0], pos = c[1] || 0;
+            const ti = tl.length;
+            const beats = (ovBeats && ovBeats[ti] != null) ? ovBeats[ti] : (c[2] || 4);
+            const pt = this._xpose(symRaw);
+            starts.push(beat);
+            tl.push({ symT: pt.sym, parsed: pt, beats, pos, si, li, ci });
+            beat += beats;
+          });
+          lines.push({ si, li, startBeat: lineStart, firstTi, hasChords: chords.length > 0 });
+        });
+      });
+      this.timeline = tl; this._starts = starts; this.totalBeats = beat; this.lineInfo = lines;
+    },
+    // Array durate corrente (override o default dei dati) — base per editing/sync.
+    _currentBeats() { return this.timeline.map(t => t.beats); },
+    _chordAtBeat(beat) {
+      let idx = 0;
+      for (let i = 0; i < this._starts.length; i++) { if (this._starts[i] <= beat) idx = i; else break; }
+      return idx;
+    },
+    _keyLabel() {
+      const song = this._current(); const p = plParseChord(song.key || '');
+      if (!p) return song.key || '—';
+      const pc = (((p.pc + (this.transpose || 0)) % 12) + 12) % 12;
+      return plChordText(pc, p.quality, null, this._spellPref(), this._notation());
+    },
+
+    _renderDetail() {
+      const host = document.getElementById('plDetail'); if (!host) return;
+      if (this.view === 'import') { this._renderImportView(host); return; }
+      const song = this._current();
+      if (!song) { host.innerHTML = `<div class="pl-detail-empty">Nessuna canzone selezionata.<br>Importane una con <b>+ Importa</b>.</div>`; return; }
+      this._buildTimeline();
+      if (this._beat >= this.totalBeats) this._beat = 0;
+      this._curIdx = this._chordAtBeat(this._beat);
+      const bpb = this._bpb();
+      const bpm = this.bpm || this._over().bpm || song.bpm;
+      const bars = Math.round(this.totalBeats / bpb);
+      const tn = TUNINGS[this._tuningIdx()].name;
+      host.innerHTML = `
+        <div class="pl-detail-head">
+          <h2 class="pl-dh-title">${this._esc(song.title)}</h2>
+          ${song.artist ? `<div class="pl-dh-artist">${this._esc(song.artist)}</div>` : ''}
+          <div class="pl-dh-meta">
+            <div class="pl-transpose">
+              <span class="pl-tr-lbl">Tonalità</span>
+              <button class="pl-tr-btn" id="plKeyDown" title="Trasporta giù">◀</button>
+              <button class="pl-tr-key ${this.transpose ? 'is-moved' : ''}" id="plKeyReset" title="${this.transpose ? 'Reset tonalità' : 'Tonalità del brano'}">${this._keyLabel()}${this.transpose ? ' ↺' : ''}</button>
+              <button class="pl-tr-btn" id="plKeyUp" title="Trasporta su">▶</button>
+            </div>
+            ${song.capo ? `<span class="pl-meta-chip">Capo <b>${song.capo}</b></span>` : ''}
+            <label class="pl-tune-select" title="Accordatura: cambia le forme degli accordi e la mappa sul manico"><span>🎸</span>
+              <select id="plTuneSel">${TUNINGS.map((t, i) => `<option value="${i}" ${i === this._tuningIdx() ? 'selected' : ''}>${this._esc(t.name)}</option>`).join('')}</select>
+            </label>
+            <span class="pl-meta-chip">${this.timeline.length} accordi</span>
+            <span class="pl-meta-chip">${bars} battute</span>
+          </div>
+        </div>
+        <div class="pl-stage"><div id="plStage"></div></div>
+        <div class="pl-mode-banner" id="plBanner" style="display:none"></div>
+        <div class="pl-transport">
+          <button class="pl-play-btn" id="plPlay" aria-label="Play/Pausa">▶</button>
+          <button class="pl-restart-btn" id="plRestart" title="Riparti dall'inizio">↺</button>
+          <div class="pl-tempo">
+            <div class="pl-tempo-head"><span>Tempo</span><span><b id="plBpmVal">${bpm}</b> BPM</span></div>
+            <input type="range" id="plBpm" min="40" max="220" step="1" value="${bpm}">
+          </div>
+          <button class="pl-toggle ${this.metronome ? 'is-active' : ''}" id="plMetro" title="Click del metronomo">🔊 Metronomo</button>
+          <button class="pl-toggle ${this.chordSound ? 'is-active' : ''}" id="plChordSnd" title="Suona gli accordi">🎸 Accordi</button>
+          <button class="pl-toggle ${this.countin ? 'is-active' : ''}" id="plCountin" title="Una battuta di intro prima di partire">⏱ Count-in</button>
+          <button class="pl-toggle ${this.loop ? 'is-active' : ''}" id="plLoop" title="Ripeti in loop">⟳ Loop</button>
+        </div>
+        <div class="pl-synctools">
+          <span class="pl-st-lbl">Sincro</span>
+          <button class="pl-chip-btn" id="plTap" title="Batti il tempo (≥2 click) per impostare i BPM">👆 Tap<b id="plTapBpm"></b></button>
+          <button class="pl-chip-btn" id="plHalf" title="Dimezza il tempo">½×</button>
+          <button class="pl-chip-btn" id="plDouble" title="Raddoppia il tempo">2×</button>
+          <span class="pl-st-sep"></span>
+          <button class="pl-chip-btn" id="plSig" title="Movimenti per battuta (metro)">${bpb}/4</button>
+          <button class="pl-chip-btn" id="plStrum" title="Schema di pennata (ritmo degli accordi)">🎚 ${PLAY_STRUM_LABELS[this.strum] || 'Folk'}</button>
+          <button class="pl-chip-btn ${this.syncMode ? 'is-active' : ''}" id="plSyncBtn" title="Sincronizza battendo a ogni cambio accordo">🎯 Sincronizza battendo</button>
+          <button class="pl-chip-btn ${this.editMode ? 'is-active' : ''}" id="plEditBtn" title="Modifica la durata di ogni accordo">✎ Durate</button>
+          ${this._over().beats ? `<button class="pl-chip-btn" id="plResetTiming" title="Ripristina le durate originali del brano">↺ durate</button>` : ''}
+          <span class="pl-st-sep"></span>
+          <button class="pl-chip-btn ${this._focus ? 'is-active' : ''}" id="plFocusBtn" title="Karaoke: testo grande, centrato e scorrevole (F)">⛶ Focus testo</button>
+          <button class="pl-chip-btn" id="plNotation" title="Notazione accordi/note: internazionale o italiana">${this.notation === 'it' ? 'IT' : 'EN'}</button>
+        </div>
+        ${this._renderAudioBar()}
+        <div class="pl-chart-wrap" id="plChartWrap">${this._renderChart()}</div>
+        <div class="pl-focus-bar" id="plFocusBar">
+          <button class="pl-play-btn" id="plFocusPlay" aria-label="Play/Pausa">▶</button>
+          <button class="pl-chip-btn" id="plFocusExit">✕ Esci da Focus</button>
+        </div>`;
+      this._renderStage();
+      this._curLineKey = null;
+      this._highlightChart();
+      this._renderBanner();
+      // wiring transport
+      document.getElementById('plPlay').addEventListener('click', () => this._togglePlay());
+      document.getElementById('plRestart').addEventListener('click', () => this._restart());
+      const bpmIn = document.getElementById('plBpm');
+      bpmIn.addEventListener('input', () => { this.bpm = parseInt(bpmIn.value); const v = document.getElementById('plBpmVal'); if (v) v.textContent = this.bpm; PlayOver.set(this.currentId, { bpm: this.bpm }); });
+      document.getElementById('plMetro').addEventListener('click', (e) => { this.metronome = !this.metronome; this._persist(); e.currentTarget.classList.toggle('is-active', this.metronome); });
+      document.getElementById('plChordSnd').addEventListener('click', (e) => { this.chordSound = !this.chordSound; this._persist(); e.currentTarget.classList.toggle('is-active', this.chordSound); });
+      document.getElementById('plCountin').addEventListener('click', (e) => { this.countin = !this.countin; this._persist(); e.currentTarget.classList.toggle('is-active', this.countin); });
+      document.getElementById('plLoop').addEventListener('click', (e) => { this.loop = !this.loop; this._persist(); e.currentTarget.classList.toggle('is-active', this.loop); });
+      document.getElementById('plKeyDown').addEventListener('click', () => this._changeKey(-1));
+      document.getElementById('plKeyUp').addEventListener('click', () => this._changeKey(1));
+      document.getElementById('plKeyReset').addEventListener('click', () => { if (this.transpose) this._changeKey(-this.transpose); });
+      // wiring sincro
+      document.getElementById('plTap').addEventListener('click', () => this._tapTempo());
+      document.getElementById('plHalf').addEventListener('click', () => this._scaleTempo(0.5));
+      document.getElementById('plDouble').addEventListener('click', () => this._scaleTempo(2));
+      document.getElementById('plSig').addEventListener('click', () => this._cycleSig());
+      document.getElementById('plStrum').addEventListener('click', () => this._cycleStrum());
+      document.getElementById('plSyncBtn').addEventListener('click', () => this.syncMode ? this._cancelSync() : this._startSync());
+      document.getElementById('plEditBtn').addEventListener('click', () => this._toggleEdit());
+      document.getElementById('plTuneSel').addEventListener('change', (e) => this._setTuning(parseInt(e.target.value)));
+      document.getElementById('plFocusBtn').addEventListener('click', () => this._toggleFocus());
+      document.getElementById('plNotation').addEventListener('click', () => { this.notation = this.notation === 'it' ? 'en' : 'it'; PlayLS.set('notation', this.notation); this._renderDetail(); });
+      const rt = document.getElementById('plResetTiming'); if (rt) rt.addEventListener('click', () => this._resetTiming());
+      document.getElementById('plFocusPlay').addEventListener('click', () => this._togglePlay());
+      document.getElementById('plFocusExit').addEventListener('click', () => this._toggleFocus());
+      if (this.playing || this._audioPlaying) this._setPlayIcon('⏸');
+      this._wireAudioBar();
+      requestAnimationFrame(() => { const l = document.querySelector('.pl-line.is-active-line'); if (l) this._centerLine(l); });
+      // wiring chart: chip accordo → zoom (o seleziona in edit); resto riga → salta lì
+      host.querySelectorAll('.pl-chord').forEach(ch => ch.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ti = parseInt(ch.dataset.ti);
+        if (this.editMode) this._selectChord(ti);
+        else if (this.timeline[ti]) this._zoomOpen(this.timeline[ti].parsed);
+      }));
+      host.querySelectorAll('.pl-line[data-li]').forEach(el => el.addEventListener('click', (e) => {
+        if (e.target.closest('.pl-chord')) return;
+        const [si, li] = el.dataset.li.split('-').map(Number);
+        const info = this.lineInfo.find(x => x.si === si && x.li === li);
+        if (info) this._jumpTo(info);
+      }));
+    },
+
+    _renderChart() {
+      const song = this._current(); let ti = 0;
+      let html = '<div class="pl-chart">';
+      (song.sections || []).forEach((sec, si) => {
+        html += `<div class="pl-section">${sec.name ? `<div class="pl-section-name">${this._esc(sec.name)}</div>` : ''}`;
+        (sec.lines || []).forEach((ln, li) => {
+          const chords = ln.chords || [], lyric = ln.lyric || '', isInstr = !lyric;
+          let maxEnd = lyric.length;
+          const spans = chords.map(c => {
+            const pos = c[1] || 0, pt = this._xpose(c[0]);
+            maxEnd = Math.max(maxEnd, pos + pt.sym.length + 2);
+            const cls = (this.editMode && ti === this._selIdx) ? 'pl-chord is-sel' : 'pl-chord';
+            const badge = this.editMode ? `<i class="pl-chord-beats">${this.timeline[ti] ? this.timeline[ti].beats : ''}</i>` : '';
+            const s = `<span class="${cls}" data-ti="${ti}" style="left:${pos}ch">${this._esc(pt.sym)}${badge}</span>`;
+            ti++; return s;
+          }).join('');
+          html += `<div class="pl-line ${isInstr ? 'is-instrumental' : ''}" data-li="${si}-${li}">
+            <div class="pl-line-chords" style="min-width:${maxEnd}ch">${spans}</div>
+            <div class="pl-line-lyric">${this._esc(lyric)}</div>
+          </div>`;
+        });
+        html += `</div>`;
+      });
+      return html + '</div>';
+    },
+
+    _renderStage() {
+      const host = document.getElementById('plStage'); if (!host) return;
+      const tl = this.timeline; const i = this._curIdx;
+      const bpb = this._bpb(), ti = this._tuningIdx();
+      if (!tl || !tl.length) { host.innerHTML = `<div class="pl-stage-inner"><div class="pl-stage-empty">Nessun accordo in questo brano.</div></div>`; return; }
+      const cur = tl[i] || tl[0], nxt = tl[i + 1], prev = tl[i - 1];
+      const bar = Math.floor((this._starts[i] || 0) / bpb) + 1;
+      const totBars = Math.max(1, Math.round(this.totalBeats / bpb));
+      host.innerHTML = `<div class="pl-stage-inner">
+        <div class="pl-stage-prev">${prev ? `<span class="pl-stage-side-lbl">prec</span><span class="pl-stage-side-chord">${this._esc(prev.symT)}</span>` : ''}</div>
+        <div class="pl-stage-current">
+          <button class="pl-chord-name" id="plBigChord" title="Zoom: gradi e tutte le posizioni sul manico">${plChordDisplayHtml(cur.parsed.pc, cur.parsed.quality, cur.parsed.bassPc, this._spellPref(), this._notation())}</button>
+          <div class="pl-chord-dia">${plChordDiagram(plResolveVoicing(cur.parsed, ti), 1.8)}</div>
+          <div class="pl-beatdots" id="plBeats">${Array.from({ length: bpb }, (_, k) => `<span class="pl-beat ${k === 0 ? 'is-accent' : ''}"></span>`).join('')}</div>
+          <div class="pl-bar-count">battuta <b>${bar}</b> / ${totBars} · <span class="pl-zoom-hint">🔍 tocca l'accordo per gradi &amp; manico</span></div>
+        </div>
+        <div class="pl-stage-next">${nxt ? `<span class="pl-stage-side-lbl">poi</span><span class="pl-stage-side-chord">${this._esc(nxt.symT)}</span><div class="pl-stage-side-dia">${plChordDiagram(plResolveVoicing(nxt.parsed, ti), 1.0)}</div>` : `<span class="pl-stage-side-lbl">fine</span>`}</div>
+      </div>`;
+      const big = document.getElementById('plBigChord');
+      if (big) big.addEventListener('click', () => this._zoomOpen(cur.parsed));
+    },
+
+    _renderBeatDots(beatInBar) {
+      const host = document.getElementById('plBeats'); if (!host) return;
+      Array.from(host.children).forEach((d, k) => d.classList.toggle('is-on', k === beatInBar));
+    },
+
+    _highlightChart() {
+      const ov = document.getElementById('playOverlay'); if (!ov) return;
+      ov.querySelectorAll('.pl-chord.is-current').forEach(e => e.classList.remove('is-current'));
+      const span = ov.querySelector(`.pl-chord[data-ti="${this._curIdx}"]`);
+      if (!span) return;
+      span.classList.add('is-current');
+      const line = span.closest('.pl-line');
+      if (line) {
+        const key = line.dataset.li;
+        if (key !== this._curLineKey) {
+          ov.querySelectorAll('.pl-line.is-active-line').forEach(e => e.classList.remove('is-active-line'));
+          line.classList.add('is-active-line');
+          this._curLineKey = key;
+          this._centerLine(line);
+        }
+      }
+    },
+
+    // ── Transport ──
+    _beatMs() { const song = this._current(); return 60000 / (this.bpm || this._over().bpm || (song && song.bpm) || 90); },
+    _togglePlay() {
+      if (this._audioReady) { if (this._audioPlaying) this._audioPause(); else this._audioPlay(); return; }
+      if (this.playing) this._pause(); else this._play();
+    },
+    _play() {
+      if (!this.timeline || !this.timeline.length) return;
+      if (typeof getSynthCtx === 'function') getSynthCtx();   // sblocca audio sul gesto utente
+      this.playing = true;
+      this._setPlayIcon('⏸');
+      this._curIdx = -1;
+      this._eighth = (this._beat || 0) * 2;                   // clock a crome (1/8)
+      this._countEighths = this.countin ? this._bpb() * 2 : 0;
+      this._tick();
+    },
+    _pause() {
+      this.playing = false;
+      if (this._timer) { clearTimeout(this._timer); this._timer = null; }
+      this._audioPause();
+      this._setPlayIcon('▶');
+    },
+    _restart() {
+      if (this._audioReady) {
+        const wasP = this._audioPlaying; this._audioPause();
+        if (this._audio) this._audio.currentTime = 0;
+        this._curIdx = 0; this._curLineKey = null; this._renderStage(); this._highlightChart(); this._syncToAudioTime();
+        if (wasP) this._audioPlay(); return;
+      }
+      const wasPlaying = this.playing;
+      this._pause();
+      this._beat = 0; this._curIdx = 0; this._curLineKey = null;
+      this._renderStage(); this._highlightChart();
+      if (wasPlaying) this._play();
+    },
+    _jumpTo(info) {
+      if (this._audioReady) {
+        const times = this._over().times;
+        if (times && times[info.firstTi] != null && this._audio) this._audio.currentTime = times[info.firstTi];
+        this._curIdx = info.firstTi; this._curLineKey = null; this._renderStage(); this._highlightChart(); this._syncToAudioTime();
+        return;
+      }
+      const wasPlaying = this.playing;
+      this._pause();
+      this._beat = info.startBeat; this._curIdx = info.firstTi; this._curLineKey = null;
+      this._renderStage(); this._highlightChart();
+      if (wasPlaying) this._play();
+    },
+    _changeKey(d) {
+      const wasPlaying = this.playing;
+      this._pause();
+      this.transpose = (this.transpose || 0) + d;
+      this._renderDetail();
+      if (wasPlaying) this._play();
+    },
+    _metroTick(accent) {
+      if (!this.metronome || typeof playSynthNote !== 'function') return;
+      playSynthNote(accent ? 84 : 79, 0, 0.045, 'square', accent ? 0.16 : 0.085);
+    },
+    _playChord(item) {
+      if (typeof playSynthNote !== 'function') return;
+      plChordMidi(item.parsed, this._tuningIdx()).forEach((m, k) => playSynthNote(m, k * 0.012, 1.1, 'triangle', 0.07));
+    },
+    _tick() {
+      if (!this.playing) return;
+      const bpb = this._bpb();
+      const half = this._beatMs() / 2;
+      if (this._countEighths > 0) {                       // count-in: click sui movimenti
+        if (this._countEighths % 2 === 0) {
+          const beatsLeft = this._countEighths / 2;
+          this._metroTick(beatsLeft === bpb);
+          this._renderBeatDots(bpb - beatsLeft);
+        }
+        this._countEighths--;
+        this._timer = setTimeout(() => this._tick(), half);
+        return;
+      }
+      let beat = Math.floor(this._eighth / 2);
+      if (beat >= this.totalBeats) {
+        if (this.loop) { this._eighth = 0; beat = 0; this._curIdx = -1; this._curLineKey = null; }
+        else { this._pause(); this._beat = 0; this._eighth = 0; this._curIdx = 0; this._curLineKey = null; this._renderStage(); this._highlightChart(); return; }
+      }
+      const idx = this._chordAtBeat(beat);
+      if (idx !== this._curIdx) { this._curIdx = idx; this._beat = beat; this._renderStage(); this._highlightChart(); }
+      if (this._eighth % 2 === 0) { const bib = beat % bpb; this._renderBeatDots(bib); this._metroTick(bib === 0); }
+      if (this.chordSound) {                              // pennata secondo lo schema
+        const pat = PLAY_STRUMS[this.strum] || PLAY_STRUMS.folk;
+        const slot = this._eighth % (bpb * 2);
+        const hit = pat[slot % pat.length];
+        if (hit && hit !== '-') this._strum(this.timeline[idx], hit, slot === 0);
+      }
+      this._beat = beat;
+      this._eighth++;
+      this._timer = setTimeout(() => this._tick(), half);
+    },
+    _strum(item, dir, accent) {
+      if (!item || typeof playSynthNote !== 'function') return;
+      const ms = plChordMidi(item.parsed, this._tuningIdx());
+      const order = dir === 'U' ? ms.slice().reverse() : ms;
+      const baseVol = accent ? 0.085 : (dir === 'U' ? 0.05 : 0.062);
+      const spread = dir === 'U' ? 0.016 : 0.012;
+      const dur = dir === 'U' ? 0.42 : 0.66;
+      order.forEach((m, k) => playSynthNote(m, k * spread + Math.random() * 0.005, dur * (0.9 + Math.random() * 0.2), 'triangle', baseVol * (0.82 + Math.random() * 0.22)));
+    },
+
+    // ── Banner modalità (sync / edit) ──
+    _renderBanner() {
+      const b = document.getElementById('plBanner'); if (!b) return;
+      if (this._audioSyncMode) {
+        const n = this.timeline.length, started = this._syncTimes.length > 0;
+        b.style.display = ''; b.className = 'pl-mode-banner is-audiosync';
+        b.innerHTML = `
+          <div class="pl-banner-txt"><b>🎙 Sincronizza con l'audio</b> — sta suonando il brano: batti <b>SPAZIO</b> (o il tasto) a OGNI cambio accordo, in tempo con la musica.
+          ${started ? `Accordo <b>${Math.min(this._curIdx + 1, n)}</b> / ${n}.` : `Batti sul <b>primo</b> accordo appena entra.`}</div>
+          <div class="pl-banner-actions">
+            <button class="pl-tap-big" id="plTapBig">👆 BATTI</button>
+            <button class="pl-btn-ghost" id="plSyncCancel">Annulla</button>
+          </div>`;
+        const tb = document.getElementById('plTapBig'); if (tb) tb.addEventListener('click', () => this._audioSyncTap());
+        const sc = document.getElementById('plSyncCancel'); if (sc) sc.addEventListener('click', () => this._cancelAudioSync());
+        return;
+      }
+      if (this.syncMode) {
+        const n = this.timeline.length, started = this._taps.length > 0;
+        b.style.display = ''; b.className = 'pl-mode-banner is-sync';
+        b.innerHTML = `
+          <div class="pl-banner-txt"><b>🎯 Sincronizza battendo</b> — ascolta il brano e batti <b>SPAZIO</b> (o il tasto) a OGNI cambio accordo.
+          ${started ? `Accordo <b>${Math.min(this._curIdx + 1, n)}</b> / ${n} — batti al prossimo; sull'ultimo batti ancora per chiudere.` : `Batti una volta sul <b>primo</b> accordo per partire.`}</div>
+          <div class="pl-banner-actions">
+            <button class="pl-tap-big" id="plTapBig">${started ? '👆 BATTI' : '▶ Inizia'}</button>
+            <button class="pl-btn-ghost" id="plSyncCancel">Annulla</button>
+          </div>`;
+        const tb = document.getElementById('plTapBig'); if (tb) tb.addEventListener('click', () => this._syncTap());
+        const sc = document.getElementById('plSyncCancel'); if (sc) sc.addEventListener('click', () => this._cancelSync());
+      } else if (this.editMode) {
+        const it = this.timeline[this._selIdx];
+        b.style.display = ''; b.className = 'pl-mode-banner is-edit';
+        b.innerHTML = `
+          <div class="pl-banner-txt"><b>✎ Modifica durate</b> — tocca un accordo nel testo, poi regola quante <b>battiti</b> dura (← →). ${it ? `Selezionato: <b>${this._esc(it.symT)}</b>` : 'Nessun accordo selezionato.'}</div>
+          <div class="pl-banner-actions">
+            <button class="pl-tr-btn" id="plBeatDown" ${it ? '' : 'disabled'}>◀</button>
+            <span class="pl-beat-val">${it ? it.beats : '–'} <small>battiti</small></span>
+            <button class="pl-tr-btn" id="plBeatUp" ${it ? '' : 'disabled'}>▶</button>
+            <button class="pl-btn-ghost" id="plEditDone">Fine</button>
+          </div>`;
+        const bd = document.getElementById('plBeatDown'); if (bd) bd.addEventListener('click', () => this._nudgeBeats(-0.5));
+        const bu = document.getElementById('plBeatUp'); if (bu) bu.addEventListener('click', () => this._nudgeBeats(0.5));
+        const ed = document.getElementById('plEditDone'); if (ed) ed.addEventListener('click', () => this._toggleEdit());
+      } else { b.style.display = 'none'; b.innerHTML = ''; }
+    },
+    _toast(msg) {
+      const ov = document.getElementById('playOverlay'); if (!ov) return;
+      let t = document.getElementById('plToast');
+      if (!t) { t = document.createElement('div'); t.id = 'plToast'; t.className = 'pl-toast'; ov.appendChild(t); }
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(this._toastT); this._toastT = setTimeout(() => t.classList.remove('show'), 1900);
+    },
+
+    // ── Strumenti tempo / sync ──
+    _tapTempo() {
+      const now = performance.now();
+      this._tapTimes = (this._tapTimes || []).filter(t => now - t < 2500);
+      this._tapTimes.push(now);
+      if (this._tapTimes.length >= 2) {
+        const d = []; for (let i = 1; i < this._tapTimes.length; i++) d.push(this._tapTimes[i] - this._tapTimes[i - 1]);
+        let bpm = Math.round(60000 / (d.reduce((a, b) => a + b, 0) / d.length));
+        bpm = Math.max(40, Math.min(220, bpm));
+        this.bpm = bpm; PlayOver.set(this.currentId, { bpm });
+        const v = document.getElementById('plBpmVal'); if (v) v.textContent = bpm;
+        const r = document.getElementById('plBpm'); if (r) r.value = bpm;
+      }
+      const tb = document.getElementById('plTapBpm'); if (tb) tb.textContent = this._tapTimes.length >= 2 ? ' ' + this.bpm : ' …';
+    },
+    _scaleTempo(f) {
+      const song = this._current();
+      let bpm = Math.max(40, Math.min(220, Math.round((this.bpm || this._over().bpm || song.bpm) * f)));
+      this.bpm = bpm; PlayOver.set(this.currentId, { bpm });
+      const v = document.getElementById('plBpmVal'); if (v) v.textContent = bpm;
+      const r = document.getElementById('plBpm'); if (r) r.value = bpm;
+      this._toast(bpm + ' BPM');
+    },
+    _cycleSig() {
+      const opts = [2, 3, 4, 6];
+      const next = opts[(opts.indexOf(this._bpb()) + 1) % opts.length] || 4;
+      PlayOver.set(this.currentId, { beatsPerBar: next });
+      const wasPlaying = this.playing; this._pause(); this._renderDetail(); if (wasPlaying) this._play();
+    },
+    _cycleStrum() {
+      const keys = Object.keys(PLAY_STRUMS);
+      this.strum = keys[(keys.indexOf(this.strum) + 1) % keys.length];
+      PlayLS.set('strum', this.strum);
+      const b = document.getElementById('plStrum'); if (b) b.textContent = '🎚 ' + (PLAY_STRUM_LABELS[this.strum] || this.strum);
+    },
+    _setTuning(idx) {
+      PlayOver.set(this.currentId, { tuning: idx });
+      this._zoomTuning = idx;
+      this._renderDetail();
+      this._toast('Accordatura: ' + TUNINGS[idx].name);
+    },
+    _setPlayIcon(t) { ['plPlay', 'plFocusPlay'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = t; }); },
+    _centerLine(line) {
+      const wrap = document.getElementById('plChartWrap'); if (!wrap || !line) return;
+      const wr = wrap.getBoundingClientRect(), lr = line.getBoundingClientRect();
+      const target = wrap.scrollTop + (lr.top + lr.height / 2) - (wr.top + wr.height / 2);
+      try { wrap.scrollTo({ top: Math.max(0, target), behavior: 'smooth' }); } catch (e) { wrap.scrollTop = Math.max(0, target); }
+    },
+    _toggleFocus() {
+      this._focus = !this._focus;
+      const ov = document.getElementById('playOverlay');
+      if (ov) ov.classList.toggle('pl-focus', this._focus);
+      const b = document.getElementById('plFocusBtn'); if (b) b.classList.toggle('is-active', this._focus);
+      const line = document.querySelector('.pl-line.is-active-line');
+      requestAnimationFrame(() => { if (line) this._centerLine(line); });
+    },
+    _resetTiming() {
+      PlayOver.set(this.currentId, { beats: null });
+      const wasPlaying = this.playing; this._pause(); this._beat = 0; this._renderDetail();
+      this._toast('Durate ripristinate'); if (wasPlaying) this._play();
+    },
+    _startSync() {
+      if (!this.timeline.length) return;
+      if (typeof getSynthCtx === 'function') getSynthCtx();
+      this._pause(); this.editMode = false; this.syncMode = true;
+      this._beat = 0; this._curIdx = 0; this._curLineKey = null;
+      this._taps = []; this._syncBeats = this.timeline.map(t => t.beats);
+      this._renderDetail();
+    },
+    _cancelSync() { this.syncMode = false; this._taps = []; this._renderDetail(); },
+    _syncTap() {
+      if (!this.syncMode) return;
+      const now = performance.now(), tl = this.timeline;
+      if (this._taps.length === 0) {
+        this._taps.push(now); this._curIdx = 0; this._renderStage(); this._highlightChart();
+        if (this.chordSound) this._playChord(tl[0]); this._renderBanner(); return;
+      }
+      let beats = Math.round(((now - this._taps[this._taps.length - 1]) / this._beatMs()) * 2) / 2;
+      beats = Math.max(0.5, Math.min(32, beats));
+      this._syncBeats[this._curIdx] = beats;
+      this._taps.push(now);
+      if (this._curIdx >= tl.length - 1) { this._finishSync(); return; }
+      this._curIdx++; this._renderStage(); this._highlightChart();
+      if (this.chordSound) this._playChord(tl[this._curIdx]); this._renderBanner();
+    },
+    _finishSync() {
+      PlayOver.set(this.currentId, { beats: this._syncBeats.slice() });
+      this.syncMode = false; this._taps = []; this._beat = 0; this._curIdx = 0; this._curLineKey = null;
+      this._renderDetail(); this._toast('✓ Tempo sincronizzato e salvato');
+    },
+    _toggleEdit() {
+      this.editMode = !this.editMode;
+      if (this.editMode) { this.syncMode = false; this._pause(); if (this._selIdx < 0) this._selIdx = this._curIdx; }
+      this._renderDetail();
+    },
+    _selectChord(ti) {
+      this._selIdx = ti;
+      const ov = document.getElementById('playOverlay'); if (!ov) return;
+      ov.querySelectorAll('.pl-chord.is-sel').forEach(e => e.classList.remove('is-sel'));
+      const span = ov.querySelector(`.pl-chord[data-ti="${ti}"]`);
+      if (span) { span.classList.add('is-sel'); try { span.closest('.pl-line').scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }
+      this._renderBanner();
+    },
+    _nudgeBeats(d) {
+      if (this._selIdx < 0 || !this.timeline[this._selIdx]) return;
+      const beats = this._currentBeats();
+      beats[this._selIdx] = Math.max(0.5, Math.min(32, Math.round(((beats[this._selIdx] || 4) + d) * 2) / 2));
+      PlayOver.set(this.currentId, { beats });
+      const sel = this._selIdx;
+      this._buildTimeline(); this._curIdx = this._chordAtBeat(this._beat);
+      this._refreshChartBeats(); this._selIdx = sel; this._renderBanner(); this._renderStage(); this._highlightChart();
+      const ov = document.getElementById('playOverlay');
+      if (ov) { const s = ov.querySelector(`.pl-chord[data-ti="${sel}"]`); if (s) s.classList.add('is-sel'); }
+    },
+    _refreshChartBeats() {
+      const ov = document.getElementById('playOverlay'); if (!ov) return;
+      ov.querySelectorAll('.pl-chord').forEach(ch => {
+        const it = this.timeline[parseInt(ch.dataset.ti)], badge = ch.querySelector('.pl-chord-beats');
+        if (badge && it) badge.textContent = it.beats;
+      });
+    },
+
+    // ── Zoom accordo: gradi + tutte le posizioni sul manico (tuning-aware) ──
+    _zoomOpen(parsed) {
+      if (!parsed) return;
+      if (typeof getSynthCtx === 'function') getSynthCtx();
+      this._zoomParsed = parsed;
+      if (this._zoomTuning == null) this._zoomTuning = this._tuningIdx();
+      this._zoomEnsureDom();
+      document.getElementById('plZoom').classList.add('show');
+      this._zoomRender();
+    },
+    _zoomClose() { const el = document.getElementById('plZoom'); if (el) el.classList.remove('show'); },
+    _zoomEnsureDom() {
+      if (document.getElementById('plZoom')) return;
+      const z = document.createElement('div');
+      z.id = 'plZoom'; z.className = 'pl-zoom-overlay';
+      z.innerHTML = `<div class="pl-zoom-card">
+        <div class="pl-zoom-head">
+          <div class="pl-zoom-title" id="plZoomTitle"></div>
+          <div class="pl-zoom-head-actions">
+            <button class="pl-chip-btn" id="plZoomNotes" title="Mostra nomi nota oppure gradi">♪/gradi</button>
+            <button class="pl-chip-btn" id="plZoomPlay" title="Ascolta l'accordo">▶ Suona</button>
+            <button class="pl-icon-btn" id="plZoomClose" title="Chiudi (ESC)">✕</button>
+          </div>
+        </div>
+        <div class="pl-zoom-body" id="plZoomBody"></div>
+      </div>`;
+      document.body.appendChild(z);
+      z.addEventListener('click', (e) => { if (e.target === z) this._zoomClose(); });
+      document.getElementById('plZoomClose').addEventListener('click', () => this._zoomClose());
+      document.getElementById('plZoomNotes').addEventListener('click', () => { this._zoomNotes = !this._zoomNotes; this._zoomRender(); });
+      document.getElementById('plZoomPlay').addEventListener('click', () => { if (typeof playSynthNote === 'function') plChordMidi(this._zoomParsed, this._zoomTuning).forEach((m, k) => playSynthNote(m, k * 0.04, 1.4, 'triangle', 0.09)); });
+    },
+    _zoomRender() {
+      const p = this._zoomParsed; if (!p) return;
+      const tuneIdx = this._zoomTuning;
+      const notation = this._notation(), pref = this._spellPref();
+      document.getElementById('plZoomTitle').innerHTML = `<span class="pl-zoom-chord">${plChordDisplayHtml(p.pc, p.quality, p.bassPc, pref, notation)}</span><span class="pl-zoom-sub">gradi e tutte le posizioni · ${this._esc(TUNINGS[tuneIdx].name)}</span>`;
+      const tones = p.intervals.map(iv => ({ deg: iv % 12, pc: (p.pc + iv) % 12 }));
+      if (p.bassPc != null && !tones.some(t => t.pc === p.bassPc)) tones.push({ deg: ((p.bassPc - p.pc) % 12 + 12) % 12, pc: p.bassPc, bass: true });
+      const legend = tones.map(t => {
+        const lbl = t.deg === 0 ? 'R' : DEGREE_LABELS[t.deg];
+        return `<span class="pl-deg-chip" style="--dc:${colorForDegree(DEGREE_LABELS[t.deg])}"><i></i>${lbl} <b>${plSpellName(t.pc, pref, notation)}</b>${t.bass ? ' <small>basso</small>' : ''}</span>`;
+      }).join('');
+      const tunes = TUNINGS.map((t, i) => `<button class="pl-chip-btn ${i === tuneIdx ? 'is-active' : ''}" data-tune="${i}">${this._esc(t.name)}</button>`).join('');
+      const seen = {}, voics = [];
+      [0, 5, 9].forEach(r => { const f = plVoicing(p, tuneIdx, r); if (f) { const k = f.join(','); if (!seen[k]) { seen[k] = 1; voics.push(f); } } });
+      const voicHtml = voics.length ? voics.map(f => `<div class="pl-voicing">${plChordDiagram(f, 1.5)}</div>`).join('') : '<span class="pl-import-note">Nessun voicing compatto trovato — vedi la mappa sopra.</span>';
+      document.getElementById('plZoomBody').innerHTML = `
+        <div class="pl-zoom-legend">${legend}</div>
+        <div class="pl-zoom-tunes"><span class="pl-st-lbl">Accordatura</span>${tunes}</div>
+        <div class="pl-zoom-section-lbl">Tutte le posizioni sul manico — colore = grado · tocca una nota per ascoltarla</div>
+        <div class="pl-neck-wrap">${this._neckSvg(p, tuneIdx)}</div>
+        <div class="pl-zoom-section-lbl">Voicing suonabili in questa accordatura</div>
+        <div class="pl-voicings">${voicHtml}</div>`;
+      document.querySelectorAll('#plZoom [data-tune]').forEach(b => b.addEventListener('click', () => { this._zoomTuning = parseInt(b.dataset.tune); this._zoomRender(); }));
+      document.querySelectorAll('#plZoom .pl-neck-note').forEach(n => n.addEventListener('click', () => { const m = parseInt(n.dataset.midi); if (!isNaN(m) && typeof playSynthNote === 'function') playSynthNote(m, 0, 0.7, 'triangle', 0.13); }));
+    },
+    _neckSvg(parsed, tuneIdx) {
+      const pcsHL = plTuningPCs(tuneIdx), nS = pcsHL.length, midiLH = plTuningMidiLowHigh(tuneIdx);
+      const NF = 15, padL = 36, padR = 16, padT = 14, padB = 22, fW = 40, rowH = 26, nutW = 5;
+      const leftEdge = padL + nutW;
+      const w = leftEdge + NF * fW + padR, h = padT + (nS - 1) * rowH + padB;
+      const sY = r => padT + r * rowH, fretX = k => leftEdge + k * fW;
+      const noteX = f => f === 0 ? padL + nutW / 2 : leftEdge + (f - 0.5) * fW;
+      const chordPCs = plChordPCs(parsed);
+      const notation = this._notation(), pref = this._spellPref();
+      let svg = `<svg class="pl-neck-svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
+      for (let k = 0; k <= NF; k++) {
+        if (k === 0) svg += `<line class="pl-neck-nut" x1="${leftEdge}" y1="${sY(0) - 4}" x2="${leftEdge}" y2="${sY(nS - 1) + 4}"/>`;
+        else svg += `<line class="pl-neck-fret" x1="${fretX(k)}" y1="${sY(0) - 4}" x2="${fretX(k)}" y2="${sY(nS - 1) + 4}"/>`;
+      }
+      const midR = (nS - 1) / 2;
+      [3, 5, 7, 9, 12, 15].forEach(f => {
+        if (f > NF) return; const cx = noteX(f);
+        if (f === 12) svg += `<circle class="pl-neck-inlay" cx="${cx}" cy="${sY(midR - 1)}" r="3"/><circle class="pl-neck-inlay" cx="${cx}" cy="${sY(midR + 1)}" r="3"/>`;
+        else svg += `<circle class="pl-neck-inlay" cx="${cx}" cy="${sY(midR)}" r="3"/>`;
+      });
+      for (let r = 0; r < nS; r++) {
+        svg += `<line class="pl-neck-string" x1="${padL}" y1="${sY(r)}" x2="${w - padR}" y2="${sY(r)}" stroke-width="${1 + (nS - 1 - r) * 0.18}"/>`;
+        svg += `<text class="pl-neck-open" x="6" y="${sY(r) + 4}">${plSpellName(pcsHL[r], pref, notation)}</text>`;
+      }
+      for (let f = 1; f <= NF; f++) svg += `<text class="pl-neck-fretnum" x="${noteX(f)}" y="${sY(nS - 1) + 16}">${f}</text>`;
+      for (let r = 0; r < nS; r++) {
+        for (let f = 0; f <= NF; f++) {
+          const pc = (pcsHL[r] + f) % 12;
+          if (!chordPCs.has(pc)) continue;
+          const deg = ((pc - parsed.pc) % 12 + 12) % 12;
+          const lbl = this._zoomNotes ? plSpellName(pc, pref, notation) : (deg === 0 ? 'R' : DEGREE_LABELS[deg]);
+          const midi = midiLH[nS - 1 - r] + f;
+          svg += `<g class="pl-neck-note${deg === 0 ? ' is-root' : ''}" data-midi="${midi}"><circle cx="${noteX(f)}" cy="${sY(r)}" r="9" fill="${colorForDegree(DEGREE_LABELS[deg])}"/><text x="${noteX(f)}" y="${sY(r)}">${lbl}</text></g>`;
+        }
+      }
+      return svg + `</svg>`;
+    },
+
+    // ── Audio: carica un file e fa seguire la progressione all'onda reale ──
+    _fmtT(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); },
+    _renderAudioBar() {
+      const hasTimes = !!(this._over().times && this._over().times.length);
+      const nm = this._audioName || this._over().audioName || '';
+      if (!this._audioReady) {
+        return `<div class="pl-audiobar">
+          <input type="file" accept="audio/*" id="plAudioFile" style="display:none">
+          <button class="pl-chip-btn" id="plAudioLoad">🎵 ${hasTimes ? 'Ricarica audio' + (nm ? ' · ' + this._esc(nm) : '') : 'Carica audio (MP3)'}</button>
+          <span class="pl-audio-hint">${hasTimes ? 'Sincronizzazione salvata — ricarica il file per farla seguire dall\'onda.' : 'Carica il brano e aggancia la progressione sull\'onda reale.'}</span>
+        </div>`;
+      }
+      const dur = this._audio && this._audio.duration ? this._audio.duration : 0;
+      return `<div class="pl-audiobar is-loaded">
+        <span class="pl-audio-name" title="${this._esc(nm)}">🎵 ${this._esc(nm || 'audio')}</span>
+        <input type="range" class="pl-audio-seek" id="plAudioSeek" min="0" max="${Math.max(1, dur)}" step="0.01" value="${this._audio ? this._audio.currentTime : 0}">
+        <span class="pl-audio-time" id="plAudioTime">${this._fmtT(this._audio ? this._audio.currentTime : 0)} / ${this._fmtT(dur)}</span>
+        <button class="pl-chip-btn ${this._audioSyncMode ? 'is-active' : ''}" id="plAudioSync" title="Batti gli accordi mentre ascolti: la progressione si aggancia all'onda">🎙 Sincronizza con l'audio</button>
+        <button class="pl-chip-btn" id="plAudioRemove" title="Rimuovi l'audio">✕</button>
+      </div>`;
+    },
+    _wireAudioBar() {
+      const fileIn = document.getElementById('plAudioFile');
+      const load = document.getElementById('plAudioLoad');
+      if (load && fileIn) { load.addEventListener('click', () => fileIn.click()); fileIn.addEventListener('change', () => { if (fileIn.files && fileIn.files[0]) this._loadAudio(fileIn.files[0]); }); }
+      const seek = document.getElementById('plAudioSeek');
+      if (seek) seek.addEventListener('input', () => { if (this._audio) { this._audio.currentTime = parseFloat(seek.value); this._syncToAudioTime(); } });
+      const sync = document.getElementById('plAudioSync'); if (sync) sync.addEventListener('click', () => this._audioSyncMode ? this._cancelAudioSync() : this._startAudioSync());
+      const rem = document.getElementById('plAudioRemove'); if (rem) rem.addEventListener('click', () => this._removeAudio());
+    },
+    _loadAudio(file) {
+      this._removeAudio(true);
+      try {
+        this._audioUrl = URL.createObjectURL(file);
+        const a = new Audio(); a.src = this._audioUrl; a.preload = 'auto';
+        this._audio = a; this._audioName = file.name;
+        PlayOver.set(this.currentId, { audioName: file.name });
+        a.addEventListener('loadedmetadata', () => { this._audioReady = true; this._renderDetail(); this._toast('Audio caricato — premi ▶ o 🎙 per sincronizzare'); });
+        a.addEventListener('ended', () => { this._audioPause(); });
+        a.load();
+      } catch (e) { this._toast('Audio non caricato'); }
+    },
+    _removeAudio(silent) {
+      this._audioPause();
+      if (this._audioUrl) { try { URL.revokeObjectURL(this._audioUrl); } catch (e) {} }
+      this._audio = null; this._audioUrl = null; this._audioReady = false; this._audioSyncMode = false; this._audioName = '';
+      if (!silent) this._renderDetail();
+    },
+    _audioPlay() {
+      if (!this._audio) return;
+      if (typeof getSynthCtx === 'function') getSynthCtx();
+      this._audioPlaying = true;
+      this._setPlayIcon('⏸');
+      this._audio.play().catch(() => {});
+      this._audioLoop();
+    },
+    _audioLoop() {
+      if (!this._audioPlaying) return;
+      this._syncToAudioTime();
+      this._raf = requestAnimationFrame(() => this._audioLoop());
+    },
+    _audioPause() {
+      this._audioPlaying = false;
+      if (this._audio) { try { this._audio.pause(); } catch (e) {} }
+      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = 0; }
+      this._setPlayIcon('▶');
+    },
+    _chordAtTime(t) {
+      const times = this._over().times;
+      if (times && times.length) {
+        let idx = 0;
+        for (let i = 0; i < times.length; i++) { if (times[i] != null && times[i] <= t) idx = i; }
+        return idx;
+      }
+      return this._chordAtBeat(t / (this._beatMs() / 1000));   // fallback BPM, offset 0
+    },
+    _syncToAudioTime() {
+      if (!this._audio) return;
+      const t = this._audio.currentTime;
+      const idx = this._chordAtTime(t);
+      if (idx !== this._curIdx) { this._curIdx = idx; this._renderStage(); this._highlightChart(); }
+      const seek = document.getElementById('plAudioSeek'); if (seek && document.activeElement !== seek) seek.value = t;
+      const tt = document.getElementById('plAudioTime'); if (tt) tt.textContent = this._fmtT(t) + ' / ' + this._fmtT(this._audio.duration || 0);
+    },
+    _startAudioSync() {
+      if (!this._audioReady) { this._toast('Carica prima un audio'); return; }
+      this.syncMode = false; this.editMode = false; this._audioSyncMode = true;
+      this._syncTimes = []; this._curIdx = 0; this._curLineKey = null;
+      if (this._audio) this._audio.currentTime = 0;
+      this._audioPlay();
+      this._renderDetail();
+    },
+    _cancelAudioSync() { this._audioSyncMode = false; this._audioPause(); this._renderDetail(); },
+    _audioSyncTap() {
+      if (!this._audioSyncMode || !this._audio) return;
+      const t = this._audio.currentTime;
+      if (this._syncTimes.length === 0) { this._syncTimes[0] = t; this._curIdx = 0; }
+      else { this._curIdx++; this._syncTimes[this._curIdx] = t; }
+      this._renderStage(); this._highlightChart();
+      if (this._curIdx >= this.timeline.length - 1) { this._finishAudioSync(); return; }
+      this._renderBanner();
+    },
+    _finishAudioSync() {
+      PlayOver.set(this.currentId, { times: this._syncTimes.slice() });
+      this._audioSyncMode = false; this._audioPause();
+      if (this._audio) this._audio.currentTime = 0;
+      this._curIdx = 0; this._curLineKey = null;
+      this._renderDetail(); this._toast('✓ Agganciato all\'audio — premi ▶ per seguirlo');
+    },
+
+    // ── Import ──
+    _renderImportView(host) {
+      host.innerHTML = `
+        <div class="pl-import">
+          <h2>Importa una canzone</h2>
+          <div class="pl-import-help">
+            <b>Due modi:</b> ① incolla un chart già pronto (da un sito di accordi o da un'AI); ② scrivi <b>titolo e artista</b> qui sotto, premi <b>🤖 Copia prompt AI</b>, incollalo in ChatGPT/Claude e reincolla qui la sua risposta.<br>
+            Nemo riconosce le <b>sezioni</b> (<code>Intro</code>, <code>Strofa</code>, <code>Ritornello</code>…), gli accordi internazionali (<code>Gm</code>, <code>Ebmaj7</code>, <code>D7</code>) o <b>italiani</b> (<code>SOLm</code>, <code>MIb7+</code>, <code>RE7</code>) e — se c'è una riga <code>Tonalità: … | BPM: … | Capo: …</code> — compila i campi da solo. Ogni accordo dura una battuta; poi rifinisci con gli strumenti di sincro.
+          </div>
+          <div class="pl-fields">
+            <div class="pl-field"><label>Titolo</label><input id="plImpTitle" placeholder="Titolo"></div>
+            <div class="pl-field"><label>Artista</label><input id="plImpArtist" placeholder="Artista"></div>
+            <div class="pl-field"><label>Tonalità</label><input id="plImpKey" placeholder="Gm"></div>
+            <div class="pl-field"><label>BPM</label><input id="plImpBpm" type="number" placeholder="90"></div>
+            <div class="pl-field"><label>Capo</label><input id="plImpCapo" type="number" placeholder="0"></div>
+            <div class="pl-field"><label>Accordatura</label><select id="plImpTune">${TUNINGS.map((t, i) => `<option value="${i}">${this._esc(t.name)}</option>`).join('')}</select></div>
+          </div>
+          <textarea id="plImpText" placeholder="Intro:&#10;Gm  Gm/F  Ebmaj7  D7&#10;&#10;Gm&#10;Time, it needs time to win back your love again&#10;          A7              D&#10;I will be there, I will be there"></textarea>
+          <div class="pl-import-actions">
+            <button class="pl-btn-primary" id="plImpSave">Importa e apri</button>
+            <button class="pl-btn-ai" id="plImpAi" title="Copia un prompt pronto da incollare in ChatGPT/Claude">🤖 Copia prompt AI</button>
+            <button class="pl-btn-ghost" id="plImpCancel">Annulla</button>
+            <span class="pl-import-note" id="plImpNote"></span>
+          </div>
+        </div>`;
+      document.getElementById('plImpCancel').addEventListener('click', () => { this.view = 'player'; this._renderDetail(); });
+      document.getElementById('plImpSave').addEventListener('click', () => this._doImport());
+      document.getElementById('plImpAi').addEventListener('click', () => this._copyAiPrompt());
+    },
+    _aiPrompt() {
+      const t = ((document.getElementById('plImpTitle') || {}).value || '').trim();
+      const a = ((document.getElementById('plImpArtist') || {}).value || '').trim();
+      const song = t ? `"${t}"${a ? ' di ' + a : ''}` : '<scrivi qui il titolo e l\'artista>';
+      return [
+        `Scrivimi accordi e testo della canzone ${song} in TESTO SEMPLICE (monospace), pronto da incollare in un'app di studio chitarra. Segui ALLA LETTERA queste regole:`,
+        ``,
+        `1. Prima riga di intestazione esatta: "Tonalità: <..> | BPM: <..> | Capo: <..>".`,
+        `2. Dividi il brano in sezioni: il nome di ogni sezione su una riga a sé (Intro, Strofa, Ritornello, Bridge, Assolo, Outro, Finale).`,
+        `3. Per ogni verso: una riga con SOLO gli accordi, allineati con spazi SOPRA la sillaba esatta in cui cambiano, e SUBITO SOTTO la riga di testo.`,
+        `4. Sezioni strumentali: solo la riga di accordi, senza testo.`,
+        `5. Accordi in notazione internazionale, iniziale MAIUSCOLA (es. Gm, Ebmaj7, D7, A7, Cm, F, Gm/F).`,
+        `6. Usa SPAZI per allineare (mai tabulazioni). NIENTE tablature, diteggiature, commenti o spiegazioni: SOLO intestazione + sezioni + accordi/testo.`,
+        ``,
+        `Esempio del formato esatto da rispettare:`,
+        `Tonalità: Gm | BPM: 63 | Capo: 0`,
+        ``,
+        `Intro:`,
+        `Gm  Gm/F  Ebmaj7  D7`,
+        ``,
+        `Strofa 1:`,
+        `Gm`,
+        `Time, it needs time to win back your love again`,
+        `          A7              D`,
+        `I will be there, I will be there`,
+      ].join('\n');
+    },
+    _copyAiPrompt() {
+      const txt = this._aiPrompt();
+      const ok = () => { const n = document.getElementById('plImpNote'); if (n) { n.textContent = '✓ Prompt copiato — incollalo in ChatGPT/Claude, poi reincolla qui la risposta.'; n.className = 'pl-import-note is-ok'; } this._toast('Prompt AI copiato'); };
+      const fail = () => {
+        try {
+          const ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta); ok();
+        } catch (e) { const n = document.getElementById('plImpNote'); if (n) { n.textContent = 'Copia non riuscita: seleziona e copia il prompt manualmente dalla console.'; n.className = 'pl-import-note is-err'; } console.log('PROMPT AI:\n' + txt); }
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fail);
+        else fail();
+      } catch (e) { fail(); }
+    },
+    _doImport() {
+      const val = id => (document.getElementById(id) || {}).value || '';
+      const note = document.getElementById('plImpNote');
+      // Estrai (e rimuovi) una riga di metadati "Tonalità: .. | BPM: .. | Capo: .."
+      const meta = { key: '', bpm: '', capo: '' };
+      const text = val('plImpText').trim().split('\n').filter(line => {
+        if (/[:=]/.test(line) && /\b(tonalit[àa]|key|bpm|tempo|capo|capotasto)\b/i.test(line) && !plIsChordLine(line)) {
+          const k = line.match(/(?:tonalit[àa]|key)\s*[:=]\s*([A-G][b#]?(?:m|min|maj7|maj|m7|7|sus[24]?|dim|aug)*)/i); if (k) meta.key = k[1];
+          const b = line.match(/(?:bpm|tempo)\s*[:=]\s*(\d{2,3})/i); if (b) meta.bpm = b[1];
+          const c = line.match(/(?:capo|capotasto)\s*[:=]\s*(\d{1,2})/i); if (c) meta.capo = c[1];
+          return false;
+        }
+        return true;
+      }).join('\n').trim();
+      const sections = plParseChart(text);
+      const nChords = sections.reduce((a, s) => a + s.lines.reduce((b, l) => b + (l.chords ? l.chords.length : 0), 0), 0);
+      if (!sections.length || !nChords) {
+        if (note) { note.textContent = 'Nessun accordo riconosciuto: controlla che gli accordi siano su una riga sopra il testo.'; note.className = 'pl-import-note is-err'; }
+        return;
+      }
+      const song = {
+        id: 'u' + Date.now(), seed: false,
+        title: val('plImpTitle').trim() || 'Senza titolo',
+        artist: val('plImpArtist').trim(),
+        key: val('plImpKey').trim() || meta.key,
+        bpm: parseInt(val('plImpBpm')) || parseInt(meta.bpm) || 90,
+        capo: parseInt(val('plImpCapo')) || parseInt(meta.capo) || 0,
+        beatsPerBar: 4, tuning: parseInt(val('plImpTune')) || 0, sections,
+      };
+      this._user.push(song); this._saveSongs();
+      const c = document.getElementById('plCount'); if (c) c.textContent = `${this._songs().length} brani`;
+      this._select(song.id);
+    },
+  };
+
+  // Wiring bottone header + scorciatoia (C = Canzoni; P è già usato) + spazio = play/pausa
+  const btnPlay = document.getElementById('btnPlay');
+  if (btnPlay) btnPlay.addEventListener('click', () => Play.open());
+  document.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'c' || e.key === 'C') {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      e.preventDefault();
+      if (Play.active) Play.close(); else Play.open();
+      return;
+    }
+    if (!Play.active) return;
+    const zoomOpen = (() => { const z = document.getElementById('plZoom'); return z && z.classList.contains('show'); })();
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (zoomOpen) Play._zoomClose();
+      else if (Play._audioSyncMode) Play._cancelAudioSync();
+      else if (Play.syncMode) Play._cancelSync();
+      else if (Play.editMode) Play._toggleEdit();
+      else if (Play._focus) Play._toggleFocus();
+      else Play.close();
+      return;
+    }
+    if (zoomOpen || Play.view !== 'player') return;
+    if (Play._audioSyncMode) { if (e.key === ' ') { e.preventDefault(); Play._audioSyncTap(); } return; }
+    if (Play.syncMode) { if (e.key === ' ') { e.preventDefault(); Play._syncTap(); } return; }
+    if (Play.editMode) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); Play._nudgeBeats(-0.5); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); Play._nudgeBeats(0.5); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); Play._selectChord(Math.min(Play.timeline.length - 1, Play._selIdx < 0 ? 0 : Play._selIdx + 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); Play._selectChord(Math.max(0, Play._selIdx < 0 ? 0 : Play._selIdx - 1)); }
+      else if (e.key === ' ') { e.preventDefault(); Play._togglePlay(); }
+      return;
+    }
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); Play._toggleFocus(); return; }
+    if (e.key === ' ') { e.preventDefault(); Play._togglePlay(); }
+  });
+  window.Play = Play;
 
   // ════════════════════════════════════════════════════════════
   //  PHRASE RECORDER · registra 10s di frase + misura timing accuracy

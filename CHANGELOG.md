@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.03.00 — 2026-06-04
+
+- Modulo **PLAY** completo: accordo in evidenza + diagramma, testo con accordi, metronomo che avanza la progressione.
+- Sincronizzazione: tap-tempo, sincronizza battendo, sync sull'audio MP3, editor durate, schemi di pennata.
+- Zoom accordo: gradi e tutte le posizioni sul manico, tuning-aware (accordature multiple).
+- Libreria canzoni + import (incolla o prompt AI), enarmonia e notazione IT/EN.
+- Fix: barra pulsanti modalità scorrevole su mobile (Play raggiungibile da telefono).
+
 Versionamento `MAJOR.MINOR.PATCH`:
 - **MAJOR**: redesign / breaking change
 - **MINOR**: nuova feature

@@ -3102,7 +3102,10 @@ body.solo-mode .btn-label:hover{color:var(--solo-fg);background:rgba(255,255,255
   }
   .solo-logo-mini,.resolve-logo-mini,.ear-logo-mini,.tuner-logo-mini,.lick-logo-mini,.play-logo-mini{font-size:13px}
   .header-actions{gap:4px;flex-wrap:wrap;justify-content:center}
-  .header-app-modes{flex-wrap:nowrap}
+  /* App-mode buttons (Solo/Solve/Ear/Lick/Play/Tune/Lab): una riga SCORREVOLE,
+     così con molti moduli nessun pulsante (es. Play) resta tagliato fuori sul mobile */
+  .header-app-modes{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;justify-content:flex-start;max-width:100%}
+  .header-app-modes::-webkit-scrollbar{height:0;width:0}
   .header-left{gap:6px;flex-wrap:nowrap;min-width:0}
   .header-left h1{font-size:15px;white-space:nowrap}
   .header-left .chip{padding:3px 8px;font-size:11px}
@@ -3979,7 +3982,7 @@ body.play-active{overflow:hidden}
 /* ── CHART: testo con accordi sopra (monospace per allineamento) ── */
 .pl-chart{display:flex;flex-direction:column;gap:16px;overflow-x:auto}
 .pl-section{display:flex;flex-direction:column;gap:2px;width:max-content;min-width:100%}
-.pl-section-name{font:700 10px/1 'Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--c-play);opacity:.85;margin-bottom:4px}
+.pl-section-name{font:800 11px/1 'Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--c-play);opacity:1;margin:2px 0 5px}
 .pl-line{position:relative;cursor:pointer;border-radius:8px;padding:2px 8px;transition:background .15s;border-left:2px solid transparent;width:max-content;min-width:100%}
 .pl-line:hover{background:#101013}
 .pl-line.is-active-line{background:color-mix(in srgb,var(--c-play) 9%,transparent);border-left-color:var(--c-play)}
@@ -4001,6 +4004,9 @@ body.play-active{overflow:hidden}
 .pl-field label{font:700 9px/1 'Inter',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6a6e78}
 .pl-field input{background:#0f0f10;border:1px solid #1f1f22;color:#ECE9E0;border-radius:9px;padding:9px 10px;font:500 14px/1 'Inter',sans-serif}
 .pl-field input:focus{outline:0;border-color:var(--c-play)}
+.pl-field select{background:#0f0f10;border:1px solid #1f1f22;color:#ECE9E0;border-radius:9px;padding:9px 10px;font:500 14px/1 'Inter',sans-serif;cursor:pointer}
+.pl-field select:focus{outline:0;border-color:var(--c-play)}
+.pl-field select option{background:#15171c;color:#ECE9E0}
 .pl-import textarea{width:100%;min-height:240px;background:#0c0c0f;border:1px solid #1f1f22;color:#ECE9E0;border-radius:12px;padding:14px;font:500 13px/1.5 'JetBrains Mono',monospace;resize:vertical}
 .pl-import textarea:focus{outline:0;border-color:var(--c-play)}
 .pl-import-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -4008,6 +4014,8 @@ body.play-active{overflow:hidden}
 .pl-btn-primary:hover{filter:brightness(1.1)}
 .pl-btn-ghost{background:#0f0f10;border:1px solid #1f1f22;color:#a8aeba;border-radius:10px;padding:11px 16px;font:600 14px/1 'Inter',sans-serif;cursor:pointer}
 .pl-btn-ghost:hover{border-color:var(--c-play);color:#fff}
+.pl-btn-ai{background:color-mix(in srgb,var(--c-play) 18%,#0f0f10);border:1px solid color-mix(in srgb,var(--c-play) 50%,transparent);color:#fff;border-radius:10px;padding:11px 16px;font:700 14px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pl-btn-ai:hover{background:color-mix(in srgb,var(--c-play) 30%,#0f0f10)}
 .pl-import-note{font:500 12px/1.5 'Inter',sans-serif;color:#7e8088}
 .pl-import-note.is-err{color:var(--c-resolve)}
 .pl-import-note.is-ok{color:var(--c-ear)}
@@ -4033,3 +4041,137 @@ body.play-active{overflow:hidden}
   .pl-topbar .module-switcher .mod-btn-logo img{width:18px;height:18px}
   .pl-topbar .pl-icon-btn{width:32px;height:32px;font-size:19px;flex-shrink:0}
 }
+
+/* ════════════════════════════════════════════════════════════
+   PLAY · sync tools + editor durate + banner + toast + ZOOM accordo
+   ════════════════════════════════════════════════════════════ */
+/* Accordo grande = ora cliccabile (apre lo zoom) */
+.pl-chord-name{background:none;border:0;cursor:pointer;padding:0;line-height:.9}
+.pl-chord-name:hover{filter:brightness(1.14)}
+.pl-chord-name:focus-visible{outline:2px solid var(--c-play);outline-offset:5px;border-radius:10px}
+.pl-bar-count{font:600 11px/1.3 'Inter',sans-serif;color:#7e8088;text-align:center;margin-top:2px}
+.pl-bar-count b{color:#cdd1da}
+.pl-zoom-hint{color:var(--c-play);opacity:.85}
+
+/* Riga strumenti sincro */
+.pl-synctools{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.pl-st-lbl{font:700 9px/1 'Inter',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#6a6e78}
+.pl-st-sep{width:1px;height:18px;background:#23232a;margin:0 2px}
+.pl-chip-btn{background:#0f0f10;border:1px solid #1f1f22;color:#a8aeba;border-radius:9px;padding:7px 11px;font:600 12px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.pl-chip-btn:hover{border-color:var(--c-play);color:#fff}
+.pl-chip-btn.is-active{background:color-mix(in srgb,var(--c-play) 20%,transparent);border-color:var(--c-play);color:#fff}
+.pl-chip-btn b{color:var(--c-play);font:700 12px 'JetBrains Mono',monospace}
+
+/* Banner modalità (sync / edit) */
+.pl-mode-banner{border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.pl-mode-banner.is-sync{background:color-mix(in srgb,var(--c-play) 12%,#0c0c0f);border:1px solid color-mix(in srgb,var(--c-play) 45%,transparent)}
+.pl-mode-banner.is-edit{background:color-mix(in srgb,var(--c-tuner) 12%,#0c0c0f);border:1px solid color-mix(in srgb,var(--c-tuner) 40%,transparent)}
+.pl-banner-txt{font:500 13px/1.5 'Inter',sans-serif;color:#cdd1da;flex:1;min-width:200px}
+.pl-banner-txt b{color:#fff}
+.pl-banner-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pl-tap-big{background:var(--c-play);color:#04282e;border:0;border-radius:12px;padding:12px 22px;font:800 15px/1 'Inter',sans-serif;cursor:pointer;letter-spacing:.04em}
+.pl-tap-big:hover{filter:brightness(1.1)}
+.pl-tap-big:active{transform:scale(.96)}
+.pl-beat-val{font:700 16px/1 'JetBrains Mono',monospace;color:#fff;min-width:60px;text-align:center}
+.pl-beat-val small{font:600 10px 'Inter',sans-serif;color:#7e8088}
+
+/* Badge durate + accordo selezionato (edit) */
+.pl-chord-beats{position:absolute;top:-7px;right:-10px;font:700 8px/1 'JetBrains Mono',monospace;color:#0a0a0d;background:var(--c-tuner);border-radius:5px;padding:1px 3px;font-style:normal}
+.pl-chord.is-sel{outline:2px solid var(--c-tuner);outline-offset:1px;border-radius:4px;color:#fff}
+
+/* Toast */
+.pl-toast{position:absolute;bottom:26px;left:50%;transform:translateX(-50%) translateY(10px);background:#15171c;border:1px solid #2a2d35;color:#fff;border-radius:10px;padding:10px 16px;font:600 13px/1 'Inter',sans-serif;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+.pl-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── ZOOM accordo (modale) ── */
+.pl-zoom-overlay{position:fixed;inset:0;z-index:10690;background:rgba(6,6,9,.74);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px}
+.pl-zoom-overlay.show{display:flex;animation:soFadeIn .2s ease}
+.pl-zoom-card{background:#0c0c0f;border:1px solid #23232a;border-radius:18px;width:min(980px,96vw);max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.pl-zoom-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid #1a1a1d;position:sticky;top:0;background:#0c0c0f;z-index:2}
+.pl-zoom-title{display:flex;flex-direction:column;gap:3px;min-width:0}
+.pl-zoom-chord{font:700 30px/1 'Inter',sans-serif;color:var(--c-play)}
+.pl-zoom-chord .pl-chord-sup{font-size:.5em;vertical-align:super;font-weight:600}
+.pl-zoom-chord .pl-chord-bass{font-size:.6em;color:#a8aeba}
+.pl-zoom-sub{font:600 10px/1.2 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#6a6e78}
+.pl-zoom-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pl-zoom-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.pl-zoom-legend{display:flex;flex-wrap:wrap;gap:8px}
+.pl-deg-chip{display:inline-flex;align-items:center;gap:7px;background:#0f0f10;border:1px solid #1f1f22;border-radius:999px;padding:5px 12px;font:600 13px/1 'Inter',sans-serif;color:#cdd1da}
+.pl-deg-chip i{width:12px;height:12px;border-radius:50%;background:var(--dc);flex-shrink:0}
+.pl-deg-chip b{color:#fff;font:700 13px 'JetBrains Mono',monospace}
+.pl-deg-chip small{color:#7e8088;font-weight:600}
+.pl-zoom-tunes{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pl-zoom-section-lbl{font:700 10px/1 'Inter',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#6a6e78;margin-top:6px}
+.pl-neck-wrap{background:#0c0c0f;border:1px solid #1a1a1d;border-radius:14px;padding:10px 12px;overflow-x:auto}
+.pl-neck-svg{display:block;min-width:640px}
+.pl-neck-fret{stroke:#2a2d35;stroke-width:1.5}
+.pl-neck-nut{stroke:#5a5f6a;stroke-width:5;stroke-linecap:round}
+.pl-neck-string{stroke:#3a3d44}
+.pl-neck-inlay{fill:#20232b}
+.pl-neck-open{fill:#9aa0ac;font:700 11px 'JetBrains Mono',monospace;text-anchor:start;dominant-baseline:central}
+.pl-neck-fretnum{fill:#6a6e78;font:600 9px 'JetBrains Mono',monospace;text-anchor:middle}
+.pl-neck-note{cursor:pointer}
+.pl-neck-note circle{stroke:#0a0a0d;stroke-width:1.4;transition:stroke-width .1s}
+.pl-neck-note.is-root circle{stroke:#fff;stroke-width:2}
+.pl-neck-note text{fill:#fff;font:700 10px 'Inter',sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.pl-neck-note:hover circle{stroke:#fff;stroke-width:2.6}
+.pl-voicings{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.pl-voicing{background:#0f0f10;border:1px solid #1f1f22;border-radius:12px;padding:8px 12px}
+@media (max-width:720px){
+  .pl-zoom-overlay{padding:0}
+  .pl-zoom-card{width:100vw;height:100vh;max-height:100vh;border-radius:0}
+  .pl-zoom-chord{font-size:24px}
+}
+
+/* Barra audio (sync sull'onda reale) */
+.pl-audiobar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;background:#0c0c0f;border:1px solid #1a1a1d;border-radius:12px;padding:9px 12px}
+.pl-audiobar.is-loaded{border-color:color-mix(in srgb,var(--c-play) 35%,#1a1a1d)}
+.pl-audio-hint{font:500 12px/1.4 'Inter',sans-serif;color:#7e8088;flex:1;min-width:140px}
+.pl-audio-name{font:600 12px/1 'Inter',sans-serif;color:#cdd1da;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-audio-seek{flex:1;min-width:120px;accent-color:var(--c-play)}
+.pl-audio-time{font:600 11px/1 'JetBrains Mono',monospace;color:#a8aeba;white-space:nowrap}
+.pl-mode-banner.is-audiosync{background:color-mix(in srgb,var(--c-play) 14%,#0c0c0f);border:1px solid color-mix(in srgb,var(--c-play) 50%,transparent)}
+
+/* ════════════════════════════════════════════════════════════
+   PLAY · testo karaoke — scroller dedicato, frase evidenziata, Focus
+   ════════════════════════════════════════════════════════════ */
+/* Il detail diventa una colonna: controlli fissi in alto, testo scorre sotto */
+.pl-stage{position:static;background:none;margin:0;padding-top:0}
+/* Scroller del testo: altezza fissa-relativa, centra la frase, con dissolvenza sopra/sotto */
+.pl-chart-wrap{height:clamp(170px,40vh,560px);overflow:auto;position:relative;border-top:1px solid #161619;margin-top:4px;padding:8px 0}
+.pl-chart{overflow:visible}
+/* Righe: non-attive attenuate, attiva piena ed evidenziata */
+.pl-chart .pl-line{opacity:.6;transition:opacity .25s ease,background .2s ease}
+.pl-chart .pl-line.is-active-line{opacity:1}
+.pl-line.is-active-line{background:color-mix(in srgb,var(--c-play) 16%,transparent);border-left-color:var(--c-play);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c-play) 22%,transparent)}
+.pl-line.is-active-line .pl-line-lyric{color:#fff;font-weight:600}
+.pl-chord.is-current{box-shadow:0 0 16px color-mix(in srgb,var(--c-play) 75%,transparent);font-weight:800}
+
+/* Barra flottante in Focus (play/pausa + esci) */
+.pl-focus-bar{display:none}
+.pl-focus-bar .pl-play-btn{width:50px;height:50px;font-size:20px}
+.play-overlay.pl-focus .pl-focus-bar{display:flex;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);gap:12px;align-items:center;background:rgba(12,12,15,.86);border:1px solid #23232a;border-radius:999px;padding:8px 12px 8px 8px;z-index:14;backdrop-filter:blur(8px);box-shadow:0 14px 40px rgba(0,0,0,.5)}
+
+/* Modalità Focus (karaoke): nasconde il superfluo, ingrandisce e centra il testo */
+.play-overlay.pl-focus .pl-detail-head,
+.play-overlay.pl-focus .pl-transport,
+.play-overlay.pl-focus .pl-synctools,
+.play-overlay.pl-focus .pl-audiobar,
+.play-overlay.pl-focus .pl-mode-banner{display:none !important}
+.play-overlay.pl-focus .pl-sidebar{display:none}
+.play-overlay.pl-focus .pl-body{grid-template-columns:1fr}
+.play-overlay.pl-focus .pl-detail{padding:10px 20px 20px}
+.play-overlay.pl-focus .pl-chart-wrap{height:72vh}
+.play-overlay.pl-focus .pl-chart .pl-line{opacity:.26}
+.play-overlay.pl-focus .pl-chart .pl-line.is-active-line{opacity:1}
+.play-overlay.pl-focus .pl-line.is-active-line{--act:clamp(20px,3.2vw,30px)}
+.play-overlay.pl-focus .pl-line.is-active-line .pl-line-lyric,
+.play-overlay.pl-focus .pl-line.is-active-line .pl-line-chords{font-size:var(--act)}
+.play-overlay.pl-focus .pl-line.is-active-line .pl-line-chords{height:1.5em}
+
+/* Selettore accordatura "a monte" nell'intestazione */
+.pl-tune-select{display:inline-flex;align-items:center;gap:5px;background:#0f0f10;border:1px solid #1f1f22;border-radius:999px;padding:3px 8px 3px 11px}
+.pl-tune-select:hover{border-color:var(--c-play)}
+.pl-tune-select > span{font-size:12px;opacity:.8}
+.pl-tune-select select{background:transparent;border:0;color:#ECE9E0;font:600 12px/1 'Inter',sans-serif;cursor:pointer;outline:none;padding:4px 2px}
+.pl-tune-select select option{background:#15171c;color:#ECE9E0}
